@@ -1,5 +1,8 @@
 # Each app installs on its own (it is not part of a monorepo). This file makes this folder its own pnpm root and
 # lists the dependencies allowed to run install scripts.
+# `packages` must be non-empty or older pnpm (e.g. Cloudflare's build image) refuses to run.
+packages:
+  - .
 allowBuilds:
   esbuild: true
   workerd: true
