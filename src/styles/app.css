@@ -1,0 +1,707 @@
+@import "tailwindcss";
+
+/* Geist Sans and Geist Mono (OFL, self-hosted variable fonts). See DESIGN.md §3. */
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist.woff2") format("woff2-variations"), url("/fonts/Geist.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono.woff2") format("woff2-variations"), url("/fonts/GeistMono.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Cove (OFL): the landing page's display face, standing in for Slush's Lateral */
+@font-face {
+  font-family: "Cove";
+  src: url("/fonts/Cove.woff2") format("woff2-variations"), url("/fonts/Cove.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* wobli follows Geist, Vercel's design system: DESIGN.md is the contract. Light values here, dark below. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
+@theme {
+  --font-sans: "Geist", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  /* the landing page's sticker-book palette. Used by the landing page only. */
+  --font-slush: "Cove", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --color-slush-sky: #dceeff;
+  --color-slush-concrete: #cccccc;
+  --color-slush-mist: #e9e9e9;
+  --color-slush-blue: #4da2ff;
+  --color-slush-mint: #55db9c;
+  --color-slush-lavender: #e9ccff;
+  --color-slush-ember: #fb4903;
+  --color-slush-sunburst: #ffd731;
+  --color-slush-violet: #5c4ade;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 600; /* Geist headings top out at 600 */
+  --font-weight-heavy: 700;
+
+  /* Geist scales (DESIGN.md §2) */
+  --color-background-100: #ffffff;
+  --color-background-200: #fafafa;
+  --color-gray-100: #f2f2f2;
+  --color-gray-200: #ebebeb;
+  --color-gray-300: #e6e6e6;
+  --color-gray-400: #ebebeb;
+  --color-gray-500: #c9c9c9;
+  --color-gray-600: #a8a8a8;
+  --color-gray-700: #8f8f8f;
+  --color-gray-800: #7d7d7d;
+  --color-gray-900: #4d4d4d;
+  --color-gray-1000: #171717;
+  --color-gray-alpha-100: #0000000d;
+  --color-gray-alpha-200: #00000014;
+  --color-gray-alpha-400: #00000014;
+  --color-gray-alpha-500: #00000024;
+  --color-blue-100: hsl(212 100% 97%);
+  --color-blue-200: hsl(210 100% 96%);
+  --color-blue-700: hsl(212 100% 48%);
+  --color-blue-900: hsl(211 100% 42%);
+  --color-red-700: hsl(358 75% 59%);
+  --color-red-900: hsl(358 66% 48%);
+  --color-green-700: hsl(131 41% 46%);
+  --color-amber-700: hsl(39 100% 57%);
+
+  /* wobli semantic names, each one a Geist step (DESIGN.md §2, "How wobli names them") */
+  --color-bg: var(--color-background-100);
+  --color-bg-2: var(--color-background-200);
+  --color-surface: var(--color-background-100);
+  --color-elevated: var(--color-background-100);
+  --color-label: var(--color-gray-1000);
+  --color-label-2: var(--color-gray-900);
+  --color-label-3: var(--color-gray-700);
+  --color-separator: var(--color-gray-alpha-400);
+  --color-border-hover: var(--color-gray-500);
+  --color-border-active: var(--color-gray-600);
+  --color-fill: var(--color-gray-100);
+  --color-fill-2: var(--color-gray-200);
+  --color-fill-3: var(--color-gray-300);
+  --color-accent: var(--color-blue-700);
+  --color-accent-press: var(--color-blue-900);
+  --color-on-accent: #ffffff;
+  --color-contrast: var(--color-gray-1000);
+  --color-on-contrast: var(--color-background-100);
+  --color-material: color-mix(in srgb, var(--color-background-100) 80%, transparent);
+  --color-scrim: rgb(0 0 0 / 0.4);
+
+  /* radius: 6 controls · 12 cards, menus, bars · 16 fullscreen (DESIGN.md §4) */
+  --radius-control: 6px;
+  --radius-card: 6px; /* code blocks, small tiles */
+  --radius-float: 12px; /* popovers and floating bars */
+  --radius-tile: 12px; /* illustration cards and panels */
+  --radius-panel: 16px;
+
+  /* materials, as box-shadows so the 1px border never moves layout */
+  --shadow-border: 0 0 0 1px var(--color-gray-alpha-400);
+  /* the same hairline drawn inside the box: use it for anything that can sit inside a scroll container, which clips outer shadows */
+  --shadow-border-inset: inset 0 0 0 1px var(--color-gray-alpha-400);
+  --shadow-border-small: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 2px #0000000a;
+  --shadow-border-medium: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #0000000a, 0 8px 8px -8px #0000000a;
+  --shadow-border-large: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #0000000a, 0 8px 16px -4px #0000000a;
+  --shadow-menu: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 1px #00000005, 0 4px 8px -4px #0000000a, 0 16px 24px -8px #0000000f;
+  --shadow-modal: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 1px #00000005, 0 8px 16px -4px #0000000a, 0 24px 32px -8px #0000000f;
+  --shadow-focus: 0 0 0 2px var(--color-background-100), 0 0 0 4px var(--color-blue-700);
+
+  --ease-out-soft: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  --ease-in-soft: ease;
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  /* strong ease-out with no overshoot: for things settling back to rest */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  /* the iOS sheet curve: steep off the mark, long gentle settle, so 500ms still feels quick */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* theme: follows the system unless the user picks one (html[data-theme], set before paint in __root) */
+:root { color-scheme: light dark; }
+:root[data-theme="light"] { color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-background-100: #0a0a0a;
+    --color-background-200: #000000;
+    --color-gray-100: #1a1a1a;
+    --color-gray-200: #1f1f1f;
+    --color-gray-300: #292929;
+    --color-gray-400: #2e2e2e;
+    --color-gray-500: #454545;
+    --color-gray-600: #878787;
+    --color-gray-700: #8f8f8f;
+    --color-gray-800: #7d7d7d;
+    --color-gray-900: #a1a1a1;
+    --color-gray-1000: #ededed;
+    --color-gray-alpha-100: #ffffff0f;
+    --color-gray-alpha-200: #ffffff17;
+    --color-gray-alpha-400: #ffffff24;
+    --color-gray-alpha-500: #ffffff3d;
+    --color-blue-100: hsl(216 50% 12%);
+    --color-blue-200: hsl(214 59% 15%);
+    --color-blue-900: hsl(210 100% 66%);
+    --color-red-900: hsl(358 100% 69%);
+    --color-scrim: rgb(0 0 0 / 0.6);
+    /* dark shadows read weakly: the border carries the separation */
+    --shadow-border-small: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 2px #00000029;
+    --shadow-border-medium: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #00000052, 0 8px 8px -8px #00000029;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background-100: #0a0a0a;
+  --color-background-200: #000000;
+  --color-gray-100: #1a1a1a;
+  --color-gray-200: #1f1f1f;
+  --color-gray-300: #292929;
+  --color-gray-400: #2e2e2e;
+  --color-gray-500: #454545;
+  --color-gray-600: #878787;
+  --color-gray-700: #8f8f8f;
+  --color-gray-800: #7d7d7d;
+  --color-gray-900: #a1a1a1;
+  --color-gray-1000: #ededed;
+  --color-gray-alpha-100: #ffffff0f;
+  --color-gray-alpha-200: #ffffff17;
+  --color-gray-alpha-400: #ffffff24;
+  --color-gray-alpha-500: #ffffff3d;
+  --color-blue-100: hsl(216 50% 12%);
+  --color-blue-200: hsl(214 59% 15%);
+  --color-blue-900: hsl(210 100% 66%);
+  --color-red-900: hsl(358 100% 69%);
+  --color-scrim: rgb(0 0 0 / 0.6);
+  /* dark shadows read weakly: the border carries the separation */
+  --shadow-border-small: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 2px #00000029;
+  --shadow-border-medium: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #00000052, 0 8px 8px -8px #00000029;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "ss01" off;
+  }
+  body {
+    @apply bg-bg text-label font-sans;
+    font-weight: var(--font-weight-normal);
+    font-size: 0.875rem; /* Copy 14: Geist's default paragraph */
+    line-height: 1.25rem;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-blue-700);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-blue-700) 30%, transparent);
+  }
+}
+
+/* Geist type presets (DESIGN.md §3). Only headings track negative. */
+@utility type-display {
+  /* Heading 72 on desktop, Heading 48 on phones */
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  font-weight: var(--font-weight-semibold);
+}
+@utility type-title {
+  /* Heading 48, Heading 32 on phones */
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.167;
+  letter-spacing: -0.06em;
+  font-weight: var(--font-weight-semibold);
+}
+@utility type-section {
+  /* Heading 32 */
+  font-size: 2rem;
+  line-height: 2.5rem;
+  letter-spacing: -0.04em;
+  font-weight: var(--font-weight-semibold);
+}
+@utility type-headline {
+  /* Heading 20 */
+  font-size: 1.25rem;
+  line-height: 1.625rem;
+  letter-spacing: -0.02em;
+  font-weight: var(--font-weight-semibold);
+}
+@utility type-caption {
+  /* Label 12 */
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: var(--font-weight-normal);
+}
+@utility type-eyebrow {
+  /* Label 12, caps */
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.02em;
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  color: var(--color-label-2);
+}
+@utility type-lead {
+  /* Copy 18, Copy 20 from md up */
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-label-2);
+  @media (width >= 48rem) {
+    font-size: 1.25rem;
+    line-height: 2rem;
+  }
+}
+
+/* Material medium: a resting card on the page (DESIGN.md §4) */
+@utility surface-card {
+  border-radius: var(--radius-float);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-border);
+}
+
+/* the hairline that keeps a pale colour swatch visible on a pale ground */
+@utility swatch-edge {
+  box-shadow: inset 0 0 0 1px var(--color-gray-alpha-400);
+}
+
+/* Translucent chrome for things that float over content: the header and the menu material for the sticky style bar. */
+@utility material {
+  background: var(--color-material);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+}
+@utility material-thick {
+  background: color-mix(in srgb, var(--color-background-100) 85%, transparent);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  box-shadow: var(--shadow-menu);
+}
+
+/* the grey checkerboard that means "transparent" */
+@utility checker {
+  background-color: var(--color-surface);
+  background-image:
+    linear-gradient(45deg, var(--color-fill) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-fill) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-fill) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-fill) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+/* a sideways-scrolling row fades out at its trailing edge instead of being cut by a hard line */
+@utility scroll-fade {
+  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+  padding-right: 40px;
+}
+
+/* Bottom sheet. The <dialog> is a full-screen host that only waits (display and top-layer membership switch off after the
+   exit has played); the panel slides and the scrim fades on transitions, never keyframes, so a close can be caught and
+   reversed mid-flight. While a finger is dragging, [data-dragging] takes the transitions off and JS writes the values. */
+.sheet {
+  transition:
+    display 500ms allow-discrete,
+    overlay 500ms allow-discrete;
+}
+.sheet-overlay {
+  opacity: 0;
+  transition: opacity 500ms var(--ease-drawer);
+}
+.sheet-panel {
+  transform: translateY(100%);
+  transition: transform 500ms var(--ease-drawer);
+  /* pulled up past its rest (rubber band), the sheet must not show the page under its foot */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 100% 0 auto;
+    height: 30vh;
+    background: inherit;
+  }
+}
+.sheet[open] {
+  .sheet-overlay {
+    opacity: 1;
+    @starting-style {
+      opacity: 0;
+    }
+  }
+  .sheet-panel {
+    transform: translateY(0);
+    @starting-style {
+      transform: translateY(100%);
+    }
+  }
+}
+.sheet[data-dragging] :is(.sheet-overlay, .sheet-panel) {
+  transition: none;
+}
+/* reduced motion: no travel. The sheet fades in place, quickly; dragging it is still the finger's own motion. */
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    transition-duration: 200ms;
+  }
+  .sheet-overlay {
+    transition-duration: 200ms;
+  }
+  .sheet-panel {
+    transform: none;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out);
+  }
+  .sheet[open] .sheet-panel {
+    transform: none;
+    opacity: 1;
+    @starting-style {
+      transform: none;
+      opacity: 0;
+    }
+  }
+}
+
+/* Slush scrollbar: a black pill on a clear track, inset so it stays clear of a rounded frame's corners. */
+@utility scrollbar-slush {
+  scrollbar-gutter: stable;
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 18px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background: #000 padding-box;
+    min-height: 40px;
+  }
+  &::-webkit-scrollbar-thumb:hover,
+  &::-webkit-scrollbar-thumb:active {
+    border-width: 2px;
+  }
+  /* Firefox has no scrollbar pseudo-elements; setting these elsewhere would switch the ones above off */
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: #000 transparent;
+  }
+}
+
+/* A strip that blurs what scrolls under it, strongest at the edge it sits on. Set --edge to the direction it fades out in. */
+@utility edge-blur {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  background: linear-gradient(var(--edge, to bottom), rgb(255 255 255 / 0.7), transparent);
+  mask-image: linear-gradient(var(--edge, to bottom), #000 35%, transparent);
+  -webkit-mask-image: linear-gradient(var(--edge, to bottom), #000 35%, transparent);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Geist slider: a 4px track filled in gray-1000 up to a small bordered thumb. --fill is set inline. (DESIGN.md §7) */
+.range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--color-gray-1000) var(--fill, 50%), var(--color-gray-alpha-400) var(--fill, 50%));
+}
+.range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-gray-alpha-400);
+}
+.range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-gray-1000);
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  margin-top: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-background-100);
+  box-shadow: 0 0 0 1px var(--color-gray-500), 0 1px 2px #00000029;
+  transition: box-shadow 150ms ease;
+}
+.range:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px var(--color-gray-600), 0 1px 2px #00000029;
+}
+.range:focus-visible {
+  outline: none;
+}
+.range:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--shadow-focus);
+}
+.range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-background-100);
+  box-shadow: 0 0 0 1px var(--color-gray-500), 0 1px 2px #00000029;
+}
+.range:focus-visible::-moz-range-thumb {
+  box-shadow: var(--shadow-focus);
+}
+
+/* ── The sticker-book pages (DESIGN.md): landing, illustrations and docs ──────────────────────────────────────────────
+   These pages are always light, whatever the site theme: `.slush` pins every Geist token back to its light value so the
+   shared controls it borrows (palette strip, sliders) read correctly on its pastel bands. */
+.slush {
+  color-scheme: light;
+  color: #000;
+  font-family: var(--font-slush);
+  --color-background-100: #ffffff;
+  --color-background-200: #fafafa;
+  --color-gray-100: #f2f2f2;
+  --color-gray-200: #ebebeb;
+  --color-gray-300: #e6e6e6;
+  --color-gray-400: #ebebeb;
+  --color-gray-500: #c9c9c9;
+  --color-gray-600: #a8a8a8;
+  --color-gray-700: #8f8f8f;
+  --color-gray-800: #7d7d7d;
+  --color-gray-900: #4d4d4d;
+  --color-gray-1000: #000000;
+  --color-gray-alpha-100: #0000000d;
+  --color-gray-alpha-200: #00000014;
+  --color-gray-alpha-400: #00000033;
+  --color-gray-alpha-500: #00000024;
+  --color-bg: #ffffff;
+  --color-bg-2: #fafafa;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-label: #000000;
+  --color-label-2: #000000;
+  --color-label-3: #4d4d4d;
+  --color-separator: #000000;
+  --color-border-hover: var(--color-gray-500);
+  --color-border-active: var(--color-gray-600);
+  --color-fill: var(--color-gray-100);
+  --color-fill-2: var(--color-gray-200);
+  --color-fill-3: var(--color-gray-300);
+  --color-accent: #000000;
+  --color-contrast: #000000;
+  --color-on-contrast: #ffffff;
+  --shadow-focus: 0 0 0 2px #ffffff, 0 0 0 4px #000000;
+  /* softness is the default: controls are pills, cards 20px, panels 30px */
+  --radius-control: 1600px;
+  --radius-card: 16px;
+  --radius-float: 30px;
+  --radius-tile: 20px;
+  --radius-panel: 30px;
+  /* no shadows anywhere: every elevation is the same black hairline */
+  --shadow-border: 0 0 0 1px #000000;
+  --shadow-border-inset: inset 0 0 0 1px #000000;
+  --shadow-border-small: 0 0 0 1px #000000;
+  --shadow-border-medium: 0 0 0 1px #000000;
+  --shadow-border-large: 0 0 0 1px #000000;
+  --shadow-menu: 0 0 0 1px #000000;
+  --shadow-modal: 0 0 0 1px #000000;
+  /* button and switch labels: 700 with a little air (DESIGN.md) */
+  --control-weight: 700;
+  --control-tracking: 0.032em;
+}
+/* sliders: a black track and a white thumb cut out with the same black hairline, no shadow */
+.slush .range::-webkit-slider-thumb,
+.slush .range:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 1px #000000;
+}
+.slush .range:active::-webkit-slider-thumb {
+  background: var(--color-slush-sunburst);
+}
+.slush .range:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--shadow-focus);
+}
+.slush .range::-moz-range-thumb {
+  box-shadow: 0 0 0 1px #000000;
+}
+.slush .range:active::-moz-range-thumb {
+  background: var(--color-slush-sunburst);
+}
+/* floating bars are paper, not glass */
+.slush .material,
+.slush .material-thick {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.slush :focus-visible {
+  outline-color: #000;
+}
+.slush ::selection {
+  background: var(--color-slush-sunburst);
+}
+/* display type as a physical object: crushed leading, never above 0.85 */
+@utility slush-display {
+  font-family: var(--font-slush);
+  font-weight: 900;
+  line-height: 0.8;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+/* nav, button and uppercase label text */
+@utility slush-label {
+  font-weight: 700;
+  letter-spacing: 0.032em;
+  text-transform: uppercase;
+}
+/* Hero stickers, tags and the ribbon wait unseen for their entrance (useLandingMotion), so the settled page never flashes first. If the script
+   never runs they show themselves after a few seconds. */
+@keyframes slush-show {
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .slush [data-pin="hero"],
+  .slush [data-tag="hero"],
+  .slush [data-ribbon="hero"] {
+    opacity: 0;
+    animation: slush-show 0s 4s forwards;
+  }
+}
+/* A headline letter that turns into a sticker under the pointer: palette colour (--c), black cut-out outline, tipped up
+   by its own angle (--r). In is quick, out is slow, so a sweep leaves a trail of colour.
+   Out (the base rule): the colour lingers while the letter settles on a plain ease-out, with no overshoot, so it lands
+   on the baseline instead of dipping under it.
+   In (the hover rule): colour answers at once, and the pop gets just long enough for the spring's overshoot to read. */
+.slush-letter {
+  display: inline-block;
+  -webkit-text-stroke: 0.03em transparent;
+  paint-order: stroke fill;
+  transition:
+    color 600ms ease,
+    -webkit-text-stroke-color 600ms ease,
+    translate 450ms var(--ease-out),
+    rotate 450ms var(--ease-out),
+    scale 450ms var(--ease-out);
+}
+/* pointer: fine keeps a tap on a touch screen from leaving a letter stuck in its hover state */
+@media (hover: hover) and (pointer: fine) {
+  .slush-letter:hover {
+    color: var(--c);
+    -webkit-text-stroke-color: #000;
+    translate: 0 -0.07em;
+    rotate: var(--r);
+    scale: 1.08;
+    transition-duration: 120ms, 120ms, 200ms, 200ms, 200ms;
+    transition-timing-function: ease, ease, var(--ease-spring), var(--ease-spring), var(--ease-spring);
+  }
+}
+/* reduced motion keeps the colour change and drops the movement */
+@media (prefers-reduced-motion: reduce) {
+  .slush-letter:hover {
+    translate: none;
+    rotate: none;
+    scale: none;
+  }
+}
+/* A nav pill that turns into a sticker under the pointer, the same way a headline letter does: its palette colour (--c)
+   pours up from the bottom edge, and the pill lifts and tips by its own angle (--r) on the spring. Out is slower and
+   has no overshoot, so the colour drains and the pill settles flat. Pressing squashes it back onto the page. */
+.slush-pill {
+  background-image: linear-gradient(var(--c), var(--c));
+  background-repeat: no-repeat;
+  background-position: bottom;
+  background-size: 100% 0%;
+  transition:
+    background-size 350ms var(--ease-out),
+    translate 350ms var(--ease-out),
+    rotate 350ms var(--ease-out),
+    scale 350ms var(--ease-out),
+    color 200ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .slush-pill:hover {
+    background-size: 100% 100%;
+    translate: 0 -3px;
+    rotate: var(--r);
+    scale: 1.06;
+    transition-duration: 220ms, 260ms, 260ms, 260ms, 150ms;
+    transition-timing-function: var(--ease-out), var(--ease-spring), var(--ease-spring), var(--ease-spring), ease;
+  }
+}
+.slush-pill:active {
+  translate: none;
+  rotate: none;
+  scale: 0.96;
+  transition-duration: 90ms;
+}
+/* keyboard focus gets the colour without the movement */
+.slush-pill:focus-visible {
+  background-size: 100% 100%;
+}
+/* reduced motion keeps the colour change and drops the movement */
+@media (prefers-reduced-motion: reduce) {
+  .slush-pill:hover,
+  .slush-pill:active {
+    translate: none;
+    rotate: none;
+    scale: none;
+  }
+}
+@keyframes slush-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.slush-marquee {
+  animation: slush-marquee 36s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slush-marquee {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .material,
+  .material-thick {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

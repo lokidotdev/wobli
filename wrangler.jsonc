@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Top level = dev; production is env.production, picked at build time with CLOUDFLARE_ENV=production (`pnpm deploy`).
+  "name": "wobli-frontend-dev",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  // The API Worker (../backend), called directly while a page renders on the server. Locally: run both dev servers.
+  "services": [{ "binding": "API", "service": "wobli-api-dev" }],
+  "env": {
+    "production": {
+      "name": "wobli-frontend",
+      "services": [{ "binding": "API", "service": "wobli-api" }]
+    }
+  }
+}
