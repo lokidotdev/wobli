@@ -50,11 +50,11 @@ Not built yet: detail page, categories pages, auth, favorites.
 
 | Var | Example |
 |---|---|
-| `VITE_API_URL` | `http://localhost:8787` |
+| `VITE_API_URL` | `http://localhost:8787` (optional; defaults to this in dev, unset in builds) |
 | `VITE_CDN_URL` | `https://cdn.isoloops.com` |
 | `VITE_SITE_URL` | `http://localhost:3000` (used for canonical URLs / sitemap) |
 
-`wrangler.jsonc` binds `API` to the backend Worker for server-side requests: `wobli-api-dev` by default, `wobli-api` in `env.production` (`pnpm deploy` builds with `CLOUDFLARE_ENV=production`).
+**The backend is optional.** A plain `pnpm build && wrangler deploy` ships the site on its own: with no `VITE_API_URL` and no binding it serves the illustrations bundled with it and the default settings. Set `VITE_API_URL` at build time to use an API over HTTP. `env.production` additionally binds `API` to the `wobli-api` Worker for server-side requests (`pnpm deploy` builds with `CLOUDFLARE_ENV=production`, and that Worker must exist first).
 
 ## Scripts
 

@@ -1,15 +1,21 @@
 import { createIsomorphicFn } from '@tanstack/react-start'
 import type { z } from 'zod'
 
-const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787').replace(/\/+$/, '')
+// The API is optional. In dev it defaults to the local backend; a build without VITE_API_URL has none, and every request
+// fails as "unreachable" without touching the network, so the site answers from its bundled catalogue.
+const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) || (import.meta.env.DEV ? 'http://localhost:8787' : ''))
+  .replace(/\/+$/, '')
 
-// The browser calls the API over HTTP. The server render calls it over the service binding: no network hop, no CORS, and
-// not counted against any visitor's rate limit.
+const noApi = (): Promise<Response> => Promise.reject(new Error('no API configured'))
+
+// The browser calls the API over HTTP. The server render calls it over the service binding when there is one: no network
+// hop, no CORS, and not counted against any visitor's rate limit.
 const send = createIsomorphicFn()
-  .client((path: string) => fetch(API_URL + path, { headers: { Accept: 'application/json' } }))
+  .client((path: string) => (API_URL ? fetch(API_URL + path, { headers: { Accept: 'application/json' } }) : noApi()))
   .server(async (path: string) => {
     const { env } = await import('cloudflare:workers')
-    return env.API ? env.API.fetch(new URL(path, 'http://api')) : fetch(API_URL + path)
+    if (env.API) return env.API.fetch(new URL(path, 'http://api'))
+    return API_URL ? fetch(API_URL + path) : noApi()
   })
 
 export class ApiError extends Error {

@@ -1,15 +1,16 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // Top level = dev; production is env.production, picked at build time with CLOUDFLARE_ENV=production (`pnpm deploy`).
-  "name": "wobli-frontend-dev",
+  // Top level = the standalone site: no backend needed. Without an API it serves the illustrations bundled with it.
+  // To use an API, set VITE_API_URL at build time; production with the API Worker bound is env.production, picked at
+  // build time with CLOUDFLARE_ENV=production (`pnpm deploy`).
+  "name": "wobli",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
-  // The API Worker (../backend), called directly while a page renders on the server. Locally: run both dev servers.
-  "services": [{ "binding": "API", "service": "wobli-api-dev" }],
   "env": {
     "production": {
       "name": "wobli-frontend",
+      // The API Worker (../backend), called directly while a page renders on the server. It must be deployed first.
       "services": [{ "binding": "API", "service": "wobli-api" }]
     }
   }
