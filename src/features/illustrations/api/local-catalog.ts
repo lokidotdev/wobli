@@ -1,16 +1,16 @@
 import type { Icon } from 'wobli'
 import { LOCAL_ICON as LOCAL } from './local-icon'
-import { CATEGORIES } from '../../../../../packages/wobli/src/catalog.ts'
-import type { IconMeta } from '../../../../../packages/wobli/src/catalog.ts'
+import { CATEGORIES } from '../../../vendor/wobli/catalog.ts'
+import type { IconMeta } from '../../../vendor/wobli/catalog.ts'
 import { filterValues, PAGE_SIZE } from '../schemas/illustration.schema'
 import type { Facets, Illustration, IllustrationPage, ListFilters } from '../schemas/illustration.schema'
 
-// The catalogue read straight from packages/wobli, for when the API isn't there (a fresh clone running only the site).
+// The catalogue read straight from the bundled engine copy (src/vendor/wobli), for when the API isn't there (a fresh clone running only the site).
 // It answers the same questions the API does, with the same rules: any chosen category or tag is enough, every search word must match,
 // featured first unless sorted A–Z. Metadata is bundled (it is small); each drawing is its own chunk, loaded on demand.
 
-const metas = import.meta.glob<IconMeta>('../../../../../packages/wobli/src/icons/*.meta.ts', { eager: true, import: 'default' })
-const drawings = import.meta.glob<Icon>(['../../../../../packages/wobli/src/icons/*.ts', '!../../../../../packages/wobli/src/icons/*.meta.ts'], { import: 'default' })
+const metas = import.meta.glob<IconMeta>('../../../vendor/wobli/icons/*.meta.ts', { eager: true, import: 'default' })
+const drawings = import.meta.glob<Icon>(['../../../vendor/wobli/icons/*.ts', '!../../../vendor/wobli/icons/*.meta.ts'], { import: 'default' })
 
 const slugOf = (file: string) => file.slice(file.lastIndexOf('/') + 1).replace(/(\.meta)?\.ts$/, '')
 const drawingBySlug = new Map(Object.entries(drawings).map(([file, load]) => [slugOf(file), load]))

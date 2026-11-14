@@ -1,0 +1,6 @@
+# Each app installs on its own (it is not part of a monorepo). This file makes this folder its own pnpm root and
+# lists the dependencies allowed to run install scripts.
+allowBuilds:
+  esbuild: true
+  workerd: true
+  sharp: true

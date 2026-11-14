@@ -14,6 +14,12 @@
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "paths": { "~/*": ["./src/*"] }
+    "paths": {
+      "~/*": ["./src/*"],
+      "wobli": ["./src/vendor/wobli/index.ts"],
+      "wobli/react": ["./src/vendor/wobli/Sticker.tsx"],
+      "wobli/icons/*": ["./src/vendor/wobli/icons/*.ts"],
+      "wobli-api/contracts": ["./src/vendor/contracts.ts"]
+    }
   }
 }
