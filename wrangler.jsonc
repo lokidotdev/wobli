@@ -1,17 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  // Top level = the standalone site: no backend needed. Without an API it serves the illustrations bundled with it.
-  // To use an API, set VITE_API_URL at build time; production with the API Worker bound is env.production, picked at
-  // build time with CLOUDFLARE_ENV=production (`pnpm deploy`).
+  // No environments and no production values here: the host's build variables decide those (see vite.config.ts).
+  //   VITE_API_URL  the API's public URL, used by the browser (and by the server when there is no binding)
+  //   API_WORKER    the API Worker's name, bound as `API` for server-side requests
+  // With neither set the site runs on its own, from the illustrations bundled with it.
   "name": "wobli",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
-  "env": {
-    "production": {
-      "name": "wobli-frontend",
-      // The API Worker (../backend), called directly while a page renders on the server. It must be deployed first.
-      "services": [{ "binding": "API", "service": "wobli-api" }]
-    }
-  }
+  "main": "src/server.ts"
 }

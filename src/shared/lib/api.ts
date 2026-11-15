@@ -35,6 +35,14 @@ const UNREACHABLE = 'unreachable'
 const UNREACHABLE_MESSAGE = "Couldn't reach the wobli API."
 const unreachable = () => new ApiError(0, UNREACHABLE, UNREACHABLE_MESSAGE)
 
+/** How long a request may take before the API counts as unreachable, so a hung backend can't hold up a page render. */
+const TIMEOUT_MS = 4000
+const withTimeout = <T,>(p: Promise<T>, ms: number) =>
+  new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms)
+    p.then(resolve, reject).finally(() => clearTimeout(timer))
+  })
+
 /** True for an error from an API that wasn't there. Matches on the message too: an error thrown during the server render
  * reaches the browser as a plain Error that keeps only its message. */
 export const isUnreachable = (e: unknown) =>
@@ -43,14 +51,19 @@ export const isUnreachable = (e: unknown) =>
 /** GET a path of the API and parse the answer. Throws ApiError for any non-2xx, with the API's own code and message. */
 export async function apiGet<T extends z.ZodType>(path: string, schema: T, params: Params = {}): Promise<z.output<T>> {
   const query = new URLSearchParams(Object.entries(params).flatMap(([k, v]) => (v === undefined || v === '' ? [] : [[k, String(v)]]))).toString()
-  const res = await send(query ? `${path}?${query}` : path).catch(() => {
+  // The site must work without its backend, so anything short of a sound answer counts as "unreachable" and the callers
+  // fall back to the bundled catalogue: no network, a hung API (timeout), any 5xx (a binding to a worker that isn't
+  // running, Cloudflare failing to reach the host, the API itself crashing), or a body that isn't the expected JSON.
+  // Only 4xx stays a real error (404 for a missing slug, 429 for rate limiting).
+  const res = await withTimeout(send(query ? `${path}?${query}` : path), TIMEOUT_MS).catch(() => {
     throw unreachable()
   })
-  // a service binding to a worker that isn't running answers 503 without the API's JSON error shape
-  if (res.status === 503 && !res.headers.get('content-type')?.includes('application/json')) throw unreachable()
+  if (res.status >= 500) throw unreachable()
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null
     throw new ApiError(res.status, body?.error?.code ?? 'http_error', body?.error?.message ?? `The API answered ${res.status}.`)
   }
-  return schema.parse(await res.json())
+  const parsed = schema.safeParse(await res.json().catch(() => undefined))
+  if (!parsed.success) throw unreachable()
+  return parsed.data
 }

@@ -44,7 +44,7 @@ Built: landing page (`/`), explore page (`/illustrations` with category, search 
 
 Not built yet: detail page, categories pages, auth, favorites.
 
-**Data.** The catalogue comes from the API in [../backend](../backend/README.md): metadata and tags from D1, posters and drawings from R2. `src/features/illustrations/api/illustrations.api.ts` holds the fetchers and `src/shared/lib/api.ts` the client, which uses the `API` service binding while rendering on the server and `VITE_API_URL` in the browser. Run `pnpm dev` at the repo root to start both, and `pnpm --filter wobli-api publish-icons` once to fill the local database.
+**Data.** The catalogue comes from the API in [../backend](../backend/README.md): metadata and tags from D1, posters and drawings from R2. `src/features/illustrations/api/illustrations.api.ts` holds the fetchers and `src/shared/lib/api.ts` the client, which calls `VITE_API_URL` both while rendering on the server and in the browser. Run `pnpm dev` at the repo root to start both, and `pnpm --filter wobli-api publish-icons` once to fill the local database.
 
 ## Environment
 
@@ -54,7 +54,9 @@ Not built yet: detail page, categories pages, auth, favorites.
 | `VITE_CDN_URL` | `https://cdn.isoloops.com` |
 | `VITE_SITE_URL` | `http://localhost:3000` (used for canonical URLs / sitemap) |
 
-**The backend is optional.** A plain `pnpm build && wrangler deploy` ships the site on its own: with no `VITE_API_URL` and no binding it serves the illustrations bundled with it and the default settings. Set `VITE_API_URL` at build time to use an API over HTTP. `env.production` additionally binds `API` to the `wobli-api` Worker for server-side requests (`pnpm deploy` builds with `CLOUDFLARE_ENV=production`, and that Worker must exist first).
+**Caching (ISR).** `src/server.ts` wraps the renderer in stale-while-revalidate on Cloudflare's edge cache: a page is served from cache for 60s, then served stale while it re-renders in the background, and dropped after a day. Only 200 HTML/XML renders are cached, never in dev. The `x-isr` header shows HIT, STALE, MISS or BYPASS. It needs a custom domain; on `*.workers.dev` every request is a MISS.
+
+**The backend is optional.** A plain `pnpm build && wrangler deploy` ships the site on its own: with no `VITE_API_URL` and no binding it serves the illustrations bundled with it and the default settings. Production settings are never in the repo: set them as build variables on the host (Cloudflare Workers Builds → Settings → Variables), the way you would on Vercel. `VITE_API_URL` is the API's public URL; `API_WORKER` (e.g. `wobli-api`) binds that Worker as `API` for server-side requests, and it must be deployed before the first build that sets it. Locally neither is set, so `pnpm dev` always runs against the local backend. `.env.example` lists both.
 
 ## Scripts
 
