@@ -5,6 +5,8 @@ import { loadIllustration, useIllustration } from '~/features/illustrations'
 import { buildMeta, illustrationJsonLd } from '~/features/seo'
 import { styleSearchSchema } from '~/features/style'
 import { site } from '~/shared/config/site'
+import { cn } from '~/shared/lib/cn'
+import { BAND } from '~/shared/ui/SlushChrome'
 
 export const Route = createFileRoute('/illustrations/$slug')({
   validateSearch: styleSearchSchema,
@@ -45,16 +47,21 @@ function AboutIllustration({ title, content }: { title: string; content: string 
   const paragraphs = content.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
   if (!paragraphs.length) return null
   return (
-    <section aria-labelledby="about-illustration" className="mx-auto max-w-3xl px-4 py-12">
-      <h2 id="about-illustration" className="type-title">
-        About the {title} illustration
-      </h2>
-      <div className="mt-4 space-y-4 text-label-2">
-        {paragraphs.map((p, i) => (
-          <p key={i} className="whitespace-pre-line">
-            {p}
-          </p>
-        ))}
+    // its own white band: the page's body follows the site theme, but Slush pages are always light (DESIGN.md)
+    <section aria-labelledby="about-illustration" className="border-t border-black bg-white text-black">
+      <div className={cn(BAND, 'py-16 sm:py-20')}>
+        <div className="max-w-3xl">
+          <h2 id="about-illustration" className="text-[clamp(2rem,4vw,3rem)] text-balance slush-display">
+            About the {title} illustration
+          </h2>
+          <div className="mt-6 space-y-4 text-[17px] leading-[1.5] text-pretty text-black/75 sm:text-[18px]">
+            {paragraphs.map((p, i) => (
+              <p key={i} className="whitespace-pre-line">
+                {p}
+              </p>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   )
