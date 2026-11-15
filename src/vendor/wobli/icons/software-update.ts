@@ -12,7 +12,7 @@ const FULL = 92
 const BADGE_OUT = 140
 const LIFT = 146
 const APP: Vec = [0, -40] // the app's centre on the screen: where the arrow lands
-const ARROW_IN: Vec = facePoint(...APP)
+const ARROW_IN: Vec = facePoint(...APP) // the app's centre in the phone's untilted space
 const ARROW_TOP: Vec = [ARROW_IN[0], ARROW_IN[1] - 140]
 const BADGE: Vec = [44, -84]
 const BAR = { x: -54, y: 30, w: 108, h: 22 }
@@ -34,7 +34,7 @@ const softwareUpdate: Icon = {
       shapes: [
         { d: PHONE_SCREEN(22), fill: 'tint' },
         { d: pill(-24, -126, 48, 14), fill: 'ink', line: false },
-        { d: pill(BAR.x, BAR.y, BAR.w, BAR.h), fill: 'white', depth: 0.3 },
+        { d: pill(BAR.x, BAR.y, BAR.w, BAR.h), fill: 'white' },
         { d: pill(-36, 72, 72, 12), fill: 'white', depth: 0.2 },
       ],
     },
@@ -43,7 +43,7 @@ const softwareUpdate: Icon = {
       parent: 'phone',
       tilt: FACE,
       a: [BAR.x + 5, BAR.y + BAR.h / 2],
-      p: [BAR.x + 5, BAR.y + BAR.h / 2],
+      p: facePoint(BAR.x + 5, BAR.y + BAR.h / 2), // a layer's p sits in its untilted parent, so a pivot on the face goes through facePoint
       s: FILL,
       shapes: [{ d: pill(BAR.x + 5, BAR.y + 4, BAR.w - 10, BAR.h - 8), fill: 'main', line: false }],
     },
@@ -53,7 +53,7 @@ const softwareUpdate: Icon = {
       parent: 'phone',
       tilt: FACE,
       a: APP,
-      p: APP,
+      p: ARROW_IN,
       s: outAndBack<Vec>([100, 100], [112, 112], FULL, 6, FULL + 6, 12),
       shapes: [
         { d: rect(APP[0] - 44, APP[1] - 44, 88, 88, 24), fill: 'main', depth: 0.5 },

@@ -2,7 +2,7 @@ import type { IconMeta } from '../catalog.ts'
 
 export default {
   title: 'API Connection',
-  description: 'A plug slides from one block into the socket of the other, a light comes on and data dots flow across the link.',
+  description: 'A client card fires a { } request packet along a lane to a server stack, which lights up and sends a green 200 chip back.',
   category: 'dev',
-  tags: ['api', 'integration', 'plug', 'endpoint', 'request', 'webhook'],
+  tags: ['api', 'request', 'response', 'json', 'server', 'client', 'endpoint'],
 } satisfies IconMeta

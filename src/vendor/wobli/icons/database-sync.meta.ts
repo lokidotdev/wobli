@@ -2,7 +2,7 @@ import type { IconMeta } from '../catalog.ts'
 
 export default {
   title: 'Database Sync',
-  description: 'Rows slide out of a stacked database, one climbing to the top tier and one dropping to the bottom, and a check confirms the sync.',
+  description: 'Two databases each hold rows the other lacks; copies cross the gap both ways until both stacks match and a check pops on each.',
   category: 'dev',
-  tags: ['database', 'sync', 'replication', 'backup', 'server', 'storage'],
+  tags: ['database', 'replication', 'replica', 'backup', 'server', 'storage'],
 } satisfies IconMeta

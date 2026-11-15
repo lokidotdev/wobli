@@ -1,118 +1,71 @@
-// Loading Spinner Cube
-import { at, ellipse, poly, view } from '../engine.ts'
-import { SNAP } from '../motions.ts'
+// Loading Cube
+import { poly, view } from '../engine.ts'
 import { EXT, glow, hit, LINE, outAndBack, popIn } from '../parts.ts'
-import type { Icon, Layer, Shape, Track, Vec } from '../engine.ts'
+import type { Icon, Layer, Shape, Vec } from '../engine.ts'
 
-// The cube lifts off its pedestal and turns a quarter on its axis, the next face coming round as the last one leaves; it
-// drops home and the pedestal takes the landing with the spring. After a short hold it does it again, and two quarter turns
-// bring the same colours back to the front, so the loop closes on the pose it opened with. A sparkle pops on each landing.
-const TURN = 90 // one beat per quarter turn
-const LIFT = 4 // the cube leaves the pedestal
-const SPIN = 10 // and turns once it is clear
-const SPIN_LEN = 40
-const LAND = 54 // home again: the pedestal takes the hit on this frame
-const RISE: Vec = [0, -34]
+// A big cube built from eight small ones sits on a tray. The four on top lift out one at a time and drop back into their
+// sockets, the lift running round the square like a spinner: back, right, front, left. The lower tier takes each landing
+// with the spring, a sparkle pops on the last one, and the cube holds whole until the round starts again.
+const C = 80 // a small cube's side
+const GAP = 6 // the seam between small cubes
+const HALF = C / 2 + GAP / 2 // from the big cube's axis to a small cube's centre
+const TOP_Z = C + GAP // the upper tier sits here
 
-// the turn and the hop for one beat, laid twice
-const beat = (b: number) => b * TURN
-const YAW: Track<number> = [0, 1].flatMap((b): Track<number> => [[beat(b) + SPIN, b * 90, SNAP], [beat(b) + SPIN + SPIN_LEN, b * 90 + 90]])
-const HOP: Track<Vec> = [0, 1].flatMap((b) => outAndBack<Vec>([0, 0], RISE, beat(b) + LIFT, 22, beat(b) + LAND - 22, 22))
-
-// the cube is modelled in 3d, x forward, y right, z up, sitting on the pedestal's top at the origin
-const S = 72 // half a side
-const H = 2 * S
 type P3 = readonly [number, number, number]
-const BASE = 28 // the house yaw, so the rest pose faces top right like every other sticker
-const cam = (yaw: number) => view(BASE + yaw, 30)
-const turn = (yaw: number, [x, y, z]: P3): Vec => cam(yaw)([x, y, z])
-const face = (yaw: number, pts: ReadonlyArray<P3>, r = 6) => poly(pts.map((p) => turn(yaw, p)), r)
+const cam = view(28, 30) // the house view: x forward, y right, z up, facing top right like every other sticker
+const face = (pts: ReadonlyArray<P3>) => poly(pts.map(cam), 4)
 
-// side k runs from corner k to corner k + 1, counter clockwise seen from above
-const CORNER: ReadonlyArray<readonly [number, number]> = [[S, -S], [S, S], [-S, S], [-S, -S]]
-const sidePts = (k: number, inset = 0): ReadonlyArray<P3> => {
-  const [[ax, ay], [bx, by]] = [CORNER[k], CORNER[(k + 1) % 4]]
-  // pull the corners in along the edge and up off the ground for a raised panel on the face
-  const [ux, uy] = [(bx - ax) / (2 * S), (by - ay) / (2 * S)]
-  const [nx, ny] = [(ax + bx) / (2 * S), (ay + by) / (2 * S)]
-  const lift = inset ? 1.5 : 0
+// the three faces of a small cube a viewer sees, the top and the two sides facing front left and front right
+const cube = ([cx, cy]: Vec, z: number, top: Shape['fill'], left: Shape['fill'], right: Shape['fill']): ReadonlyArray<Shape> => {
+  const [x0, x1, y0, y1, z1] = [cx - C / 2, cx + C / 2, cy - C / 2, cy + C / 2, z + C]
   return [
-    [ax + ux * inset + nx * lift, ay + uy * inset + ny * lift, inset],
-    [bx - ux * inset + nx * lift, by - uy * inset + ny * lift, inset],
-    [bx - ux * inset + nx * lift, by - uy * inset + ny * lift, H - inset],
-    [ax + ux * inset + nx * lift, ay + uy * inset + ny * lift, H - inset],
+    { d: face([[x0, y0, z], [x0, y1, z], [x0, y1, z1], [x0, y0, z1]]), fill: left },
+    { d: face([[x0, y0, z], [x1, y0, z], [x1, y0, z1], [x0, y0, z1]]), fill: right },
+    { d: face([[x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]]), fill: top },
   ]
 }
-// which way a side faces once turned: its outward normal against the camera's line of sight, positive when seen
-const facing = (k: number, yaw: number) => {
-  const [[ax, ay], [bx, by]] = [CORNER[k], CORNER[(k + 1) % 4]]
-  const a = ((BASE + yaw) * Math.PI) / 180
-  const [nx, ny] = [(ax + bx) / 2, (ay + by) / 2]
-  // view() puts depth along x sin + y cos; the viewer sits at negative depth
-  return -(nx * Math.sin(a) + ny * Math.cos(a))
-}
 
-// a path rebuilt every other frame from the eased yaw, so the cube turns on its axis instead of morphing straight across
-const FRAMES = 180
-const bake = (shape: (yaw: number) => string): Track<string> =>
-  Array.from({ length: FRAMES / 2 + 1 }, (_, i) => [i * 2, shape(at(YAW, i * 2))] as const)
+// the four columns in the order the lift runs round them: back, right, front, left (clockwise on screen)
+const RING: ReadonlyArray<Vec> = [[HALF, HALF], [HALF, -HALF], [-HALF, -HALF], [-HALF, HALF]]
+// further from the viewer draws first
+const depthOf = ([x, y]: Vec) => x * Math.sin((28 * Math.PI) / 180) + y * Math.cos((28 * Math.PI) / 180)
+const backToFront = RING.map((c, k) => ({ c, k })).sort((a, b) => depthOf(b.c) - depthOf(a.c))
 
-// the first and last frame a side shows; sides only come round, so each is seen over one stretch of the loop
-const shown = (k: number) => {
-  const seen = Array.from({ length: FRAMES + 1 }, (_, f) => facing(k, at(YAW, f)) > 0.5)
-  const first = seen.indexOf(true)
-  if (first < 0) return null
-  const last = seen.lastIndexOf(true)
-  return { ip: first, op: last + 1 }
-}
+const FIRST = 8 // the first cube leaves
+const STEP = 26 // the next one leaves this many frames later
+const UP = 16 // out of the socket
+const DOWN = 14 // and back in on the mirror
+const LIFT: Vec = [0, -46]
+const leave = (k: number) => FIRST + k * STEP
+const land = (k: number) => leave(k) + UP + DOWN
+const LAST = land(RING.length - 1)
 
-const SIDE_FILL: ReadonlyArray<Shape['fill']> = ['main', 'deep', 'main', 'deep']
-const side = (k: number): Layer | null => {
-  const span = shown(k)
-  if (!span) return null
-  return {
-    parent: 'cube',
-    ...(span.ip > 0 ? { ip: span.ip } : {}),
-    ...(span.op <= FRAMES ? { op: span.op } : {}),
-    shapes: [
-      { d: bake((yaw) => face(yaw, sidePts(k))), fill: SIDE_FILL[k] },
-      { d: bake((yaw) => face(yaw, sidePts(k, 24), 10)), fill: SIDE_FILL[(k + 1) % 4], line: 4 },
-    ],
-  }
-}
+// the tray, a slab square under the lower tier
+const TRAY = C + GAP + 18
+const tray: Shape = { d: face([[-TRAY, -TRAY, 0], [TRAY, -TRAY, 0], [TRAY, TRAY, 0], [-TRAY, TRAY, 0]]), fill: 'grey', depth: 1 }
 
-const TOP: ReadonlyArray<P3> = CORNER.map(([x, y]): P3 => [x, y, H])
-const TOP_INSET: ReadonlyArray<P3> = CORNER.map(([x, y]): P3 => [x * 0.42, y * 0.42, H + 1])
-
-const SPARKS: ReadonlyArray<Vec> = [[-136, -214], [128, -170]]
+const upper = ({ c, k }: { c: Vec; k: number }): Layer => ({
+  parent: 'base',
+  m: { p: outAndBack<Vec>([0, 0], LIFT, leave(k), UP, leave(k) + UP, DOWN) },
+  shapes: cube(c, TOP_Z, 'tint', 'main', 'main'),
+})
 
 const loadingCube: Icon = {
   name: 'loading-cube',
-  frames: FRAMES,
-  still: 70,
+  frames: 180,
+  still: 150,
   line: LINE,
   extrude: EXT,
   layers: [
-    { id: 'root', p: [250, 312], shapes: [] },
+    { id: 'root', p: [250, 318], shapes: [] },
     {
-      id: 'ped',
+      id: 'base',
       parent: 'root',
-      m: [0, 1].map((b) => hit(beat(b) + LAND, [0, 7], 0.6)),
-      shapes: [
-        { d: ellipse(0, 28, 146, 52), fill: 'grey', depth: 1 },
-        { d: ellipse(0, 8, 120, 42), fill: 'white', depth: 0.8 },
-      ],
+      m: RING.map((_, k) => hit(land(k), [0, 5], 0.55)),
+      shapes: [tray, ...backToFront.flatMap(({ c }) => cube(c, 0, 'white', 'deep', 'deep'))],
     },
-    { id: 'cube', parent: 'ped', p: [0, 8], m: { p: HOP }, shapes: [] },
-    ...[0, 1, 2, 3].map(side).filter((l): l is Layer => l !== null),
-    {
-      parent: 'cube',
-      shapes: [
-        { d: bake((yaw) => face(yaw, TOP)), fill: 'white' },
-        { d: bake((yaw) => face(yaw, TOP_INSET, 6)), fill: 'gold', line: 4 },
-      ],
-    },
-    ...SPARKS.map((p, i) => glow('root', p, i ? 18 : 24, popIn(beat(i) + LAND, beat(i) + LAND + 30))),
+    ...backToFront.map(upper),
+    glow('root', [126, -206], 24, popIn(LAST, LAST + 34)),
   ],
 }
 

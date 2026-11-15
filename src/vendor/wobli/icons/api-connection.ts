@@ -1,83 +1,98 @@
 // API Connection
-import { ellipse, line, poly, rect } from '../engine.ts'
-import { IN, SNAP, SOFT } from '../motions.ts'
-import { EXT, FACE, LINE, glow, hit, popIn, popScale } from '../parts.ts'
+import { ellipse, line, rect } from '../engine.ts'
+import { IN } from '../motions.ts'
+import { EXT, FACE, LINE, glow, hit, numeral, popIn, popScale } from '../parts.ts'
 import type { Icon, Layer, Shape, Vec } from '../engine.ts'
 
-// The plug leaves the left block faster and faster and strikes the right block's socket, which takes the hit with the spring;
-// its light comes on and three data dots run along the cord and into the plug, one behind the other. After a long hold the light goes
-// and the plug eases back out along the line it came in on.
-const GO = 8 // the plug leaves
-const CONNECT = 30 // it strikes the socket
-const FLOW = CONNECT + 6 // the first dot sets off
-const TRAVEL = 30
-const GAP = 10 // between dots
-const UNPLUG = 140 // the plug pulls out
-const OUT = 30
+// A request: a white `{ }` packet pops out of the client card, speeds along the top lane and strikes the server stack, which
+// takes the hit with the spring; the packet is swallowed and the server's light comes on. The reply: a green 200 chip pops out of
+// the server, runs back along the bottom lane and strikes the client, which takes it in turn. After a long hold the chip pops away
+// and the light goes out.
+const SEND = 8 // the request packet pops out of the client
+const GO = 16 // it sets off
+const ARRIVE = 42 // it strikes the server
+const REPLY = 60 // the 200 chip pops out of the server
+const RETURN = 68 // it sets off back
+const LAND = 94 // it strikes the client
+const CLEAR = 146 // the chip pops away
+const DARK = 150 // the server light goes out
 
-const HOME: Vec = [0, 0]
-const PLUGGED: Vec = [40, 0]
-const DOT_FROM = -58
-const DOT_TO = 30 // under the plug head, into the socket
-const LED: Vec = [128, -56]
+const REQ_Y = -34 // the top lane, request
+const RES_Y = 38 // the bottom lane, response
+const CLIENT_EDGE = -86 // where a chip sits against the client
+const SERVER_EDGE = 86 // where a chip sits against the server
+const LED: Vec = [160, -58]
 
-// a block: slab body, a raised screen, a light
-const block = (x: number, fill: Shape['fill']): ReadonlyArray<Shape> => [
-  { d: rect(x - 52, -80, 104, 160, 18), fill, depth: 1 },
-  { d: rect(x - 36, -40, 72, 90, 10), fill: 'tint', depth: 0.25 },
-  { d: ellipse(x - 24, -58, 7), fill: 'grey', depth: 0.2 },
+// the client: a window card with a title bar of three dots and a screen of text lines
+const client: ReadonlyArray<Shape> = [
+  { d: rect(-190, -96, 104, 192, 20), fill: 'main', depth: 1 },
+  { d: rect(-176, -60, 76, 140, 10), fill: 'white', depth: 0.25 },
+  ...[-170, -155, -140].map((x): Shape => ({ d: ellipse(x, -78, 5), fill: 'white', line: 4 })),
+  { d: line([-162, -36], [-120, -36]) },
+  { d: line([-150, -14], [-114, -14]) },
+  { d: line([-162, 8], [-130, 8]) },
 ]
+
+// the server: a deep stack of two blades, each with a light and a vent
+const server: ReadonlyArray<Shape> = [
+  { d: rect(86, -96, 104, 192, 20), fill: 'deep', depth: 1 },
+  ...[-82, 8].flatMap((y): ReadonlyArray<Shape> => [
+    { d: rect(100, y, 76, 70, 10), fill: 'white', depth: 0.35 },
+    { d: ellipse(160, y + 24, 9), fill: 'grey', line: 4 },
+    { d: line([114, y + 24], [138, y + 24]) },
+    { d: line([114, y + 46], [162, y + 46]) },
+  ]),
+]
+
+// a lane between the two, with a chevron saying which way it runs
+const lane = (y: number, dir: 1 | -1): ReadonlyArray<Shape> => [
+  { d: rect(-86, y - 8, 172, 16, 8), fill: 'grey', depth: 0.3 },
+  { d: line([-6 * dir, y - 14], [8 * dir, y], [-6 * dir, y + 14]), round: true },
+]
+
+// a brace `{` or `}` as one ink stroke, opening towards dir
+const brace = (x: number, dir: 1 | -1): string =>
+  line([x + 6 * dir, -13], [x, -13], [x, -4], [x - 5 * dir, 0], [x, 4], [x, 13], [x + 6 * dir, 13])
+
+const request: Layer = {
+  parent: 'face',
+  p: [[GO, [CLIENT_EDGE + 30, REQ_Y], IN], [ARRIVE, [SERVER_EDGE - 30, REQ_Y]]],
+  s: popScale(SEND, ARRIVE),
+  shapes: [
+    { d: rect(-30, -19, 60, 38, 11), fill: 'white', depth: 0.5 },
+    { d: brace(-10, 1), round: true },
+    { d: brace(10, -1), round: true },
+  ],
+}
+
+const response: Layer = {
+  parent: 'face',
+  p: [[RETURN, [SERVER_EDGE - 40, RES_Y], IN], [LAND, [CLIENT_EDGE + 38, RES_Y]]],
+  s: popScale(REPLY, CLEAR),
+  shapes: [
+    { d: rect(-38, -19, 76, 38, 11), fill: 'ok', depth: 0.5 },
+    { d: numeral(2, -27, -11, 12, 22), line: 4, round: true },
+    { d: numeral(0, -6, -11, 12, 22), line: 4, round: true },
+    { d: numeral(0, 15, -11, 12, 22), line: 4, round: true },
+  ],
+}
 
 const apiConnection: Icon = {
   name: 'api-connection',
   frames: 180,
-  still: 96,
+  still: 110,
   line: LINE,
   extrude: EXT,
   layers: [
-    { id: 'root', p: [252, 246], shapes: [] },
+    { id: 'root', p: [250, 250], shapes: [] },
     { id: 'face', parent: 'root', tilt: FACE, shapes: [] },
-    // the cord, long enough to stay under the plug head at both ends of its trip
-    { parent: 'face', shapes: [{ d: rect(-70, -9, 70, 18, 4), fill: 'grey', depth: 0.4 }] },
-    ...[0, 1, 2].map((i): Layer => {
-      const t = FLOW + i * GAP
-      return {
-        parent: 'face',
-        p: [[t, [DOT_FROM, 0], SNAP], [t + TRAVEL, [DOT_TO, 0]]],
-        s: popScale(t - 4, t + TRAVEL - 8),
-        shapes: [{ d: ellipse(0, 0, 10), fill: 'ok', depth: 0.3 }],
-      }
-    }),
-    {
-      parent: 'face',
-      p: [[GO, HOME, IN], [CONNECT, PLUGGED, 0], [UNPLUG, PLUGGED, SOFT], [UNPLUG + OUT, HOME]],
-      shapes: [
-        ...[-14, 6].map((y): Shape => ({ d: rect(26, y, 34, 9, 2), fill: 'white', depth: 0.3 })),
-        { d: rect(-24, -28, 52, 56, 10), fill: 'gold', depth: 0.7 },
-        { d: line([-8, -12], [-8, 12]) },
-        { d: line([8, -12], [8, 12]) },
-      ],
-    },
-    {
-      id: 'server',
-      parent: 'face',
-      m: hit(CONNECT, [7, 0]),
-      shapes: [
-        ...block(126, 'deep'),
-        { d: rect(66, -34, 14, 68, 4), fill: 'grey', depth: 0.6 },
-        ...[0, 1, 2].map((i): Shape => ({ d: line([102, -22 + i * 24], [i === 2 ? 128 : 150, -22 + i * 24]) })),
-      ],
-    },
-    {
-      parent: 'face',
-      shapes: [
-        ...block(-122, 'main'),
-        { d: poly([[-130, -22], [-148, 4], [-130, 30]], 0), round: true },
-        { d: poly([[-114, -22], [-96, 4], [-114, 30]], 0), round: true },
-      ],
-    },
-    { parent: 'server', a: LED, p: LED, m: popIn(CONNECT + 2, UNPLUG - 8), shapes: [{ d: ellipse(LED[0], LED[1], 9), fill: 'ok', depth: 0.3 }] },
-    glow('root', [136, -136], 22, popIn(CONNECT + 4, UNPLUG - 16)),
+    { parent: 'face', shapes: [...lane(REQ_Y, 1), ...lane(RES_Y, -1)] },
+    { id: 'server', parent: 'face', m: hit(ARRIVE, [8, 0]), shapes: server },
+    { parent: 'server', a: LED, p: LED, m: popIn(ARRIVE + 2, DARK), shapes: [{ d: ellipse(LED[0], LED[1], 9), fill: 'ok', line: 4 }] },
+    { id: 'client', parent: 'face', m: hit(LAND, [-8, 0]), shapes: client },
+    request,
+    response,
+    glow('root', [-150, -150], 22, popIn(LAND + 2, CLEAR - 10)),
   ],
 }
 

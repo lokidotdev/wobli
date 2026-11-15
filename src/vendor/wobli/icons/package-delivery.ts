@@ -2,7 +2,7 @@
 import { at, ellipse, line, poly, view } from '../engine.ts'
 import { SNAP, glint } from '../motions.ts'
 import { EXT, glow, LINE, mapPin, outAndBack, popIn } from '../parts.ts'
-import type { Icon, Layer, Track, Vec } from '../engine.ts'
+import type { Icon, Key, Layer, Track, Vec } from '../engine.ts'
 
 // The carton's flaps fold shut, the far one a beat after the near one, and tape runs along the seam and down the front. A
 // tracking pin pops up out of the taped seam and arcs along the route to its stop, dots marking the way; the stop pings on
@@ -26,9 +26,14 @@ const face = (pts: ReadonlyArray<P3>, r = 4) => poly(pts.map(([x, y, z]) => bx(x
 const [BW, BD, BH] = [74, 58, 138]
 const TAPE = 13
 
-// a path rebuilt every other frame from an eased number, so a flap swings on its hinge instead of morphing straight across
-const bake = (track: Track<number>, shape: (v: number) => string): Track<string> =>
-  Array.from({ length: 91 }, (_, i) => [i * 2, shape(at(track, i * 2))] as const)
+// a path rebuilt every other frame from an eased number, so a flap swings on its hinge instead of morphing straight across.
+// Where the face turns edge on its corners' arc sweep flags flip; a morph across that would tween the flags and tear the
+// shape, so that one key holds instead.
+const sweeps = (d: string) => (d.match(/A[^A-Z]*/g) ?? []).map((a) => a.trim().split(/[ ,]+/)[4]).join('')
+const bake = (track: Track<number>, shape: (v: number) => string): Track<string> => {
+  const ds = Array.from({ length: 91 }, (_, i) => shape(at(track, i * 2)))
+  return ds.map((d, i) => (i < 90 && sweeps(d) !== sweeps(ds[i + 1]) ? [i * 2, d, 0] : [i * 2, d]) as Key<string>)
+}
 
 // a flap hinged on the top edge at x = s * BW, open at 115 degrees, shut flat at 0
 const flapD = (s: -1 | 1) => (deg: number) => {

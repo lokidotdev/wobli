@@ -2,7 +2,7 @@
 import { at, ellipse, line, poly, view } from '../engine.ts'
 import { SNAP } from '../motions.ts'
 import { EXT, glow, LINE, popIn } from '../parts.ts'
-import type { Icon, Layer, Shape, Track, Vec } from '../engine.ts'
+import type { Icon, Key, Layer, Shape, Track, Vec } from '../engine.ts'
 
 // The turntable takes the product box once all the way round on one smooth sweep: the labelled front leaves, a narrow side,
 // the barcoded back and the other side come past, and the front comes home. A curved arrow grows out of the turntable a beat
@@ -23,13 +23,15 @@ const PITCH = 30
 const cam = (yaw: number) => view(BASE + yaw, PITCH)
 const face = (yaw: number, pts: ReadonlyArray<P3>, r = 5) => poly(pts.map((p) => cam(yaw)(p)), r)
 
-// a path rebuilt every other frame from the eased yaw, so the box turns on its axis instead of morphing straight across
+// a path rebuilt on every frame its layer shows from the eased yaw, so the box turns on its axis instead of morphing straight
+// across. Keys never reach past the span: a side keyed after it has turned away winds the other way, its corners' arc sweep
+// flags flip, and a morph across that tears the shape on the frame between. Where flags still change between two frames the
+// earlier key holds, and a still stretch keeps just its two ends.
 type Span = { ip?: number; op?: number }
-// keyed only across the span its layer shows, and only where the pose changes: a still stretch keeps just its two ends
+const sweeps = (d: string) => (d.match(/A[^A-Z]*/g) ?? []).map((a) => a.trim().split(/[ ,]+/)[4]).join('')
 const bake = (shape: (yaw: number) => string, { ip = 0, op = FRAMES }: Span = {}): Track<string> => {
-  const from = Math.max(0, ip - (ip % 2) - 2)
-  const to = Math.min(FRAMES, op + (op % 2) + 2)
-  const keys = Array.from({ length: (to - from) / 2 + 1 }, (_, i) => [from + i * 2, shape(at(YAW, from + i * 2))] as const)
+  const ds = Array.from({ length: op - ip }, (_, i) => shape(at(YAW, ip + i)))
+  const keys = ds.map((d, i) => (i < ds.length - 1 && sweeps(d) !== sweeps(ds[i + 1]) ? [ip + i, d, 0] : [ip + i, d]) as Key<string>)
   return keys.filter((k, i) => i === 0 || i === keys.length - 1 || k[1] !== keys[i - 1][1] || k[1] !== keys[i + 1][1])
 }
 
