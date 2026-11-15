@@ -4,6 +4,9 @@ import { useEffect, useRef } from 'react'
  * Keeps a sticky panel exactly as tall as the room it has: from wherever its top edge currently sits down to `gap` px
  * above the bottom of the viewport. Before it sticks (its top is still far down the screen) it is short; once stuck it
  * fills the column. Publishes the figure as `--avail` on the element, so pair it with `max-h-[var(--avail,<fallback>)]`.
+ *
+ * The height eases to each new figure (`.avail-height` in app.css) rather than snapping, so it reads as one smooth
+ * growth while scrolling. The class goes on after the first measure, so the panel doesn't animate in on load.
  */
 export function useAvailableHeight<T extends HTMLElement>(gap = 20) {
   const ref = useRef<T>(null)
@@ -23,6 +26,7 @@ export function useAvailableHeight<T extends HTMLElement>(gap = 20) {
       frame ||= requestAnimationFrame(measure)
     }
     measure()
+    const enable = requestAnimationFrame(() => el.classList.add('avail-height'))
     window.addEventListener('scroll', queue, { passive: true })
     window.addEventListener('resize', queue)
     // content above can change height (filters, results) and move the panel without a scroll
@@ -30,9 +34,11 @@ export function useAvailableHeight<T extends HTMLElement>(gap = 20) {
     ro.observe(document.body)
     return () => {
       cancelAnimationFrame(frame)
+      cancelAnimationFrame(enable)
       window.removeEventListener('scroll', queue)
       window.removeEventListener('resize', queue)
       ro.disconnect()
+      el.classList.remove('avail-height')
     }
   }, [gap])
   return ref

@@ -723,3 +723,15 @@
 @keyframes logo-shuffle-t { 0%, 25% { fill: #ffd60a; } 33%, 58% { fill: #34c759; } 66%, 91% { fill: #0a84ff; } 100% { fill: #ffd60a; } }
 @keyframes logo-shuffle-l { 0%, 25% { fill: #0a84ff; } 33%, 58% { fill: #ffd60a; } 66%, 91% { fill: #34c759; } 100% { fill: #0a84ff; } }
 @keyframes logo-shuffle-r { 0%, 25% { fill: #34c759; } 33%, 58% { fill: #0a84ff; } 66%, 91% { fill: #ffd60a; } 100% { fill: #34c759; } }
+
+/* useAvailableHeight: the panel's height follows the room it has as the page scrolls. A short ease-out transition
+   instead of a hard set each frame: every scroll retargets it from wherever it is, so the bottom edge glides after the
+   scroll rather than snapping a frame behind it. Added after the first measure, so the page doesn't animate on load. */
+.avail-height {
+  transition: max-height 200ms var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .avail-height {
+    transition: none;
+  }
+}
