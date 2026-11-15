@@ -30,7 +30,8 @@ export function useLogoShuffle() {
       leaving.current = true
     },
     onAnimationIteration: (e: AnimationEvent<HTMLElement>) => {
-      if (!leaving.current) return
+      // the name's letters loop too, on their own offsets: only the logo's cycle decides when to stop
+      if (!leaving.current || !e.animationName.startsWith('logo-shuffle')) return
       leaving.current = false
       delete e.currentTarget.dataset.shuffle
     },

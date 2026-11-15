@@ -21,6 +21,10 @@ export const STAR_FILLED = cn(STAR, 'bg-black! text-white! hover:bg-black/80!')
 
 export const BAND = 'mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12'
 
+// The nav name's letters, while the logo shuffles: each pops up as a sticker in turn (.nav-letter, app.css)
+const NAME_COLOURS = ['var(--color-slush-sunburst)', 'var(--color-slush-blue)', 'var(--color-slush-mint)', 'var(--color-slush-ember)', 'var(--color-slush-lavender)']
+const NAME_TILT = [-8, 6, -5, 9, -6]
+
 // Floating pills: logo left, nav centre, the one filled CTA right. No bar behind them, so every band shows through.
 function Nav() {
   const shuffle = useLogoShuffle()
@@ -29,7 +33,13 @@ function Nav() {
       <div className={cn(BAND, 'flex h-full items-center justify-between gap-2')}>
         <Link to="/" aria-label={`${site.name} home`} className={cn(GHOST, 'h-10 gap-2 px-2.5 text-[13px] normal-case sm:pr-4')} {...shuffle}>
           <Logo className="size-5" />
-          <span className="text-[16px] tracking-[-0.02em] max-sm:sr-only">{site.name}</span>
+          <span className="text-[16px] tracking-[-0.02em] max-sm:sr-only">
+            {[...site.name].map((ch, i) => (
+              <span key={i} className="nav-letter" style={{ '--c': NAME_COLOURS[i % NAME_COLOURS.length], '--r': `${NAME_TILT[i % NAME_TILT.length]}deg`, '--i': i } as CSSProperties}>
+                {ch}
+              </span>
+            ))}
+          </span>
         </Link>
         <nav aria-label="Main" className="flex items-center gap-1">
           <Link to="/illustrations" className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': 'var(--color-slush-sunburst)', '--r': '-4deg' } as CSSProperties}>

@@ -724,6 +724,42 @@
 @keyframes logo-shuffle-l { 0%, 25% { fill: #0a84ff; } 33%, 58% { fill: #ffd60a; } 66%, 91% { fill: #34c759; } 100% { fill: #0a84ff; } }
 @keyframes logo-shuffle-r { 0%, 25% { fill: #34c759; } 33%, 58% { fill: #0a84ff; } 66%, 91% { fill: #ffd60a; } 100% { fill: #34c759; } }
 
+/* The nav name rides the same hover: while the logo shuffles, its letters pop up one after another as stickers, the
+   way a hero headline letter does under the pointer (palette colour --c, black cut-out outline, tipped by --r). Same
+   2400ms cycle, each letter starting --i steps later; every pop is over by 40% of the cycle, so when the logo's cycle
+   ends (and data-shuffle goes) every letter is already back at rest. */
+.nav-letter {
+  display: inline-block;
+  -webkit-text-stroke: 0.08em transparent;
+  paint-order: stroke fill;
+}
+[data-shuffle] .nav-letter {
+  animation: nav-letter-pop 2400ms calc(var(--i) * 110ms) infinite;
+}
+@keyframes nav-letter-pop {
+  0% { animation-timing-function: var(--ease-spring); }
+  9%, 20% {
+    color: var(--c);
+    -webkit-text-stroke-color: #000;
+    translate: 0 -0.12em;
+    rotate: var(--r);
+    scale: 1.15;
+    animation-timing-function: var(--ease-out);
+  }
+  38%, 100% {
+    color: inherit;
+    -webkit-text-stroke-color: transparent;
+    translate: none;
+    rotate: none;
+    scale: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-shuffle] .nav-letter {
+    animation: none;
+  }
+}
+
 /* useAvailableHeight: the panel's height follows the room it has as the page scrolls. A short ease-out transition
    instead of a hard set each frame: every scroll retargets it from wherever it is, so the bottom edge glides after the
    scroll rather than snapping a frame behind it. Added after the first measure, so the page doesn't animate on load. */
