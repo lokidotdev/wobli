@@ -61,7 +61,7 @@ frontend/
 │   ├── styles/app.css       # Tailwind v4 @import + @theme tokens
 │   ├── router.tsx           # createRouter + routerWithQueryClient (SSR dehydrate/hydrate)
 │   └── server.ts            # Worker entry (TanStack Start server handler)
-├── public/                  # favicon, apple-touch-icon, manifest, og-default.webp
+├── public/                  # favicon, apple-touch-icon, manifest, og-default.png
 ├── vite.config.ts
 ├── wrangler.jsonc
 └── package.json
@@ -159,7 +159,7 @@ Large player, title, description, tags, palette, download buttons (WebM alpha / 
 | Structured data | `WebSite` + `SearchAction` (root), `CollectionPage` + `ItemList` (lists), `VideoObject` + `ImageObject` (detail), `BreadcrumbList` |
 | Sitemap | `sitemap.xml` server route built from `/v1/seo/sitemap-data`, cached at the edge |
 | robots.txt | Server route; disallows `/account`, `/auth` |
-| OG images | Per-illustration poster/OG asset from R2; default `og-default.webp` |
+| OG images | Per-illustration poster/OG asset from R2; default `og-default.png` |
 | Performance | Core Web Vitals: SSR, poster LCP, no CLS, lazy video, edge-cached HTML (`s-maxage` + SWR) |
 | Accessibility | Semantic landmarks, `aria-label` on players, visible focus rings, colour contrast AA |
 | i18n-ready | `lang` on `<html>`, `hreflang` when locales are added |

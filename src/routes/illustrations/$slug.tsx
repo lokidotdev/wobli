@@ -16,7 +16,7 @@ export const Route = createFileRoute('/illustrations/$slug')({
           title: loaderData.item.seo.title || `${loaderData.item.title} · ${site.name}`,
           description: loaderData.item.seo.description || `${loaderData.item.description} Restyle it live and export a PNG or a component for React and Next.js.`,
           path: `/illustrations/${params.slug}`, // styled URLs share the bare canonical, so they never duplicate the page
-          image: loaderData.item.poster,
+          image: { url: loaderData.item.poster, width: 600, height: 600, alt: `${loaderData.item.title}, an isometric illustration` }, // posters are 600×600 PNGs
           jsonLd: illustrationJsonLd(loaderData.item),
         })
       : {},
