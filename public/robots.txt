@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /account
-Disallow: /auth
-
-Sitemap: https://isoloops.com/sitemap.xml

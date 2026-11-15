@@ -7,5 +7,7 @@
   "name": "wobli",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "src/server.ts"
+  "main": "src/server.ts",
+  // Workers Logs: request traces and console output in the dashboard
+  "observability": { "enabled": true }
 }

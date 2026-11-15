@@ -23,6 +23,7 @@ export const CATEGORIES = {
   'smart-home': 'Smart home',
   marketing: 'Marketing',
   hr: 'HR & people',
+  food: 'Food & delivery',
 } as const
 export type CategorySlug = keyof typeof CATEGORIES
 

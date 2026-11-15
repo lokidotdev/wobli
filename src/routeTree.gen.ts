@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as HowItsMadeRouteImport } from './routes/how-its-made'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as EmbedSlugRouteImport } from './routes/embed.$slug'
 import { Route as IllustrationsIndexRouteImport } from './routes/illustrations/index'
@@ -30,6 +31,11 @@ const DocsRoute = DocsRouteImport.update({
 const HowItsMadeRoute = HowItsMadeRouteImport.update({
   id: '/how-its-made',
   path: '/how-its-made',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
   '/how-its-made': typeof HowItsMadeRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/embed/$slug': typeof EmbedSlugRoute
   '/illustrations/$slug': typeof IllustrationsSlugRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
   '/how-its-made': typeof HowItsMadeRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/embed/$slug': typeof EmbedSlugRoute
   '/illustrations/$slug': typeof IllustrationsSlugRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/docs': typeof DocsRoute
   '/how-its-made': typeof HowItsMadeRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/embed/$slug': typeof EmbedSlugRoute
   '/illustrations/$slug': typeof IllustrationsSlugRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/docs'
     | '/how-its-made'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/embed/$slug'
     | '/illustrations/$slug'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/docs'
     | '/how-its-made'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/embed/$slug'
     | '/illustrations/$slug'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/docs'
     | '/how-its-made'
+    | '/robots.txt'
     | '/sitemap.xml'
     | '/embed/$slug'
     | '/illustrations/$slug'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DocsRoute: typeof DocsRoute
   HowItsMadeRoute: typeof HowItsMadeRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   EmbedSlugRoute: typeof EmbedSlugRoute
   IllustrationsSlugRoute: typeof IllustrationsSlugRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/how-its-made'
       fullPath: '/how-its-made'
       preLoaderRoute: typeof HowItsMadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DocsRoute: DocsRoute,
   HowItsMadeRoute: HowItsMadeRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   EmbedSlugRoute: EmbedSlugRoute,
   IllustrationsSlugRoute: IllustrationsSlugRoute,

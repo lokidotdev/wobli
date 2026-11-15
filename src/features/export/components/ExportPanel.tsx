@@ -89,7 +89,7 @@ function PngGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
     <Group title="PNG" footer={style.bg === 'none' ? 'Transparent, the frame on screen now.' : 'On your background, the frame on screen now.'}>
       <Row className="flex items-center gap-3">
         <Segmented label="PNG size" value={size} onChange={setSize} options={SIZES.map((s) => ({ value: s, label: `${s}px` }))} className="flex-1" size="sm" />
-        <Button size="sm" onClick={save} disabled={busy} aria-label="Save PNG">
+        <Button size="sm" onClick={save} disabled={busy} aria-label="Save PNG" className="cursor-pointer disabled:cursor-default">
           {done ? <Check className="size-4" /> : <Download className="size-4" />}
           {done ? 'Saved' : 'Save'}
         </Button>
@@ -124,7 +124,7 @@ function SvgGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
           {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           {copied ? 'Copied' : 'Copy for Figma'}
         </Button>
-        <Button size="sm" onClick={save} aria-label="Save SVG">
+        <Button size="sm" onClick={save} aria-label="Save SVG" className="cursor-pointer">
           {saved ? <Check className="size-4" /> : <Download className="size-4" />}
           {saved ? 'Saved' : 'Save'}
         </Button>
@@ -205,7 +205,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
         </div>
         <div className="flex items-center gap-3">
           <Segmented label="Video size" value={size} onChange={setSize} options={VSIZES.map((s) => ({ value: s, label: `${s}p` }))} className="flex-1" size="sm" />
-          <Button size="sm" onClick={save} aria-label={progress === null ? 'Save video' : 'Cancel video export'} className="relative w-24 overflow-hidden">
+          <Button size="sm" onClick={save} aria-label={progress === null ? 'Save video' : 'Cancel video export'} className="relative w-24 cursor-pointer overflow-hidden">
             {progress !== null && <span aria-hidden className="absolute inset-y-0 left-0 bg-slush-violet transition-[width] duration-150" style={{ width: `${progress * 100}%` }} />}
             <span className="relative flex items-center gap-1.5">
               {progress !== null ? `${Math.round(progress * 100)}%` : done ? <><Check className="size-4" />Saved</> : <><Download className="size-4" />Save</>}

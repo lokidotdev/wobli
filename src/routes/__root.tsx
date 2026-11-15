@@ -11,6 +11,11 @@ import { Header } from '~/shared/ui/Header'
 import { SlushLayout } from '~/shared/ui/SlushChrome'
 import appCss from '~/styles/app.css?url'
 
+// Umami, only when both build variables are set (never in a plain local run or a fork without them).
+const umamiSrc = import.meta.env.VITE_UMAMI_SRC as string | undefined
+const umamiId = import.meta.env.VITE_UMAMI_WEBSITE_ID as string | undefined
+const analytics = umamiSrc && umamiId ? [{ src: umamiSrc, defer: true, 'data-website-id': umamiId }] : []
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   // the admin's site-wide look, in place before any page renders (and again on the client, from the dehydrated data)
   loader: async ({ context: { queryClient } }) => {
@@ -33,7 +38,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: 'preload', href: '/fonts/GeistMono.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+      { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      { rel: 'manifest', href: '/manifest.webmanifest' },
     ],
+    scripts: analytics,
   }),
   component: RootComponent,
   notFoundComponent: () => (

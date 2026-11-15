@@ -5,7 +5,7 @@ import { cn } from '~/shared/lib/cn'
 import { Container } from './Container'
 import { GitHubStar } from './GitHubStar'
 import { ThemeToggle } from './ThemeToggle'
-import { Logo } from './Logo'
+import { Logo, useLogoShuffle } from './Logo'
 
 const nav = [
   { to: '/illustrations', label: 'Illustrations' },
@@ -14,6 +14,7 @@ const nav = [
 
 // Geist header: 64px, translucent Background 1, and a 1px border that appears only once content scrolls under it.
 export function Header() {
+  const shuffle = useLogoShuffle()
   const [scrolled, setScrolled] = useState(false)
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 4)
@@ -29,7 +30,7 @@ export function Header() {
       )}
     >
       <Container className="flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 rounded-(--radius-control) text-[18px] font-semibold tracking-[-0.04em]">
+        <Link to="/" className="flex items-center gap-2 rounded-(--radius-control) text-[18px] font-semibold tracking-[-0.04em]" {...shuffle}>
           <Logo className="size-6" />
           {site.name}
         </Link>

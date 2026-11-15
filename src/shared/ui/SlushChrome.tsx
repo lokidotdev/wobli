@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { site } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
 import { GitHubStar } from './GitHubStar'
-import { Logo } from './Logo'
+import { Logo, useLogoShuffle } from './Logo'
 
 // The sticker-book chrome (DESIGN.md): a floating pill nav and a black footer ending in the wordmark, around
 // pages built from full-bleed colour bands. Everything inside `.slush` is light, outlined in black and pill-shaped: the
@@ -23,10 +23,11 @@ export const BAND = 'mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12'
 
 // Floating pills: logo left, nav centre, the one filled CTA right. No bar behind them, so every band shows through.
 function Nav() {
+  const shuffle = useLogoShuffle()
   return (
     <header className="sticky top-0 z-40 -mb-[72px] h-[72px]">
       <div className={cn(BAND, 'flex h-full items-center justify-between gap-2')}>
-        <Link to="/" aria-label={`${site.name} home`} className={cn(GHOST, 'h-10 gap-2 px-2.5 text-[13px] normal-case sm:pr-4')}>
+        <Link to="/" aria-label={`${site.name} home`} className={cn(GHOST, 'h-10 gap-2 px-2.5 text-[13px] normal-case sm:pr-4')} {...shuffle}>
           <Logo className="size-5" />
           <span className="text-[16px] tracking-[-0.02em] max-sm:sr-only">{site.name}</span>
         </Link>

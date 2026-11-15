@@ -24,6 +24,8 @@ const previewCompression = (): Plugin => ({
 export default defineConfig(({ command, mode }) => {
   const apiWorker = loadEnv(mode, process.cwd(), '').API_WORKER?.trim()
   return {
+  // a new id per build, so the ISR cache (src/server.ts) never serves a page from an earlier deploy
+  define: { __BUILD_ID__: JSON.stringify(Date.now().toString(36)) },
   plugins: [
     cloudflare({
       viteEnvironment: { name: 'ssr' },

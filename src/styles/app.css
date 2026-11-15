@@ -705,3 +705,21 @@
     -webkit-backdrop-filter: none;
   }
 }
+
+/* The logo's hover (Logo.tsx, useLogoShuffle): while a mouse is on the link the outline thickens from 1.4 to 2 and the
+   three colours step round the faces, holding on each step. It loops while hovered; on leave the running cycle
+   finishes before data-shuffle is removed, so every colour lands back on its own face. Colour and line weight only,
+   nothing moves, so it also runs under reduced motion. */
+.logo path {
+  transition: stroke-width 220ms ease;
+}
+[data-shuffle] .logo path {
+  stroke-width: 2;
+  animation: 2400ms ease infinite;
+}
+[data-shuffle] .logo .logo-t { animation-name: logo-shuffle-t; }
+[data-shuffle] .logo .logo-l { animation-name: logo-shuffle-l; }
+[data-shuffle] .logo .logo-r { animation-name: logo-shuffle-r; }
+@keyframes logo-shuffle-t { 0%, 25% { fill: #ffd60a; } 33%, 58% { fill: #34c759; } 66%, 91% { fill: #0a84ff; } 100% { fill: #ffd60a; } }
+@keyframes logo-shuffle-l { 0%, 25% { fill: #0a84ff; } 33%, 58% { fill: #ffd60a; } 66%, 91% { fill: #34c759; } 100% { fill: #0a84ff; } }
+@keyframes logo-shuffle-r { 0%, 25% { fill: #34c759; } 33%, 58% { fill: #0a84ff; } 66%, 91% { fill: #ffd60a; } 100% { fill: #34c759; } }

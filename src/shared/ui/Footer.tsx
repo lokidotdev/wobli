@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { site } from '~/shared/config/site'
 import { Container } from './Container'
-import { Logo } from './Logo'
+import { Logo, useLogoShuffle } from './Logo'
 
 const creator = [
   { href: 'https://designeng.tools', label: 'designeng.tools' },
@@ -9,11 +9,12 @@ const creator = [
 ]
 
 export function Footer() {
+  const shuffle = useLogoShuffle()
   return (
     <footer className="mt-28 border-t border-separator bg-bg-2">
       <Container className="flex flex-col gap-8 py-12 text-[14px] text-label-2 md:flex-row md:items-start md:justify-between">
         <div className="max-w-sm">
-          <Link to="/" className="flex items-center gap-2 text-[16px] font-semibold tracking-[-0.02em] text-label">
+          <Link to="/" className="flex items-center gap-2 text-[16px] font-semibold tracking-[-0.02em] text-label" {...shuffle}>
             <Logo className="size-5" />
             {site.name}
           </Link>

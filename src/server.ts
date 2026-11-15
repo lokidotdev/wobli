@@ -30,6 +30,8 @@ const cacheable = (request: Request) => {
 const cacheKey = (request: Request) => {
   const url = new URL(request.url)
   url.hash = ''
+  // each build caches separately: a page rendered by an earlier deploy points at asset files the new one doesn't have
+  url.searchParams.set('__build', __BUILD_ID__)
   for (const p of [...url.searchParams.keys()]) if (/^(utm_|fbclid$|gclid$|ref$)/.test(p)) url.searchParams.delete(p)
   return new Request(url.toString(), { method: 'GET' })
 }
@@ -57,25 +59,43 @@ const withState = (response: Response, state: string) => {
   return out
 }
 
+/** Security headers on everything the Worker answers (public/_headers covers the static files). HSTS is set by Cloudflare. */
+function secure(response: Response, request: Request): Response {
+  const out = new Response(response.body, response)
+  out.headers.set('X-Content-Type-Options', 'nosniff')
+  out.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  out.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()')
+  // the embed player exists to be framed by other sites; every other page may only be framed by this one
+  if (!new URL(request.url).pathname.startsWith('/embed/')) {
+    out.headers.set('X-Frame-Options', 'SAMEORIGIN')
+    out.headers.set('Content-Security-Policy', "frame-ancestors 'self'")
+  }
+  return out
+}
+
 export default createServerEntry({
   async fetch(request: Request, ...rest: unknown[]) {
-    if (!cacheable(request)) return render(request, ...rest)
-    const ctx = rest[1] as Ctx | undefined
-    const cache = (caches as unknown as { default: Cache }).default
-    const key = cacheKey(request)
-
-    const hit = await cache.match(key)
-    if (hit) {
-      const age = (Date.now() - Number(hit.headers.get(RENDERED_AT) ?? 0)) / 1000
-      if (age < FRESH_SECONDS) return withState(hit, 'HIT')
-      // stale: answer now, render the next copy in the background (or inline when there is no ctx to wait on)
-      const refresh = renderAndStore(cache, key, new Request(request), rest).catch(() => undefined)
-      if (ctx) ctx.waitUntil(refresh)
-      else await refresh
-      return withState(hit, 'STALE')
-    }
-
-    const fresh = await renderAndStore(cache, key, request, rest)
-    return withState(fresh, fresh.status === 200 ? 'MISS' : 'BYPASS')
+    return secure(await handle(request, rest), request)
   },
 } as Parameters<typeof createServerEntry>[0])
+
+async function handle(request: Request, rest: unknown[]): Promise<Response> {
+  if (!cacheable(request)) return render(request, ...rest)
+  const ctx = rest[1] as Ctx | undefined
+  const cache = (caches as unknown as { default: Cache }).default
+  const key = cacheKey(request)
+
+  const hit = await cache.match(key)
+  if (hit) {
+    const age = (Date.now() - Number(hit.headers.get(RENDERED_AT) ?? 0)) / 1000
+    if (age < FRESH_SECONDS) return withState(hit, 'HIT')
+    // stale: answer now, render the next copy in the background (or inline when there is no ctx to wait on)
+    const refresh = renderAndStore(cache, key, new Request(request), rest).catch(() => undefined)
+    if (ctx) ctx.waitUntil(refresh)
+    else await refresh
+    return withState(hit, 'STALE')
+  }
+
+  const fresh = await renderAndStore(cache, key, request, rest)
+  return withState(fresh, fresh.status === 200 ? 'MISS' : 'BYPASS')
+}
