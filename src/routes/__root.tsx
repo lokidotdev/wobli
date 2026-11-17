@@ -1,6 +1,7 @@
 import { themeScript } from '~/shared/ui/ThemeToggle'
 /// <reference types="vite/client" />
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext, useRouterState } from '@tanstack/react-router'
+import { NotFoundPage } from '~/features/landing'
 import { settingsQuery } from '~/features/settings'
 import { applySiteStyle } from '~/features/style'
 import type { QueryClient } from '@tanstack/react-query'
@@ -44,12 +45,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: analytics,
   }),
   component: RootComponent,
-  notFoundComponent: () => (
-    <div className="mx-auto max-w-xl px-4 py-32 text-center">
-      <h1 className="type-title">Page Not Found</h1>
-      <p className="mt-3 text-label-2">This illustration doesn't exist (yet).</p>
-    </div>
-  ),
+  notFoundComponent: NotFoundPage,
 })
 
 const SLUSH_PAGES = new Set(['/', '/illustrations', '/docs', '/how-its-made'])
@@ -60,7 +56,8 @@ function RootComponent() {
   applySiteStyle(Route.useLoaderData().style) // no-op once applied; covers hydration, where the loader does not re-run
   // the embed player is bare: no header or footer, and no page colour behind a transparent sticker
   // the sticker-book pages (DESIGN.md) bring their own shell: marquee, pill nav and footer
-  const shell = useRouterState({ select: (s) => (s.location.pathname.startsWith('/embed/') ? 'embed' : isSlush(s.location.pathname) ? 'slush' : 'site') })
+  // a 404 is a sticker-book page wherever it happens: a URL no route matches (only the root matched), or a loader's notFound()
+  const shell = useRouterState({ select: (s) => (s.location.pathname.startsWith('/embed/') ? 'embed' : s.matches.at(-1)?.routeId === '__root__' || s.matches.some((m) => m.status === 'notFound') || isSlush(s.location.pathname) ? 'slush' : 'site') })
   if (shell === 'embed')
     return (
       <RootDocument bodyClass="bg-transparent">

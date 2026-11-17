@@ -2,6 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { routeTree } from './routeTree.gen'
+import { NotFoundPage } from './features/landing'
 import { ErrorScreen } from './shared/ui/ErrorScreen'
 
 export function getRouter() {
@@ -13,6 +14,7 @@ export function getRouter() {
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: ErrorScreen,
+    defaultNotFoundComponent: NotFoundPage,
     // plain strings in the URL (?ink=000000 must not turn into the number 0); routes validate and coerce with Zod
     parseSearch: (s) => Object.fromEntries(new URLSearchParams(s)),
     stringifySearch: (o) => {
