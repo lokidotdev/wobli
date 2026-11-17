@@ -16,6 +16,7 @@ export {
   encodeStyle,
   formatMultiplier,
   hasStyleParams,
+  isDefaultStyle,
   paletteOf,
   randomizeStyle,
   styleQuery,

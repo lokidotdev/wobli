@@ -35,7 +35,11 @@ export const PALETTE_PRESETS: ReadonlyArray<{ name: PaletteName; label: string }
   { name: 'aqua', label: 'Aqua' },
 ]
 
-export const DEFAULT_STYLE: EditorStyle = {
+/**
+ * The look a style URL is written against: the package's own defaults, frozen. A URL holds only what differs from this, and
+ * a missing value means this one, so a copied link or embed shows the same look forever, whatever the admin later picks.
+ */
+export const URL_BASE: Readonly<EditorStyle> = Object.freeze<EditorStyle>({
   preset: 'system',
   recolor: { mode: 'off' },
   colors: {},
@@ -45,7 +49,10 @@ export const DEFAULT_STYLE: EditorStyle = {
   bg: 'none',
   speed: 1,
   loop: true,
-}
+})
+
+/** The site's starting look: URL_BASE until the admin's settings arrive (applySiteStyle), then theirs. */
+export const DEFAULT_STYLE: EditorStyle = { ...URL_BASE }
 
 /** The one definition of how far each control goes: sliders, the URL decoder and the docs all read these. */
 export const LINE_RANGE = { min: 0, max: 2.5, step: 0.05 } as const
@@ -103,8 +110,10 @@ const bare = (c: string) => c.replace('#', '').toLowerCase()
 const round = (n: number) => String(+n.toFixed(2))
 const SLOTS = new Set<string>([...ACCENTS, 'white', 'grey', 'paper'])
 
+/** The look a URL encodes; a URL with no style in it is the site's current starting look. */
 export function decodeStyle(q: StyleSearch): EditorStyle {
-  const preset = isPreset(q.p) ? q.p : DEFAULT_STYLE.preset
+  if (!hasStyleParams(q)) return { ...DEFAULT_STYLE }
+  const preset = isPreset(q.p) ? q.p : URL_BASE.preset
   let recolor: Recolor = { mode: 'off' }
   const [mode, a, b] = (q.q ?? '').split('.')
   const deg = num(a, HUE_RANGE)
@@ -121,39 +130,42 @@ export function decodeStyle(q: StyleSearch): EditorStyle {
     preset,
     recolor,
     colors,
-    ink: hex(q.ink) ?? DEFAULT_STYLE.ink,
-    line: num(q.lw, LINE_RANGE) ?? DEFAULT_STYLE.line,
-    depth: num(q.d, DEPTH_RANGE) ?? DEFAULT_STYLE.depth,
+    ink: hex(q.ink) ?? URL_BASE.ink,
+    line: num(q.lw, LINE_RANGE) ?? URL_BASE.line,
+    depth: num(q.d, DEPTH_RANGE) ?? URL_BASE.depth,
     bg,
-    speed: q.sp !== undefined && Number.isFinite(Number(q.sp)) ? nearestSpeed(Number(q.sp)) : DEFAULT_STYLE.speed,
+    speed: q.sp !== undefined && Number.isFinite(Number(q.sp)) ? nearestSpeed(Number(q.sp)) : URL_BASE.speed,
     loop: q.once !== '1',
   }
 }
 
-/** Only the values that differ from the default, so a plain look has a bare URL. */
+/** Only the values that differ from URL_BASE. */
 export function encodeStyle(s: EditorStyle): StyleSearch {
   const out: StyleSearch = {}
-  if (s.preset !== DEFAULT_STYLE.preset) out.p = s.preset
+  if (s.preset !== URL_BASE.preset) out.p = s.preset
   const r = s.recolor
   if (r.mode === 'hue' && r.deg) out.q = `hue.${Math.round(r.deg)}`
   if (r.mode === 'brand') out.q = `brand.${bare(r.a)}.${bare(r.b)}`
   if (r.mode === 'mono') out.q = `mono.${bare(r.c)}`
   const c = Object.entries(s.colors).map(([k, v]) => `${k}-${bare(v)}`)
   if (c.length) out.c = c.join('.')
-  if (s.ink !== DEFAULT_STYLE.ink) out.ink = bare(s.ink)
-  if (s.line !== DEFAULT_STYLE.line) out.lw = round(s.line)
-  if (s.depth !== DEFAULT_STYLE.depth) out.d = round(s.depth)
+  if (s.ink !== URL_BASE.ink) out.ink = bare(s.ink)
+  if (s.line !== URL_BASE.line) out.lw = round(s.line)
+  if (s.depth !== URL_BASE.depth) out.d = round(s.depth)
   if (s.bg !== 'none') out.bg = s.bg === 'paper' ? 'paper' : bare(s.bg)
-  if (s.speed !== DEFAULT_STYLE.speed) out.sp = round(s.speed)
+  if (s.speed !== URL_BASE.speed) out.sp = round(s.speed)
   if (!s.loop) out.once = '1'
   return out
 }
 
-/** A look as a URL query, with its `?`; empty for the default look, so a plain look has a bare URL. */
+/** A look as a URL query, with its `?`; empty only for URL_BASE itself. */
 export function styleQuery(s: EditorStyle) {
   const q = new URLSearchParams(encodeStyle(s) as Record<string, string>).toString()
   return q ? `?${q}` : ''
 }
+
+/** Whether a look is the site's starting look, compared value by value (through the URL form, which is canonical). */
+export const isDefaultStyle = (s: EditorStyle) => styleQuery(s) === styleQuery(DEFAULT_STYLE)
 
 export const hasStyleParams = (q: StyleSearch) => Object.values(q).some((v) => v !== undefined)
 

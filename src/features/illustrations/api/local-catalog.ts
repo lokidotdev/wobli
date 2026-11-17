@@ -3,6 +3,7 @@ import { LOCAL_ICON as LOCAL } from './local-icon'
 import { CATEGORIES } from '../../../vendor/wobli/catalog.ts'
 import type { IconMeta } from '../../../vendor/wobli/catalog.ts'
 import { searchFold, searchWords, startsAWord } from 'wobli-api/contracts'
+import { localPoster } from '../lib/poster'
 import { PAGE_SIZE } from '../schemas/illustration.schema'
 import type { Facets, Illustration, IllustrationPage, ListFilters } from '../schemas/illustration.schema'
 
@@ -39,7 +40,7 @@ const entries: Entry[] = Object.entries(metas)
       tags,
       featured: meta.featured ?? false,
       frames: 0, // not shown anywhere; the drawing carries its own
-      poster: `/posters/${slug}.png`,
+      poster: localPoster(slug),
       icon: LOCAL + slug,
       seo: { title: '', description: '', content: '' },
     }

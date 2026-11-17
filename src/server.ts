@@ -10,6 +10,7 @@
 
 import { createServerEntry } from '@tanstack/react-start/server-entry'
 import { createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
+import { isEmbedPath } from '~/shared/config/site'
 
 const startFetch = createStartHandler(defaultStreamHandler)
 
@@ -73,7 +74,7 @@ function secure(response: Response, request: Request): Response {
   out.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   out.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()')
   // the embed player exists to be framed by other sites; every other page may only be framed by this one
-  if (!new URL(request.url).pathname.startsWith('/embed/')) {
+  if (!isEmbedPath(new URL(request.url).pathname)) {
     out.headers.set('X-Frame-Options', 'SAMEORIGIN')
     out.headers.set('Content-Security-Policy', "frame-ancestors 'self'")
   }

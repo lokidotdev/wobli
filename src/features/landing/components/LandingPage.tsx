@@ -12,7 +12,7 @@ import { GitHubStar } from '~/shared/ui/GitHubStar'
 import { LetterSticker } from '~/shared/ui/LetterSticker'
 import { BAND, FILLED, GHOST, LG, SM, STAR_GHOST } from '~/shared/ui/slush'
 import { useLandingMotion } from '../hooks/useLandingMotion'
-import { GRID } from '../lib/queries'
+import { GRID, HERO_COUNT } from '../lib/queries'
 import letterD from '../lib/letter-d'
 import letterI from '../lib/letter-i'
 
@@ -394,9 +394,9 @@ function TakeHome({ pins, look }: { pins: ReadonlyArray<Illustration>; look: Sty
 }
 
 export function LandingPage() {
-  const { data: items } = useFeatured()
-  // the grid: the eight featured, in this order, as two full rows of four
   const { data: featured } = useFeatured(GRID.length)
+  const items = featured.slice(0, HERO_COUNT)
+  // the grid: the eight featured, in this order, as two full rows of four
   const grid = [...featured].sort((a, b) => rank(a.slug) - rank(b.slug))
   // the Featured section: the featured eight as rendered, then a random eight from the whole catalogue for this visit, swapped
   // in long before the section scrolls into view

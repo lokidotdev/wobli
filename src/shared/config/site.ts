@@ -17,6 +17,9 @@ export const site = {
   ],
 }
 
+/** Whether a path is the embeddable player's (routes/embed.$slug.tsx): bare, transparent, and framable by any site. */
+export const isEmbedPath = (pathname: string) => pathname.startsWith('/embed/')
+
 /** The npm package the site documents and its install command. */
 export const PACKAGE = 'wobli'
 export const INSTALL = `npm i ${PACKAGE}`

@@ -32,7 +32,10 @@ function Embed() {
   const style = useMemo(() => decodeStyle(search), [search])
   const look = useMemo(() => toEngineStyle(style), [style])
   // this page holds a single sticker, so the shared page clock can carry the look's speed
-  useEffect(() => void (clock.speed = style.speed), [style.speed])
+  useEffect(() => {
+    clock.speed = style.speed
+    return () => void (clock.speed = 1) // the clock is shared: leave it at normal speed for whatever renders next
+  }, [style.speed])
   if (!data) return null
   return <Player illustration={data} look={look} loop={style.loop} background={backgroundColor(style.bg)} />
 }

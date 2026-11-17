@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { EditorPage } from '~/features/customizer'
-import { illustrationPath, loadIllustration, useIllustration } from '~/features/illustrations'
+import { POSTER_SIZE, illustrationPath, loadIllustration, useIllustration } from '~/features/illustrations'
 import { buildMeta, illustrationJsonLd } from '~/features/seo'
 import { styleSearchSchema } from '~/features/style'
 import { site } from '~/shared/config/site'
@@ -18,7 +18,7 @@ export const Route = createFileRoute('/illustrations/$slug')({
           title: loaderData.item.seo.title || `${loaderData.item.title} · ${site.name}`,
           description: loaderData.item.seo.description || `${loaderData.item.description} Restyle it live and export a PNG or a component for React and Next.js.`,
           path: illustrationPath(params.slug), // styled URLs share the bare canonical, so they never duplicate the page
-          image: { url: loaderData.item.poster, width: 600, height: 600, alt: `${loaderData.item.title}, an isometric illustration` }, // posters are 600×600 PNGs
+          image: { url: loaderData.item.poster, width: POSTER_SIZE, height: POSTER_SIZE, alt: `${loaderData.item.title}, an isometric illustration` },
           jsonLd: illustrationJsonLd(loaderData.item),
         })
       : {},

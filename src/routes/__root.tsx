@@ -5,7 +5,7 @@ import { settingsQuery } from '~/features/settings'
 import { applySiteStyle } from '~/features/style'
 import type { QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { site } from '~/shared/config/site'
+import { isEmbedPath, site } from '~/shared/config/site'
 import { SlushLayout } from '~/shared/ui/SlushChrome'
 import appCss from '~/styles/app.css?url'
 
@@ -48,7 +48,7 @@ function RootComponent() {
   applySiteStyle(Route.useLoaderData().style) // no-op once applied; covers hydration, where the loader does not re-run
   // every page is a sticker-book page (DESIGN.md), 404s included; only the embed player is bare: no nav or footer, and no
   // page colour behind a transparent sticker
-  const embed = useRouterState({ select: (s) => s.location.pathname.startsWith('/embed/') })
+  const embed = useRouterState({ select: (s) => isEmbedPath(s.location.pathname) })
   if (embed)
     return (
       <RootDocument bodyClass="bg-transparent">

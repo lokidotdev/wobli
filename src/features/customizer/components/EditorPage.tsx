@@ -15,7 +15,7 @@ import { Segmented } from '~/shared/ui/Segmented'
 import { BottomSheet } from '~/shared/ui/BottomSheet'
 import type { BottomSheetHandle } from '~/shared/ui/BottomSheet'
 import { BAND, PILL } from '~/shared/ui/slush'
-import { DEFAULT_STYLE, randomizeStyle, toEngineStyle } from '~/features/style'
+import { DEFAULT_STYLE, isDefaultStyle, randomizeStyle, toEngineStyle } from '~/features/style'
 import type { StyleSearch } from '~/features/style'
 import { useEditorStyle } from '../hooks/useEditorStyle'
 import { BackgroundPanel, ColorPanel, MotionPanel, StrokePanel } from './Panels'
@@ -48,7 +48,7 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
   const [tab, setTab] = useState<Tab>('colours')
   const sheet = useRef<BottomSheetHandle>(null)
   const currentFrame = () => stage.current?.currentFrame() ?? icon.still ?? 0
-  const isDefault = JSON.stringify(style) === JSON.stringify(DEFAULT_STYLE)
+  const isDefault = isDefaultStyle(style)
   const reset = () => setStyle(DEFAULT_STYLE)
   const shuffle = () => setStyle(randomizeStyle)
   const panel = { style, update }
