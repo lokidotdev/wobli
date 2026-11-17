@@ -59,10 +59,10 @@ function Tag({ children, motion, className, fill, tilt }: TagProps) {
   )
 }
 
-/** The layer the tags sit in: over the headline from sm up, out of the pointer's way so the letters under them still answer; on a phone, a centred row under it. */
+/** The layer the tags sit in: over the headline from sm up, out of the pointer's way so the letters under them still answer; on a phone, a row under it, out at either edge with the ribbon's loop between them. */
 function Tags({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <ul aria-label={label} className="pointer-events-none relative z-20 mt-6 flex justify-center gap-3 sm:absolute sm:inset-0 sm:mt-0 sm:block">
+    <ul aria-label={label} className="pointer-events-none relative z-20 mt-6 flex justify-between gap-3 px-1 sm:absolute sm:inset-0 sm:mt-0 sm:block">
       {children}
     </ul>
   )
@@ -102,11 +102,11 @@ function Ribbon({ d, motion, className, viewBox = '0 0 1440 600' }: { d: string 
 const HERO_RIBBON =
   'M-60 90 C 60 40 190 90 170 220 C 155 320 40 330 60 240 C 80 160 190 300 150 430 C 130 500 200 550 340 555 C 600 565 900 530 1100 550 C 1230 562 1330 520 1340 420 C 1350 320 1240 300 1235 380 C 1230 450 1340 430 1370 300 C 1395 190 1300 120 1500 60'
 // A phone's headline fills the width, so its ribbon cannot go round the sides: it sweeps in under the first sticker, runs down
-// the very edge of the screen, swings under the tags, makes one loop and leaves. Built from its curvature rather than from
+// the very edge of the screen, swings under the tags, makes one loop between them and leaves. Built from its curvature rather than from
 // points: every turn eases in and out (curvature rises and falls smoothly, zero between turns), so the bend never jumps and the
 // line reads as one stroke. Drawn at the box's own proportions (390 × 360), so stretching it to fit barely distorts it.
 const HERO_RIBBON_PHONE =
-  'M-72 18 C-62.3 20.4 -52.5 22.7 -43 25.8 C-33.5 28.9 -24.2 33 -16.4 39.2 C-8.6 45.5 -2.6 53.9 0.9 63.3 C4.4 72.7 5.3 82.8 5.3 92.8 C5.3 102.8 4.4 112.8 3.7 122.8 C3 132.7 2.3 142.7 1.6 152.7 C0.9 162.7 0.2 172.6 -0.5 182.6 C-1.2 192.6 -1.9 202.6 -2.6 212.5 C-3.3 222.5 -4 232.5 -4.4 242.5 C-4.7 252.5 -4.6 262.5 -2.8 272.4 C-1.1 282.2 2.4 291.8 8 300.1 C13.6 308.4 21.2 315.3 30 320.1 C38.8 324.9 48.6 327.6 58.5 329.1 C68.4 330.5 78.4 330.8 88.4 330.9 C98.4 331 108.4 331 118.4 331 C128.4 331 138.4 331 148.4 331 C158.4 331 168.4 331 178.4 331 C188.4 331 198.4 331 208.4 331 C218.4 331 228.4 331 238.4 331 C248.4 331 258.4 331 268.4 331 C278.4 331 288.4 331.1 298.4 330.7 C308.4 330.4 318.4 329.7 328.1 327.4 C337.9 325 347.3 321 354.8 314.3 C362.3 307.6 367.5 298.2 367.8 288.2 C368.2 278.2 363.2 268 354.7 262.7 C346.2 257.4 334.7 257.5 326.3 263 C317.9 268.4 313.2 278.7 313.7 288.7 C314.2 298.7 319.5 308 327.1 314.6 C334.6 321.2 344.1 325.2 353.8 327.5 C363.6 329.8 373.6 330.5 383.6 330.8 C393.6 331.1 403.6 331 413.6 331 C423.6 331 433.6 331 443.6 330.7 C453.6 330.5 463.6 329.7 473.4 328 C483.3 326.2 492.9 323.4 502.2 319.7 C511.5 316 520.5 311.5 529.4 306.9 C535.3 303.9 541.2 300.7 547 297.6'
+  'M-72 18 C-62.3 20.4 -52.5 22.7 -43 25.8 C-33.5 28.9 -24.2 33 -16.4 39.2 C-8.6 45.5 -2.6 53.9 0.9 63.3 C4.4 72.7 5.3 82.8 5.3 92.8 C5.3 102.8 4.4 112.8 3.7 122.8 C3 132.7 2.3 142.7 1.6 152.7 C0.9 162.7 0.2 172.6 -0.5 182.6 C-1.2 192.6 -1.9 202.6 -2.6 212.5 C-3.3 222.5 -4 232.5 -4.7 242.5 C-5.3 252.4 -6.1 262.4 -6.1 272.4 C-6.1 282.4 -5.3 292.5 -2.6 302.1 C0.1 311.8 4.7 320.9 11.3 328.4 C17.9 335.9 26.4 341.7 35.7 345.4 C45 349.2 54.9 351.1 64.9 352 C74.8 352.9 84.8 352.9 94.8 352.9 C104.8 352.9 114.8 352.9 124.8 352.9 C134.8 352.9 144.8 353 154.8 352.9 C164.8 352.8 174.9 352.5 184.7 350.7 C194.6 348.9 204.3 345.4 212 339 C219.6 332.5 224.8 322.7 224.2 312.7 C223.6 302.8 216.6 293.2 207.1 290.4 C197.5 287.5 186.3 291.7 180.8 300.1 C175.3 308.4 175.5 319.8 180.3 328.6 C185.1 337.4 193.7 343.6 203.1 347.2 C212.4 350.7 222.5 352 232.5 352.5 C242.5 353 252.5 352.9 262.5 352.9 C272.5 352.9 282.5 352.9 292.5 352.9 C302.5 352.9 312.5 352.9 322.5 352.9 C332.5 352.9 342.5 352.9 352.5 352.9 C362.5 352.9 372.5 352.9 382.5 352.9 C392.5 352.9 402.5 352.9 412.5 352.9 C422.5 352.9 432.5 352.9 442.5 352.9 C452.5 352.9 462.5 352.9 472.5 352.9 C482.5 352.9 492.5 352.9 502.5 352.4 C512.4 351.8 522.4 350.6 532.1 348.3 C541.9 346 551.3 342.6 560.5 338.5 C569.6 334.5 578.5 329.8 587.3 325.2 C590.8 323.3 594.4 321.4 597.9 319.5'
 const TAKE_RIBBON = 'M-60 420 C 160 560 330 330 250 190 C 190 80 50 150 120 270 C 220 440 560 60 800 90 C 1040 120 1060 500 1230 510 C 1390 520 1420 300 1300 280 C 1190 262 1190 420 1320 430 C 1400 436 1460 400 1500 360'
 
 const Spark = ({ className }: { className?: string }) => (
