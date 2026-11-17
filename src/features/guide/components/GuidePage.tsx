@@ -23,11 +23,12 @@ const STEPS = [
 ] as const
 
 const CARD = 'rounded-[20px] border border-black bg-white'
-const LOOK = toEngineStyle(DEFAULT_STYLE)
 // the closer's three columns, each headed in its own sticker colour
 const SWAP_FILL = ['bg-slush-sunburst', 'bg-slush-mint', 'bg-slush-sky'] as const
 
 export function GuidePage() {
+  // read while rendering, not when the module loads: the site's starting look arrives with the admin's settings
+  const LOOK = toEngineStyle(DEFAULT_STYLE)
   return (
     <>
       {/* band one, sky: the page as a poster */}
