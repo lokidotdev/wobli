@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react'
 import { LiveSticker, illustrationQuery } from '~/features/illustrations'
 import { useGlobalLook } from '~/features/style'
 import { cn } from '~/shared/lib/cn'
-import { BAND, FILLED, GHOST, LG } from '~/shared/ui/SlushChrome'
+import { BAND, FILLED, GHOST, LG } from '~/shared/ui/slush'
 
 /** The catalogue's own "No Results" drawing stands in for the 0. */
 const ZERO = 'no-results'

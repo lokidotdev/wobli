@@ -10,7 +10,7 @@ import { cn } from '~/shared/lib/cn'
 import { CopyButton } from '~/shared/ui/CopyButton'
 import { GitHubStar } from '~/shared/ui/GitHubStar'
 import { LetterSticker } from '~/shared/ui/LetterSticker'
-import { BAND, FILLED, GHOST, LG, SM, STAR_GHOST } from '~/shared/ui/SlushChrome'
+import { BAND, FILLED, GHOST, LG, SM, STAR_GHOST } from '~/shared/ui/slush'
 import { useLandingMotion } from '../hooks/useLandingMotion'
 import letterD from '../lib/letter-d'
 import letterI from '../lib/letter-i'
@@ -328,6 +328,7 @@ function Featured({ items, look }: { items: ReadonlyArray<Illustration>; look: S
           {items.map((it, i) => (
             // the wrapper is what the scroll motion deals in, so it stays put (keyed by slot) when a visit's random set
             // swaps the cards in; the card inside keeps its own hover lift
+            // react-doctor-disable-next-line react-doctor/no-array-index-as-key
             <div key={i} data-card className={cn('grid', rowClass(i, items.length))}>
               <StickerCard key={it.slug} illustration={it} look={look} offset={i * 20} />
             </div>

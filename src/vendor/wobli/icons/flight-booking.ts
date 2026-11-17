@@ -25,7 +25,7 @@ const quad = (t: number): Vec => {
   return [u * u * START[0] + 2 * u * t * PEAK[0] + t * t * END[0], u * u * START[1] + 2 * u * t * PEAK[1] + t * t * END[1]]
 }
 const SAMPLES: ReadonlyArray<Vec> = Array.from({ length: 201 }, (_, i) => quad(i / 200))
-const LENS = SAMPLES.reduce<Array<number>>((acc, p, i) => (i ? [...acc, acc[i - 1] + Math.hypot(p[0] - SAMPLES[i - 1][0], p[1] - SAMPLES[i - 1][1])] : [0]), [])
+const LENS = SAMPLES.reduce<Array<number>>((acc, p, i) => (acc.push(i ? acc[i - 1] + Math.hypot(p[0] - SAMPLES[i - 1][0], p[1] - SAMPLES[i - 1][1]) : 0), acc), [])
 const TOTAL = LENS[LENS.length - 1]
 const along = (share: number): { p: Vec; turn: number } => {
   const goal = share * TOTAL
@@ -61,7 +61,7 @@ const passes = (s: number) => {
   return f
 }
 // dashes behind the plane's first stretch go down as it lifts off, those past its last as it arrives, two frames apart
-const ON = Array.from({ length: DASHES }, (_, i) => passes((i + GAP / 2) / DASHES)).reduce<Array<number>>((acc, f, i) => [...acc, i ? Math.max(f, acc[i - 1] + 2) : f], [])
+const ON = Array.from({ length: DASHES }, (_, i) => passes((i + GAP / 2) / DASHES)).reduce<Array<number>>((acc, f, i) => (acc.push(i ? Math.max(f, acc[i - 1] + 2) : f), acc), [])
 const dash = (i: number): Shape => {
   const [a, b] = [(i + GAP / 2) / DASHES, (i + 1 - GAP / 2) / DASHES]
   const pts = [0, 0.5, 1].map((t) => along(a + (b - a) * t).p)

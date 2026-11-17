@@ -38,7 +38,7 @@ const cubic = ([p0, p1, p2, p3]: readonly [Vec, Vec, Vec, Vec], t: number): Vec 
   return [b(0), b(1)]
 }
 const SAMPLES: ReadonlyArray<Vec> = SEGS.flatMap((s, i) => Array.from({ length: i ? 40 : 41 }, (_, j) => cubic(s, (i ? j + 1 : j) / 40))).map((p) => onFace(FACE, p))
-const LENS = SAMPLES.reduce<Array<number>>((acc, p, i) => (i ? [...acc, acc[i - 1] + Math.hypot(p[0] - SAMPLES[i - 1][0], p[1] - SAMPLES[i - 1][1])] : [0]), [])
+const LENS = SAMPLES.reduce<Array<number>>((acc, p, i) => (acc.push(i ? acc[i - 1] + Math.hypot(p[0] - SAMPLES[i - 1][0], p[1] - SAMPLES[i - 1][1]) : 0), acc), [])
 const TOTAL = LENS[LENS.length - 1]
 const along = (share: number): Vec => {
   const goal = share * TOTAL
@@ -59,7 +59,7 @@ const RIDE: Track<Vec> = STEPS.map((f, i): Key<Vec> => [f, SPOTS[i]])
 // round the middle of each bend. Measured a few steps ahead so a wobble in the road never turns it.
 const ways = SPOTS.map((p, i) => Math.sign(SPOTS[Math.min(SPOTS.length - 1, i + 3)][0] - SPOTS[Math.max(0, i - 3)][0]) || 1)
 const FACING: Track<Vec> = ways.reduce<Array<Key<Vec>>>(
-  (keys, w, i) => (i && w !== ways[i - 1] ? [...keys, [STEPS[i] - TURN / 2, [-w * 100, 100], EASY], [STEPS[i] + TURN / 2, [w * 100, 100]]] : keys),
+  (keys, w, i) => (i && w !== ways[i - 1] && keys.push([STEPS[i] - TURN / 2, [-w * 100, 100], EASY], [STEPS[i] + TURN / 2, [w * 100, 100]]), keys),
   [[0, [ways[0] * 100, 100]]],
 )
 const TRAIL: Track<number> = [[DEPART, 0, EASY], [ARRIVE, 1], [RETRACT, 1, SNAP], [RETRACT + 28, 0]]

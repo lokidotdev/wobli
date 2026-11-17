@@ -1,17 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { site } from '~/shared/config/site'
-import { buttonClass } from './Button'
+import { buttonClass } from './button-class'
 
 type Props = { variant?: 'primary' | 'secondary'; size?: 'sm' | 'md' | 'lg'; className?: string; label?: string; compact?: boolean }
 
 const fmt = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
-let cached: Promise<number | null> | undefined
-// one request per page load, shared by every button; null when GitHub is unreachable or rate-limited
-const loadStars = () =>
-  (cached ??= fetch(`https://api.github.com/repos/${site.repo}`)
-    .then((r) => (r.ok ? r.json() : null))
-    .then((d) => (typeof d?.stargazers_count === 'number' ? d.stargazers_count : null))
-    .catch(() => null))
+// One request per page load, shared by every button through the query cache; browser only (GitHub rate-limits by IP, and a
+// cached page must not carry one server's count). null when GitHub is unreachable or rate-limited.
+const starsQuery = {
+  queryKey: ['github-stars', site.repo],
+  queryFn: () =>
+    fetch(`https://api.github.com/repos/${site.repo}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => (typeof d?.stargazers_count === 'number' ? (d.stargazers_count as number) : null))
+      .catch(() => null),
+  staleTime: Infinity,
+  retry: false,
+}
+const isBrowser = typeof window !== 'undefined'
 
 export function GitHubMark() {
   return (
@@ -22,14 +28,7 @@ export function GitHubMark() {
 }
 
 export function GitHubStar({ variant = 'primary', size = 'sm', className, label = 'Star on GitHub', compact }: Props) {
-  const [stars, setStars] = useState<number | null>(null)
-  useEffect(() => {
-    let live = true
-    loadStars().then((n) => live && setStars(n))
-    return () => {
-      live = false
-    }
-  }, [])
+  const stars = useQuery({ ...starsQuery, enabled: isBrowser }).data ?? null
   return (
     <a href={`https://github.com/${site.repo}`} target="_blank" rel="noreferrer" className={buttonClass(variant, size, className)}>
       <GitHubMark />

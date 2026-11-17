@@ -38,6 +38,8 @@ export async function renderVideo(icon: Icon, style: Style, o: Options): Promise
   const unit = o.size / (icon.size ?? 500)
   for (let i = 0; i < total; i++) {
     if (o.signal?.aborted) {
+      // runs once at most: a cancelled export throws straight after
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop
       await output.cancel()
       throw new DOMException('cancelled', 'AbortError')
     }
@@ -46,6 +48,8 @@ export async function renderVideo(icon: Icon, style: Style, o: Options): Promise
     if (ground) (ctx.fillStyle = ground), ctx.fillRect(0, 0, o.size, o.size)
     ctx.scale(unit, unit)
     draw(ctx, icon, ((i % perLoop) / perLoop) * icon.frames, style)
+    // frames must reach the encoder in order, one at a time: each is drawn into the same canvas the source reads
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop
     await source.add(i / FPS, 1 / FPS)
     if (i % 6 === 0) o.onProgress?.(i / total)
   }

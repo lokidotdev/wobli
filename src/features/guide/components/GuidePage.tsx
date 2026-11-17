@@ -7,7 +7,7 @@ import { DEFAULT_STYLE, toEngineStyle } from '~/features/style'
 import { cn } from '~/shared/lib/cn'
 import { CodeBlock } from '~/shared/ui/CodeBlock'
 import { CopyButton } from '~/shared/ui/CopyButton'
-import { BAND, FILLED, GHOST, LG, SM } from '~/shared/ui/SlushChrome'
+import { BAND, FILLED, GHOST, LG, SM } from '~/shared/ui/slush'
 import { BEATS, BRIEF, CHECKS, FILES, FORMATS, GENERAL, PROMPT, RULES, RUN, SKILLS, STORY, SWAPS } from '../lib/content'
 
 // How an illustration gets made, told with one of them (Card Tap) from the first sentence to every file it exports as.

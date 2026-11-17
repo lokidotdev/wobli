@@ -5,22 +5,12 @@ import { site } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
 import { GitHubMark, GitHubStar } from './GitHubStar'
 import { Logo, useLogoShuffle } from './Logo'
+import { BAND, FILLED, GHOST, SM, STAR_FILLED } from './slush'
 
 // The sticker-book chrome (DESIGN.md): a floating pill nav and a black footer ending in the wordmark, around
 // pages built from full-bleed colour bands. Everything inside `.slush` is light, outlined in black and pill-shaped: the
 // class re-points the shared tokens (app.css), so shared controls dropped into these pages take the look on their own.
 
-export const PILL = 'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full border border-black slush-label transition-colors duration-150'
-export const GHOST = cn(PILL, 'bg-white text-black hover:bg-slush-mist')
-export const FILLED = cn(PILL, 'bg-black text-white hover:bg-black/80')
-export const SM = 'h-10 px-4 text-[12px] sm:text-[13px]'
-export const LG = 'h-12 px-6 text-[14px]'
-// GitHubStar is a Geist button underneath: these win over its own box
-const STAR = 'rounded-full! border border-black font-bold! tracking-[0.032em] uppercase shadow-none!'
-export const STAR_GHOST = cn(STAR, 'bg-white! text-black! hover:bg-slush-mist!')
-export const STAR_FILLED = cn(STAR, 'bg-black! text-white! hover:bg-black/80!')
-
-export const BAND = 'mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12'
 
 // The nav name's letters, while the logo shuffles: each pops up as a sticker in turn (.nav-letter, app.css)
 const NAME_COLOURS = ['var(--color-slush-sunburst)', 'var(--color-slush-blue)', 'var(--color-slush-mint)', 'var(--color-slush-ember)', 'var(--color-slush-lavender)']
@@ -36,6 +26,8 @@ function Nav() {
           <Logo className="size-5" />
           <span className="text-[16px] tracking-[-0.02em] max-sm:sr-only">
             {[...site.name].map((ch, i) => (
+              // the letters of a fixed word: their place is their identity, and the word never changes
+              // react-doctor-disable-next-line react-doctor/no-array-index-as-key
               <span key={i} className="nav-letter" style={{ '--c': NAME_COLOURS[i % NAME_COLOURS.length], '--r': `${NAME_TILT[i % NAME_TILT.length]}deg`, '--i': i } as CSSProperties}>
                 {ch}
               </span>

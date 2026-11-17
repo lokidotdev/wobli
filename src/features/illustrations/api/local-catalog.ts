@@ -50,12 +50,12 @@ const entries: Entry[] = Object.entries(metas)
 
 export function localList(filters: ListFilters & { featured?: boolean; limit?: number; seed?: number } = {}, cursor?: string): IllustrationPage {
   const words = searchWords(filters.q)
-  const categories = filterValues(filters.category)
+  const categories = new Set(filterValues(filters.category))
   const tags = filterValues(filters.tag).map(tagOf)
   const found = entries
     .filter(
       ({ item, searchText }) =>
-        (!categories.length || categories.includes(item.category.slug)) &&
+        (!categories.size || categories.has(item.category.slug)) &&
         tags.every((t) => item.tags.includes(t)) &&
         (!filters.featured || item.featured) &&
         words.every((w) => startsAWord(searchText, w)),

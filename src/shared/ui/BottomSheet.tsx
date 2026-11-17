@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { cn } from '~/shared/lib/cn'
 import { Button } from './Button'
@@ -44,7 +44,15 @@ export const BottomSheet = forwardRef<BottomSheetHandle, Props>(function BottomS
       aria-label={label}
       className={cn('sheet fixed inset-0 m-0 size-full max-h-none max-w-none overflow-clip bg-transparent p-0 text-black backdrop:bg-transparent', className)}
     >
-      <div ref={drag.overlay} onClick={close} className={cn('sheet-overlay absolute inset-0 bg-black/50', scrimClassName)} />
+      {/* the scrim: a tap outside the sheet closes it. Keyboard users have Escape and the Close button, so it stays out of the tab order and the tree */}
+      <button
+        ref={drag.overlay}
+        type="button"
+        tabIndex={-1}
+        aria-hidden
+        onClick={close}
+        className={cn('sheet-overlay absolute inset-0 cursor-default bg-black/50', scrimClassName)}
+      />
       <div ref={drag.panel} className={cn('sheet-panel absolute inset-x-0 bottom-0 flex max-h-[86dvh] flex-col rounded-t-[30px] border border-b-0 border-black bg-white', panelClassName)}>
         {/* the grab zone: the handle and the title bar always drag the sheet; the body below does too, when pulled down from its top */}
         <div {...drag.handlers} className="shrink-0 cursor-grab touch-none border-b border-separator select-none active:cursor-grabbing">
@@ -79,12 +87,15 @@ const RUBBER_BAND = 0.2 // how much of an upward pull the sheet gives
  */
 function useSheetDrag(dismiss: () => void) {
   const panel = useRef<HTMLDivElement>(null)
-  const overlay = useRef<HTMLDivElement>(null)
+  const overlay = useRef<HTMLButtonElement>(null)
   const scroller = useRef<HTMLDivElement>(null)
   const state = useRef<{ startY: number; height: number; y: number; lastY: number; lastT: number; velocity: number } | null>(null)
   const pointer = useRef<number | null>(null)
   const latest = useRef(dismiss)
-  latest.current = dismiss
+  // kept current after each render (never during one), for the stable handlers below
+  useLayoutEffect(() => {
+    latest.current = dismiss
+  })
 
   // stable across renders: these only touch refs, and the touch listeners below hold on to them
   const drag = useRef({

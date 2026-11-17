@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useEffectEvent, useRef } from 'react'
 import type { Style } from 'wobli'
 import { PAGE_SIZE } from '../schemas/illustration.schema'
 import type { Illustration } from '../schemas/illustration.schema'
@@ -15,16 +15,15 @@ type Props = {
 // the scroll rather than with the catalogue.
 export function IllustrationGrid({ items, look, onMore }: Props) {
   const more = useRef<HTMLDivElement>(null)
-  const latest = useRef(onMore)
-  latest.current = onMore
+  const more$ = useEffectEvent(() => onMore?.())
   const hasMore = !!onMore
   useEffect(() => {
     if (!hasMore || !more.current) return
     // re-observed after every page, so a tall screen keeps filling until the sentinel is pushed out of reach
-    const io = new IntersectionObserver(([e]) => e?.isIntersecting && latest.current?.(), { rootMargin: '800px' })
+    const io = new IntersectionObserver(([e]) => e?.isIntersecting && more$(), { rootMargin: '800px' })
     io.observe(more.current)
     return () => io.disconnect()
-  }, [hasMore, items.length])
+  }, [hasMore, items.length]) // more$ is an effect event: always the latest onMore, never a dependency
   return (
     <>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

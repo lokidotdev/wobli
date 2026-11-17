@@ -9,7 +9,8 @@ export const Route = createFileRoute('/illustrations/')({
   validateSearch: listSearchSchema,
   loaderDeps: ({ search }) => search,
   loader: async ({ context: { queryClient }, deps, cause }) => {
-    const seo = await pageSeo(queryClient, 'illustrations', {
+    // started together: neither waits on the other
+    const seoLoad = pageSeo(queryClient, 'illustrations', {
       title: `Illustrations · ${site.name}`,
       description: 'Live isometric illustrations for product UI. Restyle the whole grid at once, open one to customize and export.',
     })
@@ -18,9 +19,9 @@ export const Route = createFileRoute('/illustrations/')({
     if (cause === 'stay') {
       void queryClient.prefetchInfiniteQuery(illustrationsQuery(deps))
       const cached = queryClient.getQueryData(illustrationsQuery(deps).queryKey)?.pages[0]
-      return { seo, items: cached?.items ?? [], total: cached?.total ?? 0 }
+      return { seo: await seoLoad, items: cached?.items ?? [], total: cached?.total ?? 0 }
     }
-    const [list] = await Promise.all([queryClient.ensureInfiniteQueryData(illustrationsQuery(deps)), queryClient.ensureQueryData(facetsQuery())])
+    const [seo, list] = await Promise.all([seoLoad, queryClient.ensureInfiniteQueryData(illustrationsQuery(deps)), queryClient.ensureQueryData(facetsQuery())])
     const first = list.pages[0]
     return { seo, items: first?.items ?? [], total: first?.total ?? 0 }
   },
