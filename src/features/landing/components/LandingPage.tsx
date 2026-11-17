@@ -298,11 +298,12 @@ function How({ items, look }: { items: ReadonlyArray<Illustration>; look: Style 
   )
 }
 
-// Only whole rows, two at most, whatever the column count and however many are featured: a card past the last full row
-// is hidden at that breakpoint. Columns: 1 below sm, 2 from sm, 3 from lg, 4 from xl.
+// Only whole rows, whatever the column count and however many are featured: a card past the last full row is hidden at that
+// breakpoint. Two rows at most, except a phone's single column, which gets four. Columns: 1 below sm, 2 from sm, 3 from lg, 4 from xl.
+const PHONE_ROWS = 4
 const fullRows = (n: number, cols: number) => (n < cols ? n : Math.min(Math.floor(n / cols), 2) * cols)
 const rowClass = (i: number, n: number) =>
-  cn(i >= Math.min(n, 2) && 'max-sm:hidden', i >= fullRows(n, 2) && 'sm:max-lg:hidden', i >= fullRows(n, 3) && 'lg:max-xl:hidden', i >= fullRows(n, 4) && 'xl:hidden')
+  cn(i >= Math.min(n, PHONE_ROWS) && 'max-sm:hidden', i >= fullRows(n, 2) && 'sm:max-lg:hidden', i >= fullRows(n, 3) && 'lg:max-xl:hidden', i >= fullRows(n, 4) && 'xl:hidden')
 
 function Featured({ items, look }: { items: ReadonlyArray<Illustration>; look: Style }) {
   return (
