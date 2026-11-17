@@ -1,8 +1,9 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { site } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
-import { GitHubStar } from './GitHubStar'
+import { GitHubMark, GitHubStar } from './GitHubStar'
 import { Logo, useLogoShuffle } from './Logo'
 
 // The sticker-book chrome (DESIGN.md): a floating pill nav and a black footer ending in the wordmark, around
@@ -41,21 +42,110 @@ function Nav() {
             ))}
           </span>
         </Link>
-        <nav aria-label="Main" className="flex items-center gap-1">
+        <nav aria-label="Main" className="flex items-center gap-1 max-sm:hidden">
           <Link to="/illustrations" className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': 'var(--color-slush-sunburst)', '--r': '-4deg' } as CSSProperties}>
             Illustrations
           </Link>
           <Link to="/docs" className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': 'var(--color-slush-mint)', '--r': '3deg' } as CSSProperties}>
             Docs
           </Link>
-          {/* a phone has room for two pills; the guide is in the footer there */}
-          <Link to="/how-its-made" className={cn(GHOST, SM, 'slush-pill max-sm:hidden')} style={{ '--c': 'var(--color-slush-lavender)', '--r': '-3deg' } as CSSProperties}>
+          <Link to="/how-its-made" className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': 'var(--color-slush-lavender)', '--r': '-3deg' } as CSSProperties}>
             How It&rsquo;s Made
           </Link>
         </nav>
-        <GitHubStar compact size="md" label="Star" className={cn(STAR_FILLED, 'slush-pill text-[13px]! [--c:var(--color-slush-blue)] [--r:-3deg] hover:text-black! focus-visible:text-black!')} />
+        <GitHubStar compact size="md" label="Star" className={cn(STAR_FILLED, 'slush-pill text-[13px]! [--c:var(--color-slush-blue)] [--r:-3deg] hover:text-black! focus-visible:text-black! max-sm:hidden')} />
+        <PhoneMenu />
       </div>
     </header>
+  )
+}
+
+// A phone has no room for the pill row, so every link moves into one menu: at most four rows, big enough to hit with a thumb.
+const MENU = [
+  { to: '/illustrations', label: 'Illustrations', fill: 'bg-slush-sunburst', tilt: '-1.5deg' },
+  { to: '/docs', label: 'Docs', fill: 'bg-slush-mint', tilt: '1.5deg' },
+  { to: '/how-its-made', label: 'How It\u2019s Made', fill: 'bg-slush-lavender', tilt: '-1deg' },
+] as const
+const ROW = 'menu-row flex h-16 items-center justify-between rounded-[22px] border border-black px-5 text-[26px] slush-display'
+
+/**
+ * Below sm: the logo stays, everything else sits behind a Menu pill. The panel grows out of the pill (spatial: it belongs to
+ * that button) and the rows follow it in, one after another. Closes on a pick, a route change, Escape or a tap outside.
+ */
+function PhoneMenu() {
+  const [open, setOpen] = useState(false)
+  const id = useId()
+  const root = useRef<HTMLDivElement>(null)
+  const button = useRef<HTMLButtonElement>(null)
+  const path = useRouterState({ select: (s) => s.location.pathname })
+  useEffect(() => setOpen(false), [path])
+  useEffect(() => {
+    if (!open) return
+    const down = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false)
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      button.current?.focus()
+    }
+    document.addEventListener('pointerdown', down)
+    document.addEventListener('keydown', key)
+    return () => {
+      document.removeEventListener('pointerdown', down)
+      document.removeEventListener('keydown', key)
+    }
+  }, [open])
+  return (
+    <div ref={root} className="sm:hidden">
+      <button
+        ref={button}
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((o) => !o)}
+        className={cn(open ? FILLED : GHOST, SM, 'relative z-10 gap-2.5 pr-3.5 pl-4 active:scale-[0.96] motion-reduce:active:scale-100')}
+      >
+        {open ? 'Close' : 'Menu'}
+        <span aria-hidden data-open={open} className="menu-icon relative block h-2.5 w-4">
+          <span />
+          <span />
+        </span>
+      </button>
+      <div id={id} data-open={open} inert={!open} className={cn('menu-panel absolute inset-x-4 top-[64px] flex flex-col gap-2 rounded-[30px] border border-black bg-white p-2')}>
+        <nav aria-label="Main" className="contents">
+          {MENU.map((m, i) => (
+            <Link
+              key={m.to}
+              to={m.to}
+              onClick={() => setOpen(false)}
+              className={cn(ROW, m.fill)}
+              style={{ '--i': i, '--r': m.tilt } as CSSProperties}
+              activeProps={{ 'aria-current': 'page' }}
+            >
+              {m.label}
+              <Arrow />
+            </Link>
+          ))}
+          <a href={`https://github.com/${site.repo}`} target="_blank" rel="noreferrer" aria-label="Star on GitHub" className={cn(ROW, 'bg-black text-white')} style={{ '--i': MENU.length, '--r': '1deg' } as CSSProperties}>
+            <span className="flex items-center gap-3">
+              <span className="[&_svg]:size-6">
+                <GitHubMark />
+              </span>
+              GitHub
+              <span aria-hidden className="text-slush-sunburst">★</span>
+            </span>
+            <Arrow dark />
+          </a>
+        </nav>
+      </div>
+    </div>
+  )
+}
+
+function Arrow({ dark }: { dark?: boolean }) {
+  return (
+    <span aria-hidden className={cn('grid size-9 place-items-center rounded-full border text-[18px] leading-none font-bold', dark ? 'border-white bg-white text-black' : 'border-black bg-white')}>
+      →
+    </span>
   )
 }
 
