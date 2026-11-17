@@ -7,7 +7,7 @@ export const FILLED = cn(PILL, 'bg-black text-white hover:bg-black/80')
 export const SM = 'h-10 px-4 text-[12px] sm:text-[13px]'
 export const LG = 'h-12 px-6 text-[14px]'
 // GitHubStar is a Geist button underneath: these win over its own box
-const STAR = 'rounded-full! border border-black font-bold! tracking-[0.032em] uppercase shadow-none!'
+const STAR = 'rounded-full! border border-black font-bold! uppercase shadow-none!'
 export const STAR_GHOST = cn(STAR, 'bg-white! text-black! hover:bg-slush-mist!')
 export const STAR_FILLED = cn(STAR, 'bg-black! text-white! hover:bg-black/80!')
 

@@ -307,7 +307,7 @@ function ExploreHeader({ look }: { look?: Style }) {
         </div>
         {/* the description, with one sticker beside it: display type never stands alone (DESIGN.md) */}
         <div className="mt-6 flex items-center gap-4 sm:mt-8 sm:gap-8">
-          <p className="max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:text-[24px]">
+          <p className="max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:text-[24px]">
             Every one is live. Set a style and the whole grid follows; open one to fine tune it and export.
           </p>
           {giftCard && (

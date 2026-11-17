@@ -82,7 +82,7 @@ export function DocsPage() {
               <Sticker icon={ebookReader} enter={0.3} />
             </div>
           </div>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             Every illustration is a plain data object drawn on a canvas by a small runtime with no dependencies. Colours are roles, not hex
             codes, so restyling one is a single object.
           </p>
@@ -200,7 +200,7 @@ export function DocsPage() {
       <section id="licence" className="scroll-mt-0 bg-slush-lavender">
         <div className={cn(BAND, 'py-16 sm:py-24')}>
           <h2 className="text-[clamp(3rem,12vw,10rem)] slush-display">Free &amp; MIT</h2>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             Code is MIT. The illustrations are free to use in commercial and personal work.
           </p>
           <Link to="/illustrations" className={cn(FILLED, LG, 'mt-8')}>

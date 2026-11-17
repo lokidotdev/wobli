@@ -95,7 +95,7 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
             <header className="mt-8 sm:mt-10">
               <p className="inline-flex h-7 items-center rounded-full border border-black bg-slush-mint px-3 text-[11px] slush-label">{illustration.category.name}</p>
               <h1 className="mt-4 text-[clamp(2.75rem,7vw,6rem)] text-balance slush-display">{illustration.title}</h1>
-              <p className="mt-5 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-pretty sm:mt-6 sm:text-[24px]">{illustration.description}</p>
+              <p className="mt-5 max-w-2xl text-[20px] leading-[1.2] font-medium text-pretty sm:mt-6 sm:text-[24px]">{illustration.description}</p>
               <ul aria-label="Tags" className="mt-6 flex flex-wrap gap-1">
                 {illustration.tags.map((tag, i) => {
                   const [c, r] = TAG_STICKER[i % TAG_STICKER.length]!

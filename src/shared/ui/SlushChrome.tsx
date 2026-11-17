@@ -26,7 +26,7 @@ function Nav() {
       <div className={cn(BAND, 'flex h-full items-center justify-between gap-2')}>
         <Link to="/" aria-label={`${site.name} home`} className={cn(GHOST, 'h-10 gap-2 px-2.5 text-[13px] normal-case sm:pr-4')} {...shuffle}>
           <Logo className="size-5" />
-          <span className="text-[16px] tracking-[-0.02em] max-sm:sr-only">
+          <span className="text-[16px] max-sm:sr-only">
             {[...site.name].map((ch, i) => (
               // the letters of a fixed word: their place is their identity, and the word never changes
               // react-doctor-disable-next-line react-doctor/no-array-index-as-key
@@ -137,7 +137,7 @@ function Foot() {
     <footer className="overflow-hidden bg-black text-white">
       <div className={cn(BAND, 'pt-16 sm:pt-20')}>
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
-          <p className="max-w-md text-[24px] leading-[1.2] font-medium tracking-[-0.01em]">{site.description}</p>
+          <p className="max-w-md text-[24px] leading-[1.2] font-medium">{site.description}</p>
           <div className="grid grid-cols-2 gap-x-12 gap-y-8 sm:grid-cols-3">
             <FootNav label="Footer" title="Product">
               {PAGES.map((p) => (

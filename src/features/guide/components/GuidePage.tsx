@@ -44,7 +44,7 @@ export function GuidePage() {
               <Sticker icon={cardTap} palette={LOOK.palette} line={LOOK.line} depth={LOOK.depth} enter={0.3} />
             </div>
           </div>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             No design tool. Every illustration starts as two descriptions in plain words, an AI agent draws and animates it with two skills,
             and it leaves in every format the editor exports. Here is one, start to finish.
           </p>
@@ -78,7 +78,7 @@ export function GuidePage() {
             <ul className="grid gap-2 sm:grid-cols-2">
               {RULES.map(([name, text]) => (
                 <li key={name} className={cn(CARD, 'px-5 py-4')}>
-                  <h3 className="text-[17px] leading-[1.2] font-bold tracking-[-0.01em]">{name}</h3>
+                  <h3 className="text-[17px] leading-[1.2] font-bold">{name}</h3>
                   <p className="mt-1.5 text-[15px] leading-[1.39] font-medium text-label-3">{text}</p>
                 </li>
               ))}
@@ -93,7 +93,7 @@ export function GuidePage() {
             lead="Now the same idea as a short story, in the order it happens. Four beats: rest, action, settle, reset. End with the loop length and the palette."
           >
             <figure className={cn(CARD, 'overflow-hidden')}>
-              <blockquote className="bg-slush-sky px-5 py-6 text-[20px] leading-[1.3] font-medium tracking-[-0.01em] text-pretty sm:px-7 sm:py-8 sm:text-[24px]">{STORY}</blockquote>
+              <blockquote className="bg-slush-sky px-5 py-6 text-[20px] leading-[1.3] font-medium text-pretty sm:px-7 sm:py-8 sm:text-[24px]">{STORY}</blockquote>
               <figcaption className="grid divide-y divide-black border-t border-black sm:grid-cols-4 sm:divide-x sm:divide-y-0">
                 {BEATS.map(([name, text], i) => (
                   <div key={name} className="px-5 py-4">
@@ -212,7 +212,7 @@ export function GuidePage() {
             Want Another <br />
             Style?
           </h2>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             Nothing here is tied to stickers. The recipe is a description plus skills, so change either one and the same steps give you a
             different look.
           </p>
@@ -232,7 +232,7 @@ export function GuidePage() {
                       We use
                       <span className="inline-flex h-6 items-center rounded-full bg-black px-2.5 text-[11px] font-medium tracking-normal whitespace-nowrap text-white normal-case">{item.from}</span>
                     </p>
-                    <h4 className="mt-3 text-[22px] leading-[1.2] font-bold tracking-[-0.01em]">{item.change}</h4>
+                    <h4 className="mt-3 text-[22px] leading-[1.2] font-bold">{item.change}</h4>
                     <p className="mt-2 mb-4 text-[15px] leading-[1.39] font-medium text-label-3 lg:min-h-[4.17em]">{item.how}</p>
                     {/* the sentence above keeps room for three lines, so the chips of all three columns start on one line */}
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -283,7 +283,7 @@ function Step({ id, title, lead, children }: { id: (typeof STEPS)[number][0]; ti
   return (
     <section id={id} className="scroll-mt-24">
       <NumberedHeading n={n} title={title} />
-      <p className="mt-5 max-w-3xl text-[20px] leading-[1.25] font-medium tracking-[-0.01em] text-pretty sm:text-[24px]">{lead}</p>
+      <p className="mt-5 max-w-3xl text-[20px] leading-[1.25] font-medium text-pretty sm:text-[24px]">{lead}</p>
       <div className="mt-8 flex max-w-5xl flex-col gap-5">{children}</div>
     </section>
   )

@@ -16,10 +16,12 @@
   font-display: swap;
 }
 
-/* Cove (OFL): the landing page's display face, standing in for Slush's Lateral */
+/* Allo (OFL, allo-font): the sticker-book pages' face. The full variable file, since the roundness axis (ROND) is only
+   variable there: the package's "friendly" file fixes it at 50. Declared here rather than importing allo-font's CSS,
+   which also loads nine oblique files the site never uses. */
 @font-face {
-  font-family: "Cove";
-  src: url("/fonts/Cove.woff2") format("woff2-variations"), url("/fonts/Cove.woff2") format("woff2");
+  font-family: "Allo";
+  src: url("allo-font/fonts/webfonts/AlloVariable.woff2") format("woff2-variations"), url("allo-font/fonts/webfonts/AlloVariable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -31,7 +33,7 @@
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 
   /* the sticker-book palette (DESIGN.md): every page but the embed */
-  --font-slush: "Cove", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-slush: "Allo", "Geist", ui-sans-serif, system-ui, sans-serif;
   --color-slush-sky: #dceeff;
   --color-slush-concrete: #cccccc;
   --color-slush-mist: #e9e9e9;
@@ -334,6 +336,9 @@
   color-scheme: light;
   color: #000;
   font-family: var(--font-slush);
+  /* Allo's roundness: 0 sharp, 50 its default, 100 round */
+  font-variation-settings: "ROND" 100;
+  letter-spacing: 0;
   --color-background-100: #ffffff;
   --color-background-200: #fafafa;
   --color-gray-100: #f2f2f2;
@@ -418,7 +423,7 @@
 /* nav, button and uppercase label text */
 @utility slush-label {
   font-weight: 700;
-  letter-spacing: 0.032em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 /* Hero stickers, tags and the ribbon wait unseen for their entrance (useLandingMotion), so the settled page never flashes first. If the script

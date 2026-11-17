@@ -37,7 +37,7 @@ export function NotFoundPage() {
         </h1>
 
         <p className="mt-2 text-[clamp(1.75rem,5vw,3.25rem)] slush-display">This page peeled off</p>
-        <p className="mt-4 max-w-md text-[18px] leading-[1.3] font-medium tracking-[-0.01em] text-balance sm:text-[20px]">
+        <p className="mt-4 max-w-md text-[18px] leading-[1.3] font-medium text-balance sm:text-[20px]">
           The link may be old, or the page has moved. Every illustration is still in the catalogue.
         </p>
 

@@ -17,7 +17,7 @@ export function NumberedHeading({ n, title }: { n: number; title: string }) {
 /** A paragraph of body copy on the sticker-book pages, with inline code as small grey chips. */
 export function P({ children }: { children: ReactNode }) {
   return (
-    <p className="max-w-3xl text-[17px] leading-[1.5] font-medium tracking-[-0.01em] [&_code]:rounded-[6px] [&_code]:bg-slush-mist [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]">
+    <p className="max-w-3xl text-[17px] leading-[1.5] font-medium [&_code]:rounded-[6px] [&_code]:bg-slush-mist [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]">
       {children}
     </p>
   )
