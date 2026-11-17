@@ -24,6 +24,13 @@ export const getIllustrations = (filters: ListFilters = {}, cursor?: string): Pr
     async () => (await local()).localList(filters, cursor),
   )
 
+/** A seeded random few from the whole catalogue: the same seed always gives the same ones. */
+export const getShuffled = (seed: number, limit: number): Promise<Illustration[]> =>
+  orLocal(
+    async () => (await apiGet('/v1/illustrations', illustrationPageSchema, { seed, limit })).items,
+    async () => (await local()).localList({ seed, limit }).items,
+  )
+
 /** The few shown on the landing page. */
 export const getFeatured = (limit: number): Promise<Illustration[]> =>
   orLocal(

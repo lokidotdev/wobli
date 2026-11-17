@@ -3,7 +3,7 @@ import type { Palette, Style } from 'wobli'
 import { useEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { GlobalStyleControls, SITE_PALETTES, randomPresetForVisit, useGlobalLook, useGlobalStyle } from '~/features/style'
-import { LiveSticker, StickerCard, useFeatured } from '~/features/illustrations'
+import { LiveSticker, StickerCard, useFeatured, useShuffled } from '~/features/illustrations'
 import type { Illustration } from '~/features/illustrations'
 import { INSTALL } from '~/features/export/lib/code'
 import { cn } from '~/shared/lib/cn'
@@ -326,9 +326,10 @@ function Featured({ items, look }: { items: ReadonlyArray<Illustration>; look: S
         </div>
         <div data-cards className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((it, i) => (
-            // the wrapper is what the scroll motion deals in; the card inside keeps its own hover lift
-            <div key={it.slug} data-card className={cn('grid', rowClass(i, items.length))}>
-              <StickerCard illustration={it} look={look} offset={i * 20} />
+            // the wrapper is what the scroll motion deals in, so it stays put (keyed by slot) when a visit's random set
+            // swaps the cards in; the card inside keeps its own hover lift
+            <div key={i} data-card className={cn('grid', rowClass(i, items.length))}>
+              <StickerCard key={it.slug} illustration={it} look={look} offset={i * 20} />
             </div>
           ))}
         </div>
@@ -395,6 +396,9 @@ export function LandingPage() {
   // the grid: the eight featured, in this order, as two full rows of four
   const { data: featured } = useFeatured(GRID.length)
   const grid = [...featured].sort((a, b) => rank(a.slug) - rank(b.slug))
+  // the Featured section: the featured eight as rendered, then a random eight from the whole catalogue for this visit, swapped
+  // in long before the section scrolls into view
+  const shuffled = useShuffled(GRID.length)
   const look = useGlobalLook()
   const palette = SITE_PALETTES[useGlobalStyle().preset]
   // stickers for the lower bands: ones the hero has not already shown come first
@@ -413,7 +417,7 @@ export function LandingPage() {
     <div ref={root}>
       <Hero items={items} look={look} palette={palette} />
       <How items={pick(0, 3)} look={look} />
-      <Featured items={grid} look={look} />
+      <Featured items={shuffled?.length === GRID.length ? shuffled : grid} look={look} />
       <TakeHome pins={pick(4, 2)} look={look} />
     </div>
   )

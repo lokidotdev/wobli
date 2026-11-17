@@ -48,7 +48,7 @@ const entries: Entry[] = Object.entries(metas)
   })
   .sort((a, b) => a.item.slug.localeCompare(b.item.slug))
 
-export function localList(filters: ListFilters & { featured?: boolean; limit?: number } = {}, cursor?: string): IllustrationPage {
+export function localList(filters: ListFilters & { featured?: boolean; limit?: number; seed?: number } = {}, cursor?: string): IllustrationPage {
   const words = searchWords(filters.q)
   const categories = filterValues(filters.category)
   const tags = filterValues(filters.tag).map(tagOf)
@@ -62,7 +62,9 @@ export function localList(filters: ListFilters & { featured?: boolean; limit?: n
     )
     .map((e) => e.item)
   const sorted =
-    filters.sort === 'az'
+    filters.seed !== undefined
+      ? shuffle(found, filters.seed)
+      : filters.sort === 'az'
       ? found.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }) || a.slug.localeCompare(b.slug))
       : found.sort((a, b) => Number(b.featured) - Number(a.featured) || a.slug.localeCompare(b.slug))
   const offset = cursor ? Number(cursor) || 0 : 0
@@ -88,6 +90,22 @@ export function localFacets(): Facets {
       .sort((a, b) => b.count - a.count || a.slug.localeCompare(b.slug))
       .slice(0, 60),
   }
+}
+
+/** The same seeded order every time for a given seed (mulberry32), like the API's. Not the API's exact order, only as varied. */
+function shuffle<T>(items: T[], seed: number): T[] {
+  let t = seed + 0x6d2b79f5
+  const next = () => {
+    t = (t + 0x6d2b79f5) | 0
+    let r = Math.imul(t ^ (t >>> 15), 1 | t)
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296
+  }
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1))
+    ;[items[i], items[j]] = [items[j]!, items[i]!]
+  }
+  return items
 }
 
 const builtAt = new Date().toISOString()

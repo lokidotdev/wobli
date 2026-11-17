@@ -94,6 +94,8 @@ export const listOf = <T extends z.ZodType<string, string>>(item: T) =>
     .pipe(z.array(item).min(1).max(MAX_FILTER_VALUES))
     .transform((values) => [...new Set(values)])
 export const MAX_PAGE_SIZE = 48
+/** The highest `seed` a shuffled list takes: few enough that every seed's response stays warm in the cache. */
+export const MAX_SEED = 999
 
 /** GET /v1/illustrations?… Every filter narrows: in one of the `category` values, carrying every `tag`, matching every `q` word, and `featured`. */
 export const listQuerySchema = z.object({
@@ -102,6 +104,8 @@ export const listQuerySchema = z.object({
   tag: listOf(tagSchema).optional(), // carrying all of these
   featured: z.literal('1').optional(),
   sort: sortSchema.optional(),
+  // a shuffled order instead of `sort`, the same one for the same seed (so pages line up and responses cache); 0–999
+  seed: z.coerce.number().int().min(0).max(MAX_SEED).optional(),
   cursor: z.string().max(32).optional(), // nextCursor of the page before; opaque
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
 })

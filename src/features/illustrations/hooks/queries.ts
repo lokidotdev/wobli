@@ -1,11 +1,14 @@
-import { infiniteQueryOptions, queryOptions, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { getFacets, getFeatured, getIllustration, getIllustrations } from '../api/illustrations.api'
+import { infiniteQueryOptions, queryOptions, useQuery, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { MAX_SEED } from 'wobli-api/contracts'
+import { getFacets, getFeatured, getIllustration, getIllustrations, getShuffled } from '../api/illustrations.api'
 import type { ListFilters } from '../schemas/illustration.schema'
 
 export const illustrationKeys = {
   all: ['illustrations'] as const,
   list: (filters: ListFilters) => [...illustrationKeys.all, 'list', filters] as const,
   featured: (limit: number) => [...illustrationKeys.all, 'featured', limit] as const,
+  shuffled: (seed: number, limit: number) => [...illustrationKeys.all, 'shuffled', seed, limit] as const,
   detail: (slug: string) => [...illustrationKeys.all, 'detail', slug] as const,
   facets: () => ['facets'] as const,
 }
@@ -27,6 +30,10 @@ export const illustrationsQuery = (filters: ListFilters = {}) =>
 export const featuredQuery = (limit = FEATURED_COUNT) =>
   queryOptions({ queryKey: illustrationKeys.featured(limit), queryFn: () => getFeatured(limit), staleTime: FIVE_MINUTES })
 
+/** A seeded random set from the whole catalogue. */
+export const shuffledQuery = (seed: number, limit: number) =>
+  queryOptions({ queryKey: illustrationKeys.shuffled(seed, limit), queryFn: () => getShuffled(seed, limit), staleTime: Infinity })
+
 export const illustrationQuery = (slug: string) =>
   queryOptions({ queryKey: illustrationKeys.detail(slug), queryFn: () => getIllustration(slug), staleTime: FIVE_MINUTES })
 
@@ -36,3 +43,13 @@ export const useIllustrations = (filters: ListFilters = {}) => useSuspenseInfini
 export const useFeatured = (limit = FEATURED_COUNT) => useSuspenseQuery(featuredQuery(limit))
 export const useIllustration = (slug: string) => useSuspenseQuery(illustrationQuery(slug))
 export const useFacets = () => useSuspenseQuery(facetsQuery())
+
+/**
+ * A random `limit` from the whole catalogue, different on every visit. Picked in the browser after hydration, never on the
+ * server: pages are cached at the edge, so a server pick would be the same for everyone. Undefined until it arrives.
+ */
+export function useShuffled(limit: number) {
+  const [seed, setSeed] = useState<number | null>(null)
+  useEffect(() => setSeed(Math.floor(Math.random() * (MAX_SEED + 1))), [])
+  return useQuery({ ...shuffledQuery(seed ?? 0, limit), enabled: seed !== null }).data
+}
