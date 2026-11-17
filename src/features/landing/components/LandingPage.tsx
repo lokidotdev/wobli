@@ -102,10 +102,11 @@ function Ribbon({ d, motion, className, viewBox = '0 0 1440 600' }: { d: string 
 const HERO_RIBBON =
   'M-60 90 C 60 40 190 90 170 220 C 155 320 40 330 60 240 C 80 160 190 300 150 430 C 130 500 200 550 340 555 C 600 565 900 530 1100 550 C 1230 562 1330 520 1340 420 C 1350 320 1240 300 1235 380 C 1230 450 1340 430 1370 300 C 1395 190 1300 120 1500 60'
 // A phone's headline fills the width, so its ribbon cannot go round the sides: it sweeps in under the first sticker, runs down
-// the very edge of the screen, swings under the tags, makes one loop and leaves. Drawn for a tall, narrow box (400 × 500) as a
-// centripetal Catmull-Rom spline through a few points, so every curve hands its direction to the next: no corners, no kinks.
+// the very edge of the screen, swings under the tags, makes one loop and leaves. Built from its curvature rather than from
+// points: every turn eases in and out (curvature rises and falls smoothly, zero between turns), so the bend never jumps and the
+// line reads as one stroke. Drawn at the box's own proportions (390 × 360), so stretching it to fit barely distorts it.
 const HERO_RIBBON_PHONE =
-  'M-60 30 C-30 53 20 71 30 100 C40 128 12 165 6 200 C-0 238 -9 282 -4 320 C1 358 11 402 36 428 C63 456 118 471 160 478 C200 485 247 482 280 474 C304 468 323 459 340 446 C357 433 381 413 382 398 C383 385 367 366 356 362 C344 358 320 367 312 378 C304 389 305 416 312 430 C319 444 336 457 352 462 C371 468 399 464 420 456 C442 448 460 427 480 412'
+  'M-72 18 C-62.3 20.4 -52.5 22.7 -43 25.8 C-33.5 28.9 -24.2 33 -16.4 39.2 C-8.6 45.5 -2.6 53.9 0.9 63.3 C4.4 72.7 5.3 82.8 5.3 92.8 C5.3 102.8 4.4 112.8 3.7 122.8 C3 132.7 2.3 142.7 1.6 152.7 C0.9 162.7 0.2 172.6 -0.5 182.6 C-1.2 192.6 -1.9 202.6 -2.6 212.5 C-3.3 222.5 -4 232.5 -4.4 242.5 C-4.7 252.5 -4.6 262.5 -2.8 272.4 C-1.1 282.2 2.4 291.8 8 300.1 C13.6 308.4 21.2 315.3 30 320.1 C38.8 324.9 48.6 327.6 58.5 329.1 C68.4 330.5 78.4 330.8 88.4 330.9 C98.4 331 108.4 331 118.4 331 C128.4 331 138.4 331 148.4 331 C158.4 331 168.4 331 178.4 331 C188.4 331 198.4 331 208.4 331 C218.4 331 228.4 331 238.4 331 C248.4 331 258.4 331 268.4 331 C278.4 331 288.4 331.1 298.4 330.7 C308.4 330.4 318.4 329.7 328.1 327.4 C337.9 325 347.3 321 354.8 314.3 C362.3 307.6 367.5 298.2 367.8 288.2 C368.2 278.2 363.2 268 354.7 262.7 C346.2 257.4 334.7 257.5 326.3 263 C317.9 268.4 313.2 278.7 313.7 288.7 C314.2 298.7 319.5 308 327.1 314.6 C334.6 321.2 344.1 325.2 353.8 327.5 C363.6 329.8 373.6 330.5 383.6 330.8 C393.6 331.1 403.6 331 413.6 331 C423.6 331 433.6 331 443.6 330.7 C453.6 330.5 463.6 329.7 473.4 328 C483.3 326.2 492.9 323.4 502.2 319.7 C511.5 316 520.5 311.5 529.4 306.9 C535.3 303.9 541.2 300.7 547 297.6'
 const TAKE_RIBBON = 'M-60 420 C 160 560 330 330 250 190 C 190 80 50 150 120 270 C 220 440 560 60 800 90 C 1040 120 1060 500 1230 510 C 1390 520 1420 300 1300 280 C 1190 262 1190 420 1320 430 C 1400 436 1460 400 1500 360'
 
 const Spark = ({ className }: { className?: string }) => (
@@ -205,7 +206,7 @@ function Hero({ items, look, palette }: { items: ReadonlyArray<Illustration>; lo
       <div className={cn(BAND, 'pt-4 pb-12 sm:pb-16')}>
         <div className="relative pt-[27vw] pb-[9vw] sm:py-[12vw] lg:py-[9vw] min-[1440px]:py-[130px]">
           <Ribbon d={HERO_RIBBON} motion="hero" className="text-slush-blue max-sm:hidden" />
-          <Ribbon d={HERO_RIBBON_PHONE} viewBox="0 0 400 500" motion="hero" className="text-slush-blue sm:hidden" />
+          <Ribbon d={HERO_RIBBON_PHONE} viewBox="0 0 390 360" motion="hero" className="text-slush-blue sm:hidden" />
           {/* the headline and the facts stuck on it move as one */}
           <div data-hero-title className="relative">
             <Headline palette={palette} look={look} />
