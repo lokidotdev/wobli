@@ -2,12 +2,13 @@ import type { Icon } from 'wobli'
 import { LOCAL_ICON as LOCAL } from './local-icon'
 import { CATEGORIES } from '../../../vendor/wobli/catalog.ts'
 import type { IconMeta } from '../../../vendor/wobli/catalog.ts'
+import { searchFold, searchWords, startsAWord } from 'wobli-api/contracts'
 import { filterValues, PAGE_SIZE } from '../schemas/illustration.schema'
 import type { Facets, Illustration, IllustrationPage, ListFilters } from '../schemas/illustration.schema'
 
 // The catalogue read straight from the bundled engine copy (src/vendor/wobli), for when the API isn't there (a fresh clone running only the site).
-// It answers the same questions the API does, with the same rules: any chosen category or tag is enough, every search word must match,
-// featured first unless sorted A–Z. Metadata is bundled (it is small); each drawing is its own chunk, loaded on demand.
+// It answers the same questions the API does, with the same rules: every filter narrows (category, every chosen tag, every search word
+// starting a word), featured first unless sorted A–Z. Metadata is bundled (it is small); each drawing is its own chunk, loaded on demand.
 
 const metas = import.meta.glob<IconMeta>('../../../vendor/wobli/icons/*.meta.ts', { eager: true, import: 'default' })
 const drawings = import.meta.glob<Icon>(['../../../vendor/wobli/icons/*.ts', '!../../../vendor/wobli/icons/*.meta.ts'], { import: 'default' })
@@ -21,7 +22,6 @@ export function loadLocalIcon(url: string): Promise<Icon> {
   return load ? load() : Promise.reject(new Error(`wobli: no local drawing for "${slug}"`))
 }
 
-const fold = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
 const tagOf = (t: string) => t.trim().toLowerCase().replace(/[\s_]+/g, '-')
 
 type Entry = { item: Illustration; searchText: string }
@@ -44,20 +44,21 @@ const entries: Entry[] = Object.entries(metas)
       seo: { title: '', description: '', content: '' },
     }
     const searchTags = tags.flatMap((t) => (t.includes('-') ? [t, t.replaceAll('-', ' ')] : [t]))
-    return { item, searchText: fold([meta.title, category.name, ...searchTags, meta.description].join(' ')) }
+    return { item, searchText: searchFold([meta.title, category.name, ...searchTags, meta.description].join(' ')) }
   })
   .sort((a, b) => a.item.slug.localeCompare(b.item.slug))
 
 export function localList(filters: ListFilters & { featured?: boolean; limit?: number } = {}, cursor?: string): IllustrationPage {
-  const words = [...new Set(fold(filters.q ?? '').split(/\s+/).filter(Boolean))].slice(0, 5)
+  const words = searchWords(filters.q)
   const categories = filterValues(filters.category)
   const tags = filterValues(filters.tag).map(tagOf)
   const found = entries
     .filter(
       ({ item, searchText }) =>
-        ((!categories.length && !tags.length) || categories.includes(item.category.slug) || tags.some((t) => item.tags.includes(t))) &&
+        (!categories.length || categories.includes(item.category.slug)) &&
+        tags.every((t) => item.tags.includes(t)) &&
         (!filters.featured || item.featured) &&
-        words.every((w) => searchText.includes(w.slice(0, 24))),
+        words.every((w) => startsAWord(searchText, w)),
     )
     .map((e) => e.item)
   const sorted =

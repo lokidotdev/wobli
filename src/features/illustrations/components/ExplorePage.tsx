@@ -5,7 +5,7 @@ import type { Style } from 'wobli'
 import { useAvailableHeight } from '~/shared/hooks/useAvailableHeight'
 import { useScrollFade } from '~/shared/hooks/useScrollFade'
 import { Button } from '~/shared/ui/Button'
-import { Chips, MultiChips } from '~/shared/ui/Chips'
+import { Chips } from '~/shared/ui/Chips'
 import { BottomSheet } from '~/shared/ui/BottomSheet'
 import type { BottomSheetHandle } from '~/shared/ui/BottomSheet'
 import { Filter, Search } from '~/shared/ui/icons'
@@ -69,25 +69,26 @@ export function ExplorePage({ filters, onFiltersChange, look, styleBar, styleSid
       onChange={(sort) => onFiltersChange({ ...filters, sort: sort === 'featured' ? undefined : sort })}
     />
   )
-  // any number of each: an illustration shows if it is in one of the chosen categories or carries one of the chosen tags
+  // one category and one tag at a time, and every filter narrows the others: in this category AND carrying this tag AND matching the search.
+  // Picking a pill replaces the current one; the leading pill clears it.
   const categoryChips = (
-    <MultiChips
+    <Chips<string>
       label="Category"
-      value={chosenCategories}
-      all={{ label: 'All', count: allCount }}
-      options={facets.categories.map((c) => ({ value: c.slug, label: c.name, count: c.count }))}
-      onChange={(v) => onFiltersChange({ ...filters, category: v.join(',') || undefined })}
+      wrap
+      value={chosenCategories[0] ?? ''}
+      options={[{ value: '', label: 'All', count: allCount }, ...facets.categories.map((c) => ({ value: c.slug, label: c.name, count: c.count }))]}
+      onChange={(v) => onFiltersChange({ ...filters, category: v || undefined })}
     />
   )
   const tagChips = (
-    <MultiChips
+    <Chips<string>
       label="Tag"
+      wrap
       size="sm"
       variant="quiet"
-      value={chosenTags}
-      all={{ label: 'Any' }}
-      options={tags.map((t) => ({ value: t, label: tagLabel(t) }))}
-      onChange={(v) => onFiltersChange({ ...filters, tag: v.join(',') || undefined })}
+      value={chosenTags[0] ?? ''}
+      options={[{ value: '', label: 'Any' }, ...tags.map((t) => ({ value: t, label: tagLabel(t) }))]}
+      onChange={(v) => onFiltersChange({ ...filters, tag: v || undefined })}
     />
   )
 

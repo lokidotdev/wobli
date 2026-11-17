@@ -63,35 +63,3 @@ function Pill<T extends string>({ option: o, checked, size, variant }: { option:
     </span>
   )
 }
-
-type MultiProps<T extends string> = {
-  label: string
-  /** The chosen values; none means no filter, and lights the `all` pill. */
-  value: ReadonlyArray<T>
-  options: ReadonlyArray<Option<T>>
-  onChange: (v: T[]) => void
-  /** The leading pill that clears the choice. */
-  all: { label: string; count?: number }
-  size?: 'md' | 'sm'
-  variant?: 'filled' | 'quiet'
-  className?: string
-}
-
-/** The same pills, any number chosen at once: checkboxes underneath. Always wraps. */
-export function MultiChips<T extends string>({ label, value, options, onChange, all, size = 'md', variant = 'filled', className }: MultiProps<T>) {
-  const toggle = (v: T) => onChange(value.includes(v) ? value.filter((x) => x !== v) : [...value, v])
-  return (
-    <div role="group" aria-label={label} className={cn('relative flex flex-wrap gap-1', className)}>
-      <label className="shrink-0 cursor-pointer select-none p-px">
-        <input type="checkbox" checked={value.length === 0} onChange={() => onChange([])} className="peer sr-only" />
-        <Pill option={{ value: '', ...all }} checked={value.length === 0} size={size} variant={variant} />
-      </label>
-      {options.map((o) => (
-        <label key={o.value} className="shrink-0 cursor-pointer select-none p-px">
-          <input type="checkbox" checked={value.includes(o.value)} onChange={() => toggle(o.value)} className="peer sr-only" />
-          <Pill option={o} checked={value.includes(o.value)} size={size} variant={variant} />
-        </label>
-      ))}
-    </div>
-  )
-}

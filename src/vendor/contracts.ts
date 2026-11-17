@@ -17,6 +17,34 @@ export const tagSchema = z
   .transform((s) => s.replace(/[\s_]+/g, '-'))
   .pipe(z.string().regex(SLUG, 'letters, digits and hyphens').max(32))
 
+/** Lowercase, accents stripped: the form both the indexed text and a query are compared in. */
+export const searchFold = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+
+const MAX_SEARCH_WORDS = 5
+const MAX_SEARCH_WORD = 24 // D1 rejects LIKE patterns over 50 bytes; this leaves room for the wildcards and escapes
+
+/** A word reduced to the stem it is matched by, so a plural finds the singular: "charts" → "chart", "boxes" → "box", "categories" → "categor". */
+function stem(w: string) {
+  if (w.length <= 3 || w.endsWith('ss')) return w
+  if (w.endsWith('ies')) return w.slice(0, -3)
+  if (/(x|z|ch|sh|ss)es$/.test(w)) return w.slice(0, -2)
+  if (w.endsWith('s')) return w.slice(0, -1)
+  return w
+}
+
+/**
+ * A query as the words to look for. Every one must start a word in the indexed text (prefix, so "notif" finds "notification",
+ * but "ai" no longer finds "again"); plurals are stemmed, punctuation splits words.
+ */
+export function searchWords(q: string | undefined): string[] {
+  if (!q) return []
+  const words = searchFold(q).split(/[^\p{L}\p{N}-]+/u).map((w) => w.replace(/^-+|-+$/g, '')).filter(Boolean)
+  return [...new Set(words.map((w) => stem(w).slice(0, MAX_SEARCH_WORD)))].slice(0, MAX_SEARCH_WORDS)
+}
+
+/** Whether `text` (already folded) has a word starting with `word`. The same rule the API's LIKE patterns apply. */
+export const startsAWord = (text: string, word: string) => (' ' + text.replace(/[^\p{L}\p{N}-]+/gu, ' ')).includes(' ' + word)
+
 export const categorySchema = z.object({ slug: slugSchema, name: z.string().min(1).max(40) })
 export type Category = z.infer<typeof categorySchema>
 
@@ -67,11 +95,11 @@ export const listOf = <T extends z.ZodType<string, string>>(item: T) =>
     .transform((values) => [...new Set(values)])
 export const MAX_PAGE_SIZE = 48
 
-/** GET /v1/illustrations?… `category` and `tag` widen: any one of their values is enough. `q` and `featured` narrow what that leaves. */
+/** GET /v1/illustrations?… Every filter narrows: in one of the `category` values, carrying every `tag`, matching every `q` word, and `featured`. */
 export const listQuerySchema = z.object({
   q: z.string().trim().max(64).optional(), // words matched against title, description, category and tags; all must match
   category: listOf(slugSchema).optional(), // in any of these
-  tag: listOf(tagSchema).optional(), // carrying any of these
+  tag: listOf(tagSchema).optional(), // carrying all of these
   featured: z.literal('1').optional(),
   sort: sortSchema.optional(),
   cursor: z.string().max(32).optional(), // nextCursor of the page before; opaque
