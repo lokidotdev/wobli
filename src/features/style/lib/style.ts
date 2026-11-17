@@ -149,6 +149,12 @@ export function encodeStyle(s: EditorStyle): StyleSearch {
   return out
 }
 
+/** A look as a URL query, with its `?`; empty for the default look, so a plain look has a bare URL. */
+export function styleQuery(s: EditorStyle) {
+  const q = new URLSearchParams(encodeStyle(s) as Record<string, string>).toString()
+  return q ? `?${q}` : ''
+}
+
 export const hasStyleParams = (q: StyleSearch) => Object.values(q).some((v) => v !== undefined)
 
 /** A fresh look that still reads: a random preset, often turned around the wheel, an outline and depth near the house values. */

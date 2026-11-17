@@ -10,7 +10,6 @@ export {
   HUE_RANGE,
   LINE_RANGE,
   SPEEDS,
-  SITE_PALETTES,
   SLOT_LABEL,
   backgroundColor,
   decodeStyle,
@@ -19,6 +18,7 @@ export {
   hasStyleParams,
   paletteOf,
   randomizeStyle,
+  styleQuery,
   toEngineStyle,
 } from './lib/style'
 export type { Background, EditorStyle, Recolor } from './lib/style'

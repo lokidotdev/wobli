@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { FPS, toSvg } from 'wobli'
 import type { Icon } from 'wobli'
-import { backgroundColor, encodeStyle, toEngineStyle } from '~/features/style'
+import { backgroundColor, styleQuery, toEngineStyle } from '~/features/style'
 import type { EditorStyle } from '~/features/style'
-import { illustrationLabel } from '~/features/illustrations'
+import { illustrationLabel, illustrationPath } from '~/features/illustrations'
 import { useFlash } from '~/shared/hooks/useFlash'
 import { Button } from '~/shared/ui/Button'
 import { CopyButton } from '~/shared/ui/CopyButton'
 import { Group } from '~/shared/ui/Group'
 import { Check, Copy, Download, Link2 } from '~/shared/ui/icons'
 import { Segmented } from '~/shared/ui/Segmented'
-import { INSTALL, reactSnippet } from '../lib/code'
+import { INSTALL } from '~/shared/config/site'
+import { reactSnippet } from '../lib/code'
 import { embedUrl, iframeSnippet } from '../lib/embed'
 import { OPAQUE_GROUND, videoSeconds } from '../lib/frame'
 import { download, renderPng } from '../lib/png'
@@ -39,10 +40,7 @@ export function ExportPanel({ slug, title, icon, style, currentFrame }: Props) {
   useEffect(() => setOrigin(location.origin), [])
   const embed = embedUrl(origin, slug, style)
   const iframe = iframeSnippet(embed, illustrationLabel(title))
-  const shareLink = () => {
-    const q = new URLSearchParams(encodeStyle(style) as Record<string, string>).toString()
-    return `${location.origin}/illustrations/${slug}${q ? `?${q}` : ''}`
-  }
+  const shareLink = () => `${location.origin}${illustrationPath(slug)}${styleQuery(style)}`
 
   return (
     <div className="flex flex-col gap-6">
@@ -75,19 +73,21 @@ function PngGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
   const [size, setSize] = useState<(typeof SIZES)[number]>('1024')
   const [busy, setBusy] = useState(false)
   const [done, flash] = useFlash()
+  const [error, setError] = useState<string | null>(null)
   const save = async () => {
     setBusy(true)
+    setError(null)
     try {
       download(await renderPng(icon, Math.floor(currentFrame()), toEngineStyle(style), Number(size), backgroundColor(style.bg)), `${slug}-${size}.png`)
       flash()
     } catch {
-      // nothing was saved: the button simply goes back to Save
+      setError('This browser could not make the PNG. Try a smaller size.')
     } finally {
       setBusy(false)
     }
   }
   return (
-    <Group title="PNG" footer={style.bg === 'none' ? 'Transparent, the frame on screen now.' : 'On your background, the frame on screen now.'}>
+    <Group title="PNG" footer={error ?? (style.bg === 'none' ? 'Transparent, the frame on screen now.' : 'On your background, the frame on screen now.')}>
       <div className="flex items-center gap-3">
         <Segmented label="PNG size" value={size} onChange={setSize} options={SIZES.map((s) => ({ value: s, label: `${s}px` }))} className="flex-1" size="sm" />
         <Button size="sm" onClick={save} disabled={busy} aria-label="Save PNG" className="cursor-pointer disabled:cursor-default">

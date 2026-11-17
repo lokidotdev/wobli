@@ -2,10 +2,10 @@ import { Link } from '@tanstack/react-router'
 import type { Palette, Style } from 'wobli'
 import { useEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { GlobalStyleControls, SITE_PALETTES, randomPresetForVisit, useGlobalLook, useGlobalStyle } from '~/features/style'
+import { GlobalStyleControls, randomPresetForVisit, useGlobalLook } from '~/features/style'
 import { LiveSticker, StickerCard, useFeatured, useShuffled } from '~/features/illustrations'
 import type { Illustration } from '~/features/illustrations'
-import { INSTALL } from '~/features/export/lib/code'
+import { INSTALL } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
 import { CopyButton } from '~/shared/ui/CopyButton'
 import { GitHubStar } from '~/shared/ui/GitHubStar'
@@ -165,7 +165,8 @@ const LETTER_TILT = [-7, 5, -4, 8, -6, 4, 7, -5, 6, -8, 5]
  * "Try a Style", gets the black cut-out outline and tips up off the page. The colour fades out slowly, so sweeping across
  * leaves a trail. It is the pitch in the headline itself: the type restyles live, like the illustrations do.
  */
-function Headline({ palette, look }: { palette: Palette; look: Style }) {
+function Headline({ look }: { look: Style & { palette: Palette } }) {
+  const palette = look.palette
   let n = 0
   return (
     <h1
@@ -200,7 +201,7 @@ function Headline({ palette, look }: { palette: Palette; look: Style }) {
   )
 }
 
-function Hero({ items, look, palette }: { items: ReadonlyArray<Illustration>; look: Style; palette: Palette }) {
+function Hero({ items, look }: { items: ReadonlyArray<Illustration>; look: Style & { palette: Palette } }) {
   return (
     <section data-hero className="overflow-x-clip bg-slush-sky pt-(--nav-h)">
       <div className={cn(BAND, 'pt-4 pb-12 sm:pb-16')}>
@@ -209,7 +210,7 @@ function Hero({ items, look, palette }: { items: ReadonlyArray<Illustration>; lo
           <Ribbon d={HERO_RIBBON_PHONE} viewBox="0 0 390 360" motion="hero" className="text-slush-blue sm:hidden" />
           {/* the headline and the facts stuck on it move as one */}
           <div data-hero-title className="relative">
-            <Headline palette={palette} look={look} />
+            <Headline look={look} />
             {/* each tag sits on the ribbon: the left loop, the right loop, and the run under the type */}
             <Tags label="In short">
               <Tag motion="hero" className="max-sm:order-2 sm:top-[49%] sm:right-[2%]" fill="bg-slush-mint" tilt="rotate-[5deg] sm:rotate-[7deg]">
@@ -401,7 +402,6 @@ export function LandingPage() {
   // in long before the section scrolls into view
   const shuffled = useShuffled(GRID.length)
   const look = useGlobalLook()
-  const palette = SITE_PALETTES[useGlobalStyle().preset]
   // stickers for the lower bands: ones the hero has not already shown come first
   const hero = new Set(items.map((it) => it.slug))
   const rest = [...grid.filter((it) => !hero.has(it.slug)), ...grid.filter((it) => hero.has(it.slug))]
@@ -416,7 +416,7 @@ export function LandingPage() {
 
   return (
     <div ref={root}>
-      <Hero items={items} look={look} palette={palette} />
+      <Hero items={items} look={look} />
       <How items={pick(0, 3)} look={look} />
       <Featured items={shuffled?.length === GRID.length ? shuffled : grid} look={look} />
       <TakeHome pins={pick(4, 2)} look={look} />

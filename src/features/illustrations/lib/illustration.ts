@@ -3,6 +3,9 @@ import type { QueryClient } from '@tanstack/react-query'
 import { illustrationQuery } from '../hooks/queries'
 import { loadIcon } from './icons'
 
+/** Where an illustration's own page is. */
+export const illustrationPath = (slug: string) => `/illustrations/${slug}`
+
 /** The accessible name of a live sticker, wherever one is shown. */
 export const illustrationLabel = (title: string) => `${title}, animated illustration`
 

@@ -4,7 +4,7 @@ import { clock } from 'wobli'
 import type { Style } from 'wobli'
 import { Sticker } from 'wobli/react'
 import { backgroundColor, decodeStyle, styleSearchSchema, toEngineStyle } from '~/features/style'
-import { illustrationLabel, loadIllustration, useIcon, useIllustration } from '~/features/illustrations'
+import { illustrationLabel, illustrationPath, loadIllustration, useIcon, useIllustration } from '~/features/illustrations'
 import type { Illustration } from '~/features/illustrations'
 import { absolute } from '~/features/seo'
 
@@ -16,7 +16,7 @@ export const Route = createFileRoute('/embed/$slug')({
   head: ({ loaderData, params }) => ({
     // color-scheme normal: an iframe whose scheme differs from its host gets an opaque backdrop, which would hide transparency
     meta: [{ title: loaderData?.item.title ?? 'wobli' }, { name: 'robots', content: 'noindex' }, { name: 'color-scheme', content: 'normal' }],
-    links: [{ rel: 'canonical', href: absolute(`/illustrations/${params.slug}`) }],
+    links: [{ rel: 'canonical', href: absolute(illustrationPath(params.slug)) }],
   }),
   component: () => (
     <Suspense>

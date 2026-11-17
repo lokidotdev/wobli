@@ -17,6 +17,10 @@ export const site = {
   ],
 }
 
+/** The npm package the site documents and its install command. */
+export const PACKAGE = 'wobli'
+export const INSTALL = `npm i ${PACKAGE}`
+
 /** The X profile behind `site.twitter`. */
 export const xUrl = `https://x.com/${site.twitter.slice(1)}`
 

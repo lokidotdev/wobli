@@ -1,3 +1,4 @@
+import { illustrationPath } from '~/features/illustrations'
 import type { Illustration } from '~/features/illustrations'
 import { site } from '~/shared/config/site'
 import { absolute } from './meta'
@@ -20,7 +21,7 @@ const image = (item: Illustration) => ({
   name: item.title,
   description: item.description,
   contentUrl: absolute(item.poster),
-  url: absolute(`/illustrations/${item.slug}`),
+  url: absolute(illustrationPath(item.slug)),
   keywords: item.tags.join(', '),
   license: absolute('/docs#licence'),
 })
