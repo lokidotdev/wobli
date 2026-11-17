@@ -7,8 +7,9 @@ export { applySiteStyle, getGlobalStyle, isDefaultGlobalStyle, useGlobalStyle, r
 export {
   DEFAULT_STYLE,
   DEPTH_RANGE,
+  HUE_RANGE,
   LINE_RANGE,
-  PAPER_COLOR,
+  SPEEDS,
   SITE_PALETTES,
   SLOT_LABEL,
   backgroundColor,

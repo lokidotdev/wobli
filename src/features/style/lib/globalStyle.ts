@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react'
 import { PALETTES } from 'wobli'
 import type { PaletteName } from 'wobli'
 import type { SiteSettings } from 'wobli-api/contracts'
-import { DEFAULT_STYLE, DEPTH_RANGE, LINE_RANGE, PALETTE_PRESETS, SITE_PALETTES } from './style'
+import { DEFAULT_STYLE, DEPTH_RANGE, LINE_RANGE, PALETTE_PRESETS, SITE_PALETTES, clamp, isPreset } from './style'
 
 // The grid's global style bar: one preset, outline and depth for every card, kept per viewer in localStorage. It is also where
 // the editor starts when an illustration is opened without a style in its URL.
@@ -10,8 +10,7 @@ export type GlobalStyle = { preset: PaletteName; line: number; depth: number }
 const KEY = 'wobli.style'
 let INITIAL: GlobalStyle = { preset: DEFAULT_STYLE.preset, line: DEFAULT_STYLE.line, depth: DEFAULT_STYLE.depth }
 
-const within = (v: unknown, range: { min: number; max: number }, fallback: number) =>
-  typeof v === 'number' && Number.isFinite(v) ? Math.min(range.max, Math.max(range.min, v)) : fallback
+const within = (v: unknown, range: { min: number; max: number }, fallback: number) => (typeof v === 'number' && Number.isFinite(v) ? clamp(v, range) : fallback)
 
 let state = INITIAL
 let loaded = false
@@ -25,7 +24,7 @@ function load() {
     if (!stored) return
     // storage is the visitor's to edit: take only what is still a valid value
     state = {
-      preset: PALETTE_PRESETS.some((p) => p.name === stored.preset) ? stored.preset! : INITIAL.preset,
+      preset: isPreset(stored.preset) ? stored.preset : INITIAL.preset,
       line: within(stored.line, LINE_RANGE, INITIAL.line),
       depth: within(stored.depth, DEPTH_RANGE, INITIAL.depth),
     }
@@ -73,7 +72,7 @@ export function applySiteStyle(style: SiteSettings['style']) {
   if (key === applied) return
   applied = key
   for (const p of PALETTE_PRESETS) SITE_PALETTES[p.name] = { ...PALETTES[p.name], ...style.palettes[p.name] }
-  const preset = PALETTE_PRESETS.some((p) => p.name === style.preset) ? style.preset : DEFAULT_STYLE.preset
+  const preset = isPreset(style.preset) ? style.preset : DEFAULT_STYLE.preset
   Object.assign(DEFAULT_STYLE, { preset, line: style.line, depth: style.depth })
   const wasInitial = state === INITIAL
   INITIAL = { preset, line: style.line, depth: style.depth }

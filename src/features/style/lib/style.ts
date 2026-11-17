@@ -1,4 +1,4 @@
-import { ACCENTS, PALETTES, brand, hue, mono } from 'wobli'
+import { ACCENTS, PALETTES, RISO, brand, hue, mono } from 'wobli'
 import type { Palette, PaletteName, Style } from 'wobli'
 import type { StyleSearch } from '../schemas/style.schema'
 
@@ -15,7 +15,7 @@ export type EditorStyle = {
   line: number // outline multiplier, within LINE_RANGE
   depth: number // extrusion multiplier, within DEPTH_RANGE
   bg: Background
-  speed: number // 0.25 to 2
+  speed: number // one of SPEEDS
   loop: boolean
 }
 
@@ -50,8 +50,15 @@ export const DEFAULT_STYLE: EditorStyle = {
 /** The one definition of how far each control goes: sliders, the URL decoder and the docs all read these. */
 export const LINE_RANGE = { min: 0, max: 2.5, step: 0.05 } as const
 export const DEPTH_RANGE = { min: 0, max: 1.5, step: 0.05 } as const
-export const SPEED_RANGE = { min: 0.25, max: 2 } as const
-/** 1.5 → "1.5×" */
+export const HUE_RANGE = { min: -180, max: 180, step: 1 } as const
+/** The playback speeds on offer; a speed from a URL snaps to the nearest. */
+export const SPEEDS = [0.25, 0.5, 1, 1.5, 2] as const
+
+/** `v` brought inside `range`. */
+export const clamp = (v: number, range: { min: number; max: number }) => Math.min(range.max, Math.max(range.min, v))
+/** Whether `name` is one of the palettes on offer (URLs, storage and the admin's settings can all hold stale names). */
+export const isPreset = (name: unknown): name is PaletteName => PALETTE_PRESETS.some((p) => p.name === name)
+
 export const formatMultiplier = (v: number) => `${+v.toFixed(2)}×`
 
 export const SLOT_LABEL: Record<Slot, string> = {
@@ -67,7 +74,8 @@ export const SLOT_LABEL: Record<Slot, string> = {
   ink: 'Stroke',
 }
 
-export const PAPER_COLOR = '#f7f7f7'
+/** The 'paper' background: the engine's own paper. */
+const PAPER_COLOR = RISO.paper
 export const backgroundColor = (bg: Background) => (bg === 'none' ? undefined : bg === 'paper' ? PAPER_COLOR : bg)
 
 /** The whole palette a style draws with: preset, then the quick recolour, then single slot overrides, then the stroke. */
@@ -86,19 +94,21 @@ export const toEngineStyle = (s: EditorStyle): Style & { palette: Palette; line:
 // ── URL ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const HEX = /^[0-9a-f]{6}$/i
 const hex = (v: string | undefined) => (v && HEX.test(v) ? (`#${v.toLowerCase()}` as const) : undefined)
-const num = (v: string | undefined, lo: number, hi: number) => {
+const num = (v: string | undefined, range: { min: number; max: number }) => {
   const n = v === undefined ? NaN : Number(v)
-  return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : undefined
+  return Number.isFinite(n) ? clamp(n, range) : undefined
 }
+const nearestSpeed = (v: number) => SPEEDS.reduce((best, s) => (Math.abs(s - v) < Math.abs(best - v) ? s : best))
 const bare = (c: string) => c.replace('#', '').toLowerCase()
 const round = (n: number) => String(+n.toFixed(2))
 const SLOTS = new Set<string>([...ACCENTS, 'white', 'grey', 'paper'])
 
 export function decodeStyle(q: StyleSearch): EditorStyle {
-  const preset = (PALETTE_PRESETS.some((p) => p.name === q.p) ? q.p : DEFAULT_STYLE.preset) as PaletteName
+  const preset = isPreset(q.p) ? q.p : DEFAULT_STYLE.preset
   let recolor: Recolor = { mode: 'off' }
   const [mode, a, b] = (q.q ?? '').split('.')
-  if (mode === 'hue' && num(a, -180, 180) !== undefined) recolor = { mode: 'hue', deg: num(a, -180, 180)! }
+  const deg = num(a, HUE_RANGE)
+  if (mode === 'hue' && deg !== undefined) recolor = { mode: 'hue', deg }
   if (mode === 'brand' && hex(a)) recolor = { mode: 'brand', a: hex(a)!, b: hex(b) ?? hex(a)! }
   if (mode === 'mono' && hex(a)) recolor = { mode: 'mono', c: hex(a)! }
   const colors: EditorStyle['colors'] = {}
@@ -112,10 +122,10 @@ export function decodeStyle(q: StyleSearch): EditorStyle {
     recolor,
     colors,
     ink: hex(q.ink) ?? DEFAULT_STYLE.ink,
-    line: num(q.lw, LINE_RANGE.min, LINE_RANGE.max) ?? DEFAULT_STYLE.line,
-    depth: num(q.d, DEPTH_RANGE.min, DEPTH_RANGE.max) ?? DEFAULT_STYLE.depth,
+    line: num(q.lw, LINE_RANGE) ?? DEFAULT_STYLE.line,
+    depth: num(q.d, DEPTH_RANGE) ?? DEFAULT_STYLE.depth,
     bg,
-    speed: num(q.sp, SPEED_RANGE.min, SPEED_RANGE.max) ?? DEFAULT_STYLE.speed,
+    speed: q.sp !== undefined && Number.isFinite(Number(q.sp)) ? nearestSpeed(Number(q.sp)) : DEFAULT_STYLE.speed,
     loop: q.once !== '1',
   }
 }

@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { paint } from 'wobli'
+import { FPS, paint } from 'wobli'
 import type { Icon, Style } from 'wobli'
 import { cn } from '~/shared/lib/cn'
 import { IconButton } from '~/shared/ui/IconButton'
@@ -47,7 +47,7 @@ export const Stage = forwardRef<StageHandle, Props>(function Stage({ icon, look,
       last = now
       const state = latest.current
       if (state.playing) {
-        frame.current += (dt / 1000) * 60 * state.speed
+        frame.current += (dt / 1000) * FPS * state.speed
         if (!state.loop && frame.current >= state.icon.frames) {
           frame.current = state.icon.still ?? 0
           setPlaying(false)
@@ -61,7 +61,7 @@ export const Stage = forwardRef<StageHandle, Props>(function Stage({ icon, look,
           scrub.current.value = String(Math.floor(frame.current))
           scrub.current.style.setProperty('--fill', `${(frame.current / (state.icon.frames - 1)) * 100}%`)
         }
-        if (time.current) time.current.textContent = `${(frame.current / 60).toFixed(1)}s`
+        if (time.current) time.current.textContent = `${(frame.current / FPS).toFixed(1)}s`
         dirty.current = false
       }
       raf = requestAnimationFrame(tick)

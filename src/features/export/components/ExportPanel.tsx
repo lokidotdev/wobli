@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { toSvg } from 'wobli'
+import { FPS, toSvg } from 'wobli'
 import type { Icon } from 'wobli'
 import { backgroundColor, encodeStyle, toEngineStyle } from '~/features/style'
 import type { EditorStyle } from '~/features/style'
@@ -12,6 +12,7 @@ import { Check, Copy, Download, Link2 } from '~/shared/ui/icons'
 import { Segmented } from '~/shared/ui/Segmented'
 import { INSTALL, reactSnippet } from '../lib/code'
 import { embedUrl, iframeSnippet } from '../lib/embed'
+import { OPAQUE_GROUND, videoSeconds } from '../lib/frame'
 import { download, renderPng } from '../lib/png'
 import type { VideoFormat } from '../lib/video'
 
@@ -143,7 +144,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
   const [alphaOk, setAlphaOk] = useState<boolean | null>(null)
   const abort = useRef<AbortController | null>(null)
   const bg = backgroundColor(style.bg)
-  const seconds = ((icon.frames / style.speed) * Number(loops)) / 60
+  const seconds = videoSeconds(icon, style.speed, Number(loops))
 
   useEffect(() => {
     if (format === 'webm' && !bg) loadVideoEncoder()
@@ -162,7 +163,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
       const blob = await renderVideo(icon, toEngineStyle(style), {
         format,
         size: Number(size),
-        bg: format === 'webm' && !bg && alphaOk === false ? '#ffffff' : bg,
+        bg: format === 'webm' && !bg && alphaOk === false ? OPAQUE_GROUND : bg,
         speed: style.speed,
         loops: Number(loops),
         onProgress: setProgress,
@@ -171,7 +172,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
       download(blob, `${slug}-${size}.${format}`)
       flash()
     } catch (e) {
-      if ((e as Error).name !== 'AbortError') setError('This browser could not encodeStyle the video. Try MP4, or a recent Chrome, Edge or Safari.')
+      if ((e as Error).name !== 'AbortError') setError('This browser could not encode the video. Try MP4, or a recent Chrome, Edge or Safari.')
     } finally {
       setProgress(null)
     }
@@ -183,11 +184,11 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
       : bg
         ? 'VP9 on your background.'
         : alphaOk === false
-          ? 'This browser can’t encodeStyle transparent video, so it will be on white. Chrome or Edge can.'
+          ? 'This browser can’t encode transparent video, so it will be on white. Chrome or Edge can.'
           : 'VP9 with a transparent background, for the web.'
 
   return (
-    <Group title="Video" footer={error ?? `${note} ${seconds.toFixed(1)}s, 60 fps, loops seamlessly.`}>
+    <Group title="Video" footer={error ?? `${note} ${seconds.toFixed(1)}s, ${FPS} fps, loops seamlessly.`}>
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <Segmented<VideoFormat>

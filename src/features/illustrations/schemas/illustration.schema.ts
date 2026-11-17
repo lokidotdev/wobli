@@ -7,8 +7,6 @@ export type { Category, Facets, Illustration, IllustrationPage, Sort } from 'wob
 
 // The page filters by one category and one tag at a time. An older link with several (?tag=chat,inbox) keeps the first.
 const one = (item: Parameters<typeof listOf>[0]) => listOf(item).transform((values) => values[0])
-/** The values of a comma separated filter. */
-export const filterValues = (value: string | undefined) => (value ? value.split(',') : [])
 
 // /illustrations search params. A hand-edited value the API would refuse is dropped here, so a filtered URL never errors.
 export const listSearchSchema = z.object({

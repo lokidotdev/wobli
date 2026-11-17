@@ -1,5 +1,5 @@
-import { draw } from 'wobli'
 import type { Icon, Style } from 'wobli'
+import { drawFrame } from './frame'
 
 /** One frame at any size, drawn fresh (not copied off the stage), transparent unless a background is given. */
 export async function renderPng(icon: Icon, frame: number, style: Style, size: number, bg?: string): Promise<Blob> {
@@ -7,12 +7,7 @@ export async function renderPng(icon: Icon, frame: number, style: Style, size: n
   canvas.width = canvas.height = size
   const ctx = canvas.getContext('2d')
   if (!ctx) throw new Error('no 2d context')
-  if (bg) {
-    ctx.fillStyle = bg
-    ctx.fillRect(0, 0, size, size)
-  }
-  ctx.scale(size / (icon.size ?? 500), size / (icon.size ?? 500))
-  draw(ctx, icon, frame, style)
+  drawFrame(ctx, icon, frame, style, size, bg)
   return new Promise((ok, no) => canvas.toBlob((b) => (b ? ok(b) : no(new Error('toBlob failed'))), 'image/png'))
 }
 

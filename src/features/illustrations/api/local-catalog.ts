@@ -3,11 +3,11 @@ import { LOCAL_ICON as LOCAL } from './local-icon'
 import { CATEGORIES } from '../../../vendor/wobli/catalog.ts'
 import type { IconMeta } from '../../../vendor/wobli/catalog.ts'
 import { searchFold, searchWords, startsAWord } from 'wobli-api/contracts'
-import { filterValues, PAGE_SIZE } from '../schemas/illustration.schema'
+import { PAGE_SIZE } from '../schemas/illustration.schema'
 import type { Facets, Illustration, IllustrationPage, ListFilters } from '../schemas/illustration.schema'
 
 // The catalogue read straight from the bundled engine copy (src/vendor/wobli), for when the API isn't there (a fresh clone running only the site).
-// It answers the same questions the API does, with the same rules: every filter narrows (category, every chosen tag, every search word
+// It answers the same questions the API does, with the same rules: every filter narrows (the category, the tag, every search word
 // starting a word), featured first unless sorted A–Z. Metadata is bundled (it is small); each drawing is its own chunk, loaded on demand.
 
 const metas = import.meta.glob<IconMeta>('../../../vendor/wobli/icons/*.meta.ts', { eager: true, import: 'default' })
@@ -50,13 +50,12 @@ const entries: Entry[] = Object.entries(metas)
 
 export function localList(filters: ListFilters & { featured?: boolean; limit?: number; seed?: number } = {}, cursor?: string): IllustrationPage {
   const words = searchWords(filters.q)
-  const categories = new Set(filterValues(filters.category))
-  const tags = filterValues(filters.tag).map(tagOf)
+  const tag = filters.tag && tagOf(filters.tag)
   const found = entries
     .filter(
       ({ item, searchText }) =>
-        (!categories.size || categories.has(item.category.slug)) &&
-        tags.every((t) => item.tags.includes(t)) &&
+        (!filters.category || item.category.slug === filters.category) &&
+        (!tag || item.tags.includes(tag)) &&
         (!filters.featured || item.featured) &&
         words.every((w) => startsAWord(searchText, w)),
     )

@@ -14,7 +14,6 @@ import { BAND } from '~/shared/ui/slush'
 import { illustrationQuery, useFacets, useIllustrations } from '../hooks/queries'
 import { tagLabel } from '../lib/illustration'
 import letterS from '../lib/letter-s'
-import { filterValues } from '../schemas/illustration.schema'
 import type { ListFilters, Sort } from '../schemas/illustration.schema'
 import { IllustrationGrid } from './IllustrationGrid'
 import { LiveSticker } from './LiveSticker'
@@ -49,7 +48,7 @@ export function ExplorePage({ filters, onFiltersChange, look, styleBar, styleSid
   const activeCount = (filters.category ? 1 : 0) + (filters.tag ? 1 : 0) + (filters.sort ? 1 : 0)
   const panel = useAvailableHeight<HTMLElement>()
   const fade = useScrollFade<HTMLDivElement>()
-  const filterGroups = <FilterGroups filters={filters} onFiltersChange={onFiltersChange} />
+  const filterGroups = <FilterGroups filters={filters} onFiltersChange={onFiltersChange} allCount={allCount} />
 
   return (
     <>
@@ -62,7 +61,7 @@ export function ExplorePage({ filters, onFiltersChange, look, styleBar, styleSid
 
           <div className="flex items-start gap-8 xl:gap-10">
             <div className="min-w-0 flex-1">
-              <CatalogueToolbar filters={filters} onFiltersChange={onFiltersChange} total={total} allCount={allCount} active={activeCount}>
+              <CatalogueToolbar filters={filters} onFiltersChange={onFiltersChange} total={total} allCount={allCount} filtered={filtered} active={activeCount}>
                 {filterGroups}
               </CatalogueToolbar>
               {items.length ? (
@@ -142,11 +141,10 @@ function FilterDrawer({ active, children }: { active: number; children: ReactNod
  * Sort, category and tag. One category and one tag at a time, and every filter narrows the others: in this category AND carrying
  * this tag AND matching the search. Picking a pill replaces the current one; the leading pill clears it.
  */
-function FilterGroups({ filters, onFiltersChange }: { filters: ListFilters; onFiltersChange: (next: ListFilters) => void }) {
+function FilterGroups({ filters, onFiltersChange, allCount }: { filters: ListFilters; onFiltersChange: (next: ListFilters) => void; allCount: number }) {
   const { data: facets } = useFacets()
-  const chosenCategory = filterValues(filters.category)[0] ?? ''
-  const chosenTag = filterValues(filters.tag)[0] ?? ''
-  const allCount = useMemo(() => facets.categories.reduce((n, c) => n + c.count, 0), [facets])
+  const chosenCategory = filters.category ?? ''
+  const chosenTag = filters.tag ?? ''
   // the most used tags, plus the chosen one if it is rarer than those
   const tags = useMemo(() => {
     const top = facets.tags.slice(0, TOP_TAGS).map((t) => t.slug)
@@ -260,11 +258,10 @@ function SearchField({ value, onChange, count }: { value: string; onChange: (q: 
   )
 }
 
-type ToolbarProps = { filters: ListFilters; onFiltersChange: (next: ListFilters) => void; total: number; allCount: number; active: number; children: ReactNode }
+type ToolbarProps = { filters: ListFilters; onFiltersChange: (next: ListFilters) => void; total: number; allCount: number; filtered: boolean; active: number; children: ReactNode }
 
 /** Over the grid: the search box, the Filters button (below lg), how many are showing, and a way to clear what narrows them. */
-function CatalogueToolbar({ filters, onFiltersChange, total, allCount, active, children }: ToolbarProps) {
-  const filtered = Boolean(filters.q || filters.category || filters.tag)
+function CatalogueToolbar({ filters, onFiltersChange, total, allCount, filtered, active, children }: ToolbarProps) {
   return (
     <section aria-label="Search illustrations" className="mb-6 flex flex-col gap-4">
       <div className="flex items-center gap-2">

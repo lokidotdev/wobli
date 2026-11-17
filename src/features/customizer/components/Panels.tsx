@@ -5,7 +5,7 @@ import { Button } from '~/shared/ui/Button'
 import { Field, Group } from '~/shared/ui/Group'
 import { Segmented } from '~/shared/ui/Segmented'
 import { Slider } from '~/shared/ui/Slider'
-import { DEPTH_RANGE, LINE_RANGE, PAPER_COLOR, PresetStrip, SLOT_LABEL, formatMultiplier, paletteOf } from '~/features/style'
+import { DEPTH_RANGE, HUE_RANGE, LINE_RANGE, PresetStrip, SPEEDS, SLOT_LABEL, formatMultiplier, paletteOf } from '~/features/style'
 import type { EditorStyle, Recolor } from '~/features/style'
 
 type PanelProps = { style: EditorStyle; update: (patch: Partial<EditorStyle>) => void }
@@ -43,7 +43,7 @@ export function ColorPanel({ style, update, icon }: PanelProps & { icon: Icon })
             ]}
           />
           {style.recolor.mode === 'hue' && (
-            <Slider label="Hue shift" value={style.recolor.deg} min={-180} max={180} step={1} onChange={(deg) => update({ recolor: { mode: 'hue', deg }, colors: {} })} format={(v) => `${Math.round(v)}°`} />
+            <Slider label="Hue shift" value={style.recolor.deg} {...HUE_RANGE} onChange={(deg) => update({ recolor: { mode: 'hue', deg }, colors: {} })} format={(v) => `${Math.round(v)}°`} />
           )}
           {style.recolor.mode === 'brand' && (
             <div className="flex gap-5">
@@ -109,13 +109,12 @@ export function BackgroundPanel({ style, update }: PanelProps) {
           ]}
           className="flex-1"
         />
-        {kind === 'custom' && <ColorWell label="Background colour" value={style.bg === 'paper' ? PAPER_COLOR : (style.bg as string)} onChange={(c) => update({ bg: c as `#${string}` })} showLabel={false} />}
+        {kind === 'custom' && <ColorWell label="Background colour" value={style.bg} onChange={(c) => update({ bg: c as `#${string}` })} showLabel={false} />}
       </div>
     </Group>
   )
 }
 
-const SPEEDS = ['0.25', '0.5', '1', '1.5', '2'] as const
 export function MotionPanel({ style, update }: PanelProps) {
   return (
     <Group title="Motion" footer="Reduced motion opens on the still frame; press play to watch it anyway.">
@@ -123,9 +122,9 @@ export function MotionPanel({ style, update }: PanelProps) {
         <Field label="Speed">
           <Segmented
             label="Speed"
-            value={String(style.speed) as (typeof SPEEDS)[number]}
+            value={String(style.speed)}
             onChange={(v) => update({ speed: Number(v) })}
-            options={SPEEDS.map((v) => ({ value: v, label: `${v}×` }))}
+            options={SPEEDS.map((v) => ({ value: String(v), label: formatMultiplier(v) }))}
             className="w-60"
             size="sm"
           />
