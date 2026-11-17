@@ -329,6 +329,8 @@
    `.slush` re-points the Geist tokens so the shared controls it borrows (palette strip, sliders) read correctly on its
    pastel bands. */
 .slush {
+  /* the floating nav's height: it overlaps the first band, which pads its top by this much */
+  --nav-h: 72px;
   color-scheme: light;
   color: #000;
   font-family: var(--font-slush);
@@ -364,7 +366,7 @@
   --shadow-focus: 0 0 0 2px #ffffff, 0 0 0 4px #000000;
   /* softness is the default: controls are pills, cards 20px, panels 30px */
   --radius-control: 1600px;
-  --radius-card: 16px;
+  --radius-card: 20px;
   --radius-float: 30px;
   /* no shadows anywhere: every elevation is the same black hairline */
   --shadow-border: 0 0 0 1px #000000;

@@ -294,7 +294,7 @@ function CatalogueToolbar({ filters, onFiltersChange, total, allCount, filtered,
 function ExploreHeader({ look }: { look?: Style }) {
   const { data: giftCard } = useQuery(illustrationQuery(HEADER_STICKER))
   return (
-    <section className="bg-slush-sky pt-[72px]">
+    <section className="bg-slush-sky pt-(--nav-h)">
       <div className={`${BAND} pt-10 pb-12 sm:pt-14 sm:pb-16`}>
         <div className="relative">
           {/* the last S is a live sticker standing in the type, in the look picked below */}

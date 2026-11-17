@@ -12,3 +12,7 @@ export const STAR_GHOST = cn(STAR, 'bg-white! text-black! hover:bg-slush-mist!')
 export const STAR_FILLED = cn(STAR, 'bg-black! text-white! hover:bg-black/80!')
 
 export const BAND = 'mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12'
+
+/** The sticker colours a numbered list cycles through: step numbers, section markers, the docs thread. */
+export const TINTS = ['bg-slush-sunburst', 'bg-slush-mint', 'bg-slush-lavender', 'bg-slush-blue', 'bg-slush-ember', 'bg-slush-violet text-white'] as const
+export const tint = (i: number) => TINTS[i % TINTS.length]

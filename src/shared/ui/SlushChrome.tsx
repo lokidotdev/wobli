@@ -1,5 +1,6 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
+import { useDismiss } from '~/shared/hooks/useDismiss'
 import type { CSSProperties, ReactNode } from 'react'
 import { PAGES, site, xUrl } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
@@ -21,7 +22,7 @@ const NAME_TILT = [-8, 6, -5, 9, -6]
 function Nav() {
   const shuffle = useLogoShuffle()
   return (
-    <header className="sticky top-0 z-40 -mb-[72px] h-[72px]">
+    <header className="sticky top-0 z-40 -mb-(--nav-h) h-(--nav-h)">
       <div className={cn(BAND, 'flex h-full items-center justify-between gap-2')}>
         <Link to="/" aria-label={`${site.name} home`} className={cn(GHOST, 'h-10 gap-2 px-2.5 text-[13px] normal-case sm:pr-4')} {...shuffle}>
           <Logo className="size-5" />
@@ -63,21 +64,7 @@ function PhoneMenu() {
   const button = useRef<HTMLButtonElement>(null)
   const path = useRouterState({ select: (s) => s.location.pathname })
   useEffect(() => setOpen(false), [path])
-  useEffect(() => {
-    if (!open) return
-    const down = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false)
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      setOpen(false)
-      button.current?.focus()
-    }
-    document.addEventListener('pointerdown', down)
-    document.addEventListener('keydown', key)
-    return () => {
-      document.removeEventListener('pointerdown', down)
-      document.removeEventListener('keydown', key)
-    }
-  }, [open])
+  useDismiss(open, () => setOpen(false), root, button)
   return (
     <div ref={root} className="sm:hidden">
       <button
@@ -94,7 +81,7 @@ function PhoneMenu() {
           <span />
         </span>
       </button>
-      <div id={id} data-open={open} inert={!open} className={cn('menu-panel absolute inset-x-4 top-[64px] flex flex-col gap-2 rounded-[30px] border border-black bg-white p-2')}>
+      <div id={id} data-open={open} inert={!open} className={cn('menu-panel absolute inset-x-4 top-[calc(var(--nav-h)-8px)] flex flex-col gap-2 rounded-[30px] border border-black bg-white p-2')}>
         <nav aria-label="Main" className="contents">
           {PAGES.map((p, i) => (
             <Link

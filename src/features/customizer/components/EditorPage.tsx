@@ -66,7 +66,7 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
 
   return (
     // one sky band (DESIGN.md): the drawing as a sticker-book card, its facts in display type, the controls in one outlined frame
-    <section className="bg-slush-sky pt-[72px]">
+    <section className="bg-slush-sky pt-(--nav-h)">
       <div className={cn(BAND, 'pt-4 pb-28 sm:pt-6 lg:pb-20')}>
         <nav aria-label="Editor" className="flex items-center justify-between gap-3">
           <Link to="/illustrations" className={cn(PILL, 'h-10 gap-1 bg-white pr-4 pl-2.5 text-[12px] text-black hover:bg-slush-mist sm:text-[13px]')}>
@@ -77,8 +77,8 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
           <div className="hidden lg:block">
             <Popover
               label="Export"
-              trigger={({ open, toggle, id }) => (
-                <Button onClick={toggle} aria-expanded={open} aria-controls={id} className="px-5 text-[13px]! uppercase">
+              trigger={({ toggle, props }) => (
+                <Button {...props} onClick={toggle} className="px-5 text-[13px]! uppercase">
                   <Download className="size-4" />
                   Export
                 </Button>

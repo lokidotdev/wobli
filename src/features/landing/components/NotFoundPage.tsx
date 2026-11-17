@@ -16,7 +16,7 @@ export function NotFoundPage() {
   // the band simply shows a plain 0 if the drawing cannot be loaded
   const { data: zero } = useQuery(illustrationQuery(ZERO))
   return (
-    <section className="flex min-h-[100svh] flex-col overflow-x-clip bg-slush-sky pt-[72px]">
+    <section className="flex min-h-[100svh] flex-col overflow-x-clip bg-slush-sky pt-(--nav-h)">
       <div className={cn(BAND, 'flex flex-1 flex-col items-center justify-center pt-10 pb-20 text-center sm:pt-6 sm:pb-24')}>
         <span className="inline-flex h-8 -rotate-[4deg] items-center rounded-full border border-black bg-slush-sunburst px-4 text-[12px] slush-label sm:h-10 sm:px-5 sm:text-[13px]">
           Error 404

@@ -64,6 +64,20 @@ export async function apiGet<T extends z.ZodType>(path: string, schema: T, param
     throw new ApiError(res.status, body?.error?.code ?? 'http_error', body?.error?.message ?? `The API answered ${res.status}.`)
   }
   const parsed = schema.safeParse(await res.json().catch(() => undefined))
-  if (!parsed.success) throw unreachable()
+  if (!parsed.success) {
+    // still served from the fallback, but said out loud: a mismatch here means the API and its contracts have drifted
+    console.error(`wobli: ${path} answered something its schema does not accept`, parsed.error.issues.slice(0, 3))
+    throw unreachable()
+  }
   return parsed.data
+}
+
+/** apiGet, or `fallback`'s answer when the API isn't there. A 4xx is a real answer and still throws. */
+export async function apiGetOr<T extends z.ZodType>(path: string, schema: T, params: Params, fallback: () => Promise<z.output<T>> | z.output<T>): Promise<z.output<T>> {
+  try {
+    return await apiGet(path, schema, params)
+  } catch (e) {
+    if (isUnreachable(e)) return fallback()
+    throw e
+  }
 }

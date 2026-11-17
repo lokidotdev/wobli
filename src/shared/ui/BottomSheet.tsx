@@ -14,9 +14,7 @@ type Props = {
   /** Pinned under the body. */
   footer?: ReactNode
   children: ReactNode
-  /** Classes for the panel, e.g. its max height. */
   panelClassName?: string
-  /** Classes for the scrim. */
   scrimClassName?: string
   className?: string
 }

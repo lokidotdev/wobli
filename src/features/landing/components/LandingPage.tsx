@@ -202,7 +202,7 @@ function Headline({ palette, look }: { palette: Palette; look: Style }) {
 
 function Hero({ items, look, palette }: { items: ReadonlyArray<Illustration>; look: Style; palette: Palette }) {
   return (
-    <section data-hero className="overflow-x-clip bg-slush-sky pt-[72px]">
+    <section data-hero className="overflow-x-clip bg-slush-sky pt-(--nav-h)">
       <div className={cn(BAND, 'pt-4 pb-12 sm:pb-16')}>
         <div className="relative pt-[27vw] pb-[9vw] sm:py-[12vw] lg:py-[9vw] min-[1440px]:py-[130px]">
           <Ribbon d={HERO_RIBBON} motion="hero" className="text-slush-blue max-sm:hidden" />

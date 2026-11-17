@@ -9,7 +9,6 @@ export const Route = createFileRoute('/illustrations/')({
   validateSearch: listSearchSchema,
   loaderDeps: ({ search }) => search,
   loader: async ({ context: { queryClient }, deps, cause }) => {
-    // started together: neither waits on the other
     const seoLoad = pageSeo(queryClient, 'illustrations', {
       title: `Illustrations · ${site.name}`,
       description: 'Live isometric illustrations for product UI. Restyle the whole grid at once, open one to customize and export.',
