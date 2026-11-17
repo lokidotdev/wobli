@@ -151,7 +151,7 @@ export function ExplorePage({ filters, onFiltersChange, look, styleBar, styleSid
                 </p>
                 {/* narrow screens: how many of the catalogue are showing, only once something narrows it */}
                 {filtered && (
-                  <div className="flex items-center justify-between gap-3 lg:hidden">
+                  <div className="enter flex items-center justify-between gap-3 [--enter-y:-4px] lg:hidden">
                     <span aria-hidden className="inline-flex h-7 items-center rounded-full bg-black px-2.5 text-[13px] font-bold text-white tabular-nums">
                       {total}
                       <span className="opacity-60">/{allCount}</span>
@@ -165,7 +165,7 @@ export function ExplorePage({ filters, onFiltersChange, look, styleBar, styleSid
               {items.length ? (
                 <IllustrationGrid items={items} look={look} onMore={hasNextPage ? () => fetchNextPage({ cancelRefetch: false }) : undefined} />
               ) : (
-                <div className="flex flex-col items-center rounded-[40px] border border-black bg-slush-lavender px-6 py-20 text-center">
+                <div className="enter flex flex-col items-center rounded-[40px] border border-black bg-slush-lavender px-6 py-20 text-center [--enter-dur:300ms] [--enter-scale:0.96]">
                   <NoResultsSticker look={look} />
                   <p className="mt-2 text-[clamp(2.25rem,5vw,4rem)] slush-display">Nothing here</p>
                   <p className="mt-4 max-w-sm text-[16px] leading-[1.39] font-medium">
@@ -245,7 +245,7 @@ function FilterDrawer({ active, children }: { active: number; children: ReactNod
       >
         <Filter className="size-4" />
         {active > 0 && (
-          <span aria-hidden className="absolute -top-1 -right-1 grid size-4 place-items-center rounded-full bg-contrast font-mono text-[10px] text-on-contrast">
+          <span aria-hidden className="enter absolute -top-1 -right-1 grid size-4 [--enter-scale:0.6] place-items-center rounded-full bg-contrast font-mono text-[10px] text-on-contrast">
             {active}
           </span>
         )}

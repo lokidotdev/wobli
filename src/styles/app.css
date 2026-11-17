@@ -771,3 +771,26 @@
     transition: none;
   }
 }
+
+/* Things that appear on their own (an empty state, a badge, a row, a check): they arrive from a little smaller, higher or
+   fainter instead of teleporting. @starting-style, so the component only has to mount them; transitions, so a quick
+   remount retargets instead of restarting. Tune per use with --enter-scale, --enter-y and --enter-dur. */
+.enter {
+  transition-property: opacity, scale, translate;
+  transition-duration: var(--enter-dur, 200ms);
+  transition-timing-function: var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    scale: var(--enter-scale, 1);
+    translate: 0 var(--enter-y, 0);
+  }
+}
+/* reduced motion: the fade stays, the travel goes */
+@media (prefers-reduced-motion: reduce) {
+  .enter {
+    @starting-style {
+      scale: 1;
+      translate: none;
+    }
+  }
+}

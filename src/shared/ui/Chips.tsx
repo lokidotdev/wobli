@@ -36,7 +36,7 @@ export function Chips<T extends string>({ label, value, options, onChange, size 
       {options.map((o) => {
         const checked = o.value === value
         return (
-          <label key={o.value} className="shrink-0 cursor-pointer select-none p-px">
+          <label key={o.value} className="group shrink-0 cursor-pointer select-none p-px">
             <input type="radio" name={name} value={o.value} checked={checked} onChange={() => onChange(o.value)} className="peer sr-only" />
             <Pill option={o} checked={checked} size={size} variant={variant} />
           </label>
@@ -50,7 +50,7 @@ function Pill<T extends string>({ option: o, checked, size, variant }: { option:
   return (
     <span
       className={cn(
-        'flex items-center gap-1.5 rounded-full whitespace-nowrap transition-[background-color,color,box-shadow] duration-150 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent',
+        'flex items-center gap-1.5 rounded-full whitespace-nowrap transition-[background-color,color,box-shadow,scale] duration-150 ease-out group-active:scale-[0.96] motion-reduce:group-active:scale-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent',
         size === 'sm' ? 'h-7 px-2.5 text-[13px]' : 'h-8 px-3 text-[14px]',
         'font-medium',
         checked

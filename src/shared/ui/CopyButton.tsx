@@ -24,22 +24,24 @@ export function CopyButton({ text, variant = 'text', label = 'Copy', copiedLabel
     flash()
   }
   const Glyph = copied ? Check : Icon
+  // the check pops in where the copy icon was; keyed, so it mounts fresh (and enters) each time
+  const glyph = (size: string) => <Glyph key={String(copied)} className={cn(size, copied && 'enter [--enter-dur:150ms] [--enter-scale:0.6]')} />
   if (variant === 'icon')
     return (
       <IconButton label={label} size="sm" tone="quiet" onClick={copy} className={className}>
-        <Glyph className="size-3.5" />
+        {glyph('size-3.5')}
       </IconButton>
     )
   if (variant === 'block')
     return (
       <Button variant="secondary" onClick={copy} className={className}>
-        <Glyph className="size-4" />
+        {glyph('size-4')}
         {copied ? copiedLabel : label}
       </Button>
     )
   return (
     <Button variant="plain" size="sm" onClick={copy} className={cn('text-[12px]! uppercase', className)}>
-      <Glyph className="size-3.5" />
+      {glyph('size-3.5')}
       {copied ? copiedLabel : label}
     </Button>
   )

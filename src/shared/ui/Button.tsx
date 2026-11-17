@@ -8,8 +8,9 @@ type Size = 'sm' | 'md' | 'lg'
 
 // Geist Button (DESIGN.md §7): 6px radius, Button 14 type, 32 / 40 / 48 tall. Disabled is gray, not faded colour.
 const BASE =
-  'inline-flex select-none items-center justify-center gap-1.5 whitespace-nowrap [font-weight:var(--control-weight,500)] [letter-spacing:var(--control-tracking,normal)] transition-[background-color,box-shadow,color,opacity] duration-150 ease-out disabled:pointer-events-none'
-const BOX = 'rounded-(--radius-control) disabled:text-label-3'
+  'inline-flex select-none items-center justify-center gap-1.5 whitespace-nowrap [font-weight:var(--control-weight,500)] [letter-spacing:var(--control-tracking,normal)] transition-[background-color,box-shadow,color,opacity,scale] duration-150 ease-out disabled:pointer-events-none'
+// pressed, a boxed button gives a little (ease-out is the strong --ease-out token); a plain text button doesn't
+const BOX = 'rounded-(--radius-control) disabled:text-label-3 active:scale-[0.97] motion-reduce:active:scale-100'
 // filled buttons go gray when disabled; a tertiary one just dims its text
 const SOLID_DISABLED = 'disabled:bg-fill disabled:shadow-[var(--shadow-border)]'
 const variants: Record<Variant, string> = {
