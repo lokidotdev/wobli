@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { featuredQuery } from '~/features/illustrations'
-import { LandingPage } from '~/features/landing'
+import { LandingPage, landingQueries } from '~/features/landing'
 import { buildMeta, websiteJsonLd } from '~/features/seo'
 import { pageSeo } from '~/features/settings'
 import { site } from '~/shared/config/site'
@@ -9,8 +8,7 @@ export const Route = createFileRoute('/')({
   loader: async ({ context: { queryClient } }) => {
     const [seo] = await Promise.all([
       pageSeo(queryClient, 'home', { title: `Animated Isometric Illustrations for React & Next.js · ${site.name}`, description: site.description }),
-      queryClient.ensureQueryData(featuredQuery()),
-      queryClient.ensureQueryData(featuredQuery(8)),
+      ...landingQueries().map((q) => queryClient.ensureQueryData(q)),
     ])
     return { seo }
   },

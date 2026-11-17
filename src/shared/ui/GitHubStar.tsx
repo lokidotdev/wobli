@@ -30,7 +30,7 @@ export function GitHubMark() {
 export function GitHubStar({ size = 'sm', className, label = 'Star on GitHub', compact }: Props) {
   const stars = useQuery({ ...starsQuery, enabled: isBrowser }).data ?? null
   return (
-    <a href={`https://github.com/${site.repo}`} target="_blank" rel="noreferrer" className={buttonClass('primary', size, className)}>
+    <a href={site.repoUrl} target="_blank" rel="noreferrer" className={buttonClass('primary', size, className)}>
       <GitHubMark />
       <span className={compact ? "max-sm:sr-only" : undefined}>{label}</span>
       {stars !== null && (

@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { site } from '~/shared/config/site'
+import { PAGES, site, xUrl } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
 import { GitHubMark, GitHubStar } from './GitHubStar'
 import { Logo, useLogoShuffle } from './Logo'
@@ -11,6 +11,7 @@ import { BAND, FILLED, GHOST, SM, STAR_FILLED } from './slush'
 // pages built from full-bleed colour bands. Everything inside `.slush` is light, outlined in black and pill-shaped: the
 // class re-points the shared tokens (app.css), so shared controls dropped into these pages take the look on their own.
 
+const sticker = (colour: string) => `var(--color-slush-${colour})`
 
 // The nav name's letters, while the logo shuffles: each pops up as a sticker in turn (.nav-letter, app.css)
 const NAME_COLOURS = ['var(--color-slush-sunburst)', 'var(--color-slush-blue)', 'var(--color-slush-mint)', 'var(--color-slush-ember)', 'var(--color-slush-lavender)']
@@ -35,15 +36,11 @@ function Nav() {
           </span>
         </Link>
         <nav aria-label="Main" className="flex items-center gap-1 max-sm:hidden">
-          <Link to="/illustrations" className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': 'var(--color-slush-sunburst)', '--r': '-4deg' } as CSSProperties}>
-            Illustrations
-          </Link>
-          <Link to="/docs" className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': 'var(--color-slush-mint)', '--r': '3deg' } as CSSProperties}>
-            Docs
-          </Link>
-          <Link to="/how-its-made" className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': 'var(--color-slush-lavender)', '--r': '-3deg' } as CSSProperties}>
-            How It&rsquo;s Made
-          </Link>
+          {PAGES.map((p) => (
+            <Link key={p.to} to={p.to} className={cn(GHOST, SM, 'slush-pill')} style={{ '--c': sticker(p.colour), '--r': `${p.tilt}deg` } as CSSProperties}>
+              {p.label}
+            </Link>
+          ))}
         </nav>
         <GitHubStar compact size="md" label="Star" className={cn(STAR_FILLED, 'slush-pill text-[13px]! [--c:var(--color-slush-blue)] [--r:-3deg] hover:text-black! focus-visible:text-black! max-sm:hidden')} />
         <PhoneMenu />
@@ -53,11 +50,6 @@ function Nav() {
 }
 
 // A phone has no room for the pill row, so every link moves into one menu: at most four rows, big enough to hit with a thumb.
-const MENU = [
-  { to: '/illustrations', label: 'Illustrations', fill: 'bg-slush-sunburst', tilt: '-1.5deg' },
-  { to: '/docs', label: 'Docs', fill: 'bg-slush-mint', tilt: '1.5deg' },
-  { to: '/how-its-made', label: 'How It\u2019s Made', fill: 'bg-slush-lavender', tilt: '-1deg' },
-] as const
 const ROW = 'menu-row flex h-16 items-center justify-between rounded-[22px] border border-black px-5 text-[26px] slush-display'
 
 /**
@@ -104,20 +96,21 @@ function PhoneMenu() {
       </button>
       <div id={id} data-open={open} inert={!open} className={cn('menu-panel absolute inset-x-4 top-[64px] flex flex-col gap-2 rounded-[30px] border border-black bg-white p-2')}>
         <nav aria-label="Main" className="contents">
-          {MENU.map((m, i) => (
+          {PAGES.map((p, i) => (
             <Link
-              key={m.to}
-              to={m.to}
+              key={p.to}
+              to={p.to}
               onClick={() => setOpen(false)}
-              className={cn(ROW, m.fill)}
-              style={{ '--i': i, '--r': m.tilt } as CSSProperties}
+              className={ROW}
+              // a row tips up less than its pill does: it is much wider
+              style={{ background: sticker(p.colour), '--i': i, '--r': `${p.tilt * 0.4}deg` } as CSSProperties}
               activeProps={{ 'aria-current': 'page' }}
             >
-              {m.label}
+              {p.label}
               <Arrow />
             </Link>
           ))}
-          <a href={`https://github.com/${site.repo}`} target="_blank" rel="noreferrer" aria-label="Star on GitHub" className={cn(ROW, 'bg-black text-white')} style={{ '--i': MENU.length, '--r': '1deg' } as CSSProperties}>
+          <a href={site.repoUrl} target="_blank" rel="noreferrer" aria-label="Star on GitHub" className={cn(ROW, 'bg-black text-white')} style={{ '--i': PAGES.length, '--r': '1deg' } as CSSProperties}>
             <span className="flex items-center gap-3">
               <span className="[&_svg]:size-6">
                 <GitHubMark />
@@ -141,10 +134,6 @@ function Arrow({ dark }: { dark?: boolean }) {
   )
 }
 
-const creator = [
-  { href: 'https://designeng.tools', label: 'designeng.tools' },
-  { href: 'https://oxyn.space', label: 'oxyn.space' },
-]
 const FOOT_LINK = 'w-fit text-[15px] font-medium text-white/70 transition-colors duration-150 hover:text-white'
 
 function FootNav({ label, title, children }: { label: string; title: string; children: ReactNode }) {
@@ -164,31 +153,27 @@ function Foot() {
           <p className="max-w-md text-[24px] leading-[1.2] font-medium tracking-[-0.01em]">{site.description}</p>
           <div className="grid grid-cols-2 gap-x-12 gap-y-8 sm:grid-cols-3">
             <FootNav label="Footer" title="Product">
-              <Link to="/illustrations" className={FOOT_LINK}>
-                Illustrations
-              </Link>
-              <Link to="/docs" className={FOOT_LINK}>
-                Docs
-              </Link>
-              <Link to="/how-its-made" className={FOOT_LINK}>
-                How It&rsquo;s Made
-              </Link>
+              {PAGES.map((p) => (
+                <Link key={p.to} to={p.to} className={FOOT_LINK}>
+                  {p.label}
+                </Link>
+              ))}
               <Link to="/docs" hash="licence" className={FOOT_LINK}>
                 Licence
               </Link>
             </FootNav>
             <FootNav label="More from the creator" title="More from the Creator">
-              {creator.map((l) => (
+              {site.creator.map((l) => (
                 <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className={FOOT_LINK}>
                   {l.label}
                 </a>
               ))}
             </FootNav>
             <FootNav label="Social" title="Follow">
-              <a href="https://x.com/lokidotdev" target="_blank" rel="noreferrer" className={FOOT_LINK}>
-                X (@lokidotdev)
+              <a href={xUrl} target="_blank" rel="noreferrer" className={FOOT_LINK}>
+                X ({site.twitter})
               </a>
-              <a href={`https://github.com/${site.repo}`} target="_blank" rel="noreferrer" className={FOOT_LINK}>
+              <a href={site.repoUrl} target="_blank" rel="noreferrer" className={FOOT_LINK}>
                 GitHub
               </a>
             </FootNav>

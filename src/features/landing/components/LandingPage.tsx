@@ -12,6 +12,7 @@ import { GitHubStar } from '~/shared/ui/GitHubStar'
 import { LetterSticker } from '~/shared/ui/LetterSticker'
 import { BAND, FILLED, GHOST, LG, SM, STAR_GHOST } from '~/shared/ui/slush'
 import { useLandingMotion } from '../hooks/useLandingMotion'
+import { GRID } from '../lib/queries'
 import letterD from '../lib/letter-d'
 import letterI from '../lib/letter-i'
 
@@ -19,7 +20,6 @@ import letterI from '../lib/letter-i'
 // outlines, pills everywhere, no shadows and no gradients. The stickers are the site's own live illustrations, pinned around
 // the type like cut-outs. Everything else on the site stays Geist (DESIGN.md).
 
-const GRID = ['folder-hover', 'ai-agent-tasks', 'calendar-booking', 'camera-capture', 'e-signature', 'headphones', 'invoice-paid', 'no-results']
 const rank = (slug: string) => (GRID.indexOf(slug) + GRID.length + 1) % (GRID.length + 1)
 
 type PinProps = { illustration: Illustration; look: Style; index: number; motion: string; className?: string; tilt?: string }
