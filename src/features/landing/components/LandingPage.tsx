@@ -101,10 +101,11 @@ function Ribbon({ d, motion, className, viewBox = '0 0 1440 600' }: { d: string 
 // under the last line of type, then a loop up the right edge and out.
 const HERO_RIBBON =
   'M-60 90 C 60 40 190 90 170 220 C 155 320 40 330 60 240 C 80 160 190 300 150 430 C 130 500 200 550 340 555 C 600 565 900 530 1100 550 C 1230 562 1330 520 1340 420 C 1350 320 1240 300 1235 380 C 1230 450 1340 430 1370 300 C 1395 190 1300 120 1500 60'
-// A phone's headline fills the width, so its ribbon cannot go round the sides: it curls under the first sticker, runs down the
-// very edge of the screen, sweeps under the tags and curls out past the last one. Drawn for a tall, narrow box (400 × 500).
+// A phone's headline fills the width, so its ribbon cannot go round the sides: it sweeps in under the first sticker, runs down
+// the very edge of the screen, swings under the tags, makes one loop and leaves. Drawn for a tall, narrow box (400 × 500) as a
+// centripetal Catmull-Rom spline through a few points, so every curve hands its direction to the next: no corners, no kinks.
 const HERO_RIBBON_PHONE =
-  'M-40 30 C 40 0 110 60 80 100 C 55 135 0 110 0 160 L 0 330 C 0 400 60 440 170 445 C 270 450 340 440 355 405 C 368 375 335 360 322 385 C 305 420 360 450 440 420'
+  'M-60 30 C-30 53 20 71 30 100 C40 128 12 165 6 200 C-0 238 -9 282 -4 320 C1 358 11 402 36 428 C63 456 118 471 160 478 C200 485 247 482 280 474 C304 468 323 459 340 446 C357 433 381 413 382 398 C383 385 367 366 356 362 C344 358 320 367 312 378 C304 389 305 416 312 430 C319 444 336 457 352 462 C371 468 399 464 420 456 C442 448 460 427 480 412'
 const TAKE_RIBBON = 'M-60 420 C 160 560 330 330 250 190 C 190 80 50 150 120 270 C 220 440 560 60 800 90 C 1040 120 1060 500 1230 510 C 1390 520 1420 300 1300 280 C 1190 262 1190 420 1320 430 C 1400 436 1460 400 1500 360'
 
 const Spark = ({ className }: { className?: string }) => (
