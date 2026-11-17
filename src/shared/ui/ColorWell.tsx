@@ -1,15 +1,15 @@
 import { cn } from '~/shared/lib/cn'
 
-type Props = { label: string; value: string; onChange: (hex: string) => void; size?: 'md' | 'lg'; className?: string; showLabel?: boolean }
+type Props = { label: string; value: string; onChange: (hex: string) => void; className?: string; showLabel?: boolean }
 
 // A round swatch over the system colour picker. The picker owns keyboard and AT; the ring shows focus.
-export function ColorWell({ label, value, onChange, size = 'md', className, showLabel = true }: Props) {
+export function ColorWell({ label, value, onChange, className, showLabel = true }: Props) {
   return (
     <label className={cn('group flex cursor-pointer flex-col items-center gap-1.5', className)}>
       <span
         className={cn(
           'swatch-edge relative block rounded-full outline-offset-2 transition-[outline-color] duration-150 group-has-focus-visible:outline-2 group-has-focus-visible:outline-accent',
-          size === 'md' ? 'size-9' : 'size-11',
+          'size-9',
         )}
         style={{ background: value }}
       >

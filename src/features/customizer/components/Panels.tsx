@@ -2,7 +2,7 @@ import { usedSlots } from 'wobli'
 import type { Icon } from 'wobli'
 import { ColorWell } from '~/shared/ui/ColorWell'
 import { Button } from '~/shared/ui/Button'
-import { Field, Group, Row } from '~/shared/ui/Group'
+import { Field, Group } from '~/shared/ui/Group'
 import { Segmented } from '~/shared/ui/Segmented'
 import { Slider } from '~/shared/ui/Slider'
 import { DEPTH_RANGE, LINE_RANGE, PAPER_COLOR, PresetStrip, SLOT_LABEL, formatMultiplier, paletteOf } from '~/features/style'
@@ -25,12 +25,12 @@ export function ColorPanel({ style, update, icon }: PanelProps & { icon: Icon })
   return (
     <>
       <Group title="Palette">
-        <Row>
+        <div>
           <PresetStrip value={style.preset} onChange={(preset) => update({ preset, colors: {} })} showLabels />
-        </Row>
+        </div>
       </Group>
       <Group title="Quick Recolour" footer={mode === 'brand' ? 'Primary fills bodies and tints, secondary the dark parts, coins and checks.' : mode === 'mono' ? 'One hue at six lightnesses; the outlines keep parts apart.' : undefined}>
-        <Row className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           <Segmented<Recolor['mode']>
             label="Quick recolour"
             value={mode}
@@ -52,7 +52,7 @@ export function ColorPanel({ style, update, icon }: PanelProps & { icon: Icon })
             </div>
           )}
           {style.recolor.mode === 'mono' && <ColorWell label="Colour" value={style.recolor.c} onChange={(c) => update({ recolor: { mode: 'mono', c }, colors: {} })} className="items-start" />}
-        </Row>
+        </div>
       </Group>
       <Group
         title="Colours"
@@ -65,11 +65,11 @@ export function ColorPanel({ style, update, icon }: PanelProps & { icon: Icon })
         }
         footer="Only the colours this illustration uses."
       >
-        <Row className="grid grid-cols-[repeat(auto-fill,minmax(58px,1fr))] gap-y-3">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(58px,1fr))] gap-y-3">
           {slots.map((slot) => (
             <ColorWell key={slot} label={SLOT_LABEL[slot]} value={palette[slot]} onChange={(v) => update({ colors: { ...style.colors, [slot]: v } })} />
           ))}
-        </Row>
+        </div>
       </Group>
     </>
   )
@@ -79,15 +79,15 @@ export function StrokePanel({ style, update }: PanelProps) {
   return (
     <>
       <Group title="Stroke">
-        <Row className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <ColorWell label="Stroke colour" value={style.ink} onChange={(ink) => update({ ink })} showLabel={false} />
           <Slider label="Width" value={style.line} {...LINE_RANGE} onChange={(line) => update({ line })} format={(v) => (v === 0 ? 'None' : formatMultiplier(v))} className="flex-1" />
-        </Row>
+        </div>
       </Group>
       <Group title="Depth" footer="0 is flat: no sides, no creases.">
-        <Row>
+        <div>
           <Slider label="Extrusion" value={style.depth} {...DEPTH_RANGE} onChange={(depth) => update({ depth })} format={(v) => (v === 0 ? 'Flat' : formatMultiplier(v))} />
-        </Row>
+        </div>
       </Group>
     </>
   )
@@ -97,7 +97,7 @@ export function BackgroundPanel({ style, update }: PanelProps) {
   const kind = style.bg === 'none' ? 'none' : style.bg === 'paper' ? 'paper' : 'custom'
   return (
     <Group title="Background" footer="Preview and export only; the illustration itself stays transparent.">
-      <Row className="flex items-center gap-4">
+      <div className="flex items-center gap-4">
         <Segmented
           label="Background"
           value={kind}
@@ -110,7 +110,7 @@ export function BackgroundPanel({ style, update }: PanelProps) {
           className="flex-1"
         />
         {kind === 'custom' && <ColorWell label="Background colour" value={style.bg === 'paper' ? PAPER_COLOR : (style.bg as string)} onChange={(c) => update({ bg: c as `#${string}` })} showLabel={false} />}
-      </Row>
+      </div>
     </Group>
   )
 }
@@ -119,7 +119,7 @@ const SPEEDS = ['0.25', '0.5', '1', '1.5', '2'] as const
 export function MotionPanel({ style, update }: PanelProps) {
   return (
     <Group title="Motion" footer="Reduced motion opens on the still frame; press play to watch it anyway.">
-      <Row className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         <Field label="Speed">
           <Segmented
             label="Speed"
@@ -143,7 +143,7 @@ export function MotionPanel({ style, update }: PanelProps) {
             size="sm"
           />
         </Field>
-      </Row>
+      </div>
     </Group>
   )
 }

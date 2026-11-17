@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { site } from '~/shared/config/site'
 import { buttonClass } from './button-class'
 
-type Props = { variant?: 'primary' | 'secondary'; size?: 'sm' | 'md' | 'lg'; className?: string; label?: string; compact?: boolean }
+type Props = { size?: 'sm' | 'md' | 'lg'; className?: string; label?: string; compact?: boolean }
 
 const fmt = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
 // One request per page load, shared by every button through the query cache; browser only (GitHub rate-limits by IP, and a
@@ -27,10 +27,10 @@ export function GitHubMark() {
   )
 }
 
-export function GitHubStar({ variant = 'primary', size = 'sm', className, label = 'Star on GitHub', compact }: Props) {
+export function GitHubStar({ size = 'sm', className, label = 'Star on GitHub', compact }: Props) {
   const stars = useQuery({ ...starsQuery, enabled: isBrowser }).data ?? null
   return (
-    <a href={`https://github.com/${site.repo}`} target="_blank" rel="noreferrer" className={buttonClass(variant, size, className)}>
+    <a href={`https://github.com/${site.repo}`} target="_blank" rel="noreferrer" className={buttonClass('primary', size, className)}>
       <GitHubMark />
       <span className={compact ? "max-sm:sr-only" : undefined}>{label}</span>
       {stars !== null && (

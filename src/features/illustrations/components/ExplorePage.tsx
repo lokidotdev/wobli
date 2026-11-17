@@ -157,7 +157,6 @@ function FilterGroups({ filters, onFiltersChange }: { filters: ListFilters; onFi
       <DrawerGroup title="Sort">
         <Chips<Sort>
           label="Sort"
-          wrap
           value={filters.sort ?? 'featured'}
           options={[
             { value: 'featured', label: 'Featured' },
@@ -169,7 +168,6 @@ function FilterGroups({ filters, onFiltersChange }: { filters: ListFilters; onFi
       <DrawerGroup title="Category">
         <Chips<string>
           label="Category"
-          wrap
           value={chosenCategory}
           options={[{ value: '', label: 'All', count: allCount }, ...facets.categories.map((c) => ({ value: c.slug, label: c.name, count: c.count }))]}
           onChange={(v) => onFiltersChange({ ...filters, category: v || undefined })}
@@ -179,7 +177,6 @@ function FilterGroups({ filters, onFiltersChange }: { filters: ListFilters; onFi
         <DrawerGroup title="Tags">
           <Chips<string>
             label="Tag"
-            wrap
             size="sm"
             variant="quiet"
             value={chosenTag}

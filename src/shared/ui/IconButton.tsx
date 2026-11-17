@@ -3,20 +3,19 @@ import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '~/shared/lib/cn'
 
 type Size = 'sm' | 'md' | 'lg'
-type Tone = 'accent' | 'quiet' | 'filled' | 'solid'
+type Tone = 'quiet' | 'filled' | 'solid'
 
 const sizes: Record<Size, string> = { sm: 'size-8', md: 'size-10', lg: 'size-12' }
 const tones: Record<Tone, string> = {
-  accent: 'text-label hover:bg-gray-alpha-100 active:bg-gray-alpha-200',
   quiet: 'text-label-2 hover:bg-gray-alpha-100 hover:text-label active:bg-gray-alpha-200',
   filled: 'bg-bg text-label shadow-[var(--shadow-border-small)] hover:bg-fill',
   solid: 'bg-contrast text-on-contrast hover:bg-contrast/80',
 }
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & { label: string; size?: Size; tone?: Tone }
+type Props = ButtonHTMLAttributes<HTMLButtonElement> & { label: string; size?: Size; tone: Tone }
 
 /** A square Geist icon-only button (6px radius). `label` is its accessible name and its tooltip: name the action and target. */
-export const IconButton = forwardRef<HTMLButtonElement, Props>(({ label, size = 'md', tone = 'accent', className, type = 'button', ...props }, ref) => (
+export const IconButton = forwardRef<HTMLButtonElement, Props>(({ label, size = 'md', tone, className, type = 'button', ...props }, ref) => (
   <button
     ref={ref}
     type={type}

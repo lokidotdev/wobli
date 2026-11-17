@@ -1,6 +1,6 @@
 import { cn } from '~/shared/lib/cn'
 
-export type Variant = 'primary' | 'secondary' | 'tertiary' | 'plain' | 'error'
+export type Variant = 'primary' | 'secondary' | 'tertiary' | 'plain'
 export type Size = 'sm' | 'md' | 'lg'
 
 // Geist Button (DESIGN.md §7): 6px radius, Button 14 type, 32 / 40 / 48 tall. Disabled is gray, not faded colour.
@@ -15,7 +15,6 @@ const variants: Record<Variant, string> = {
   secondary: cn(BOX, SOLID_DISABLED, 'bg-bg text-label shadow-[var(--shadow-border-small)] hover:bg-fill'),
   // no chrome until hovered: toolbar actions like Reset Style
   tertiary: cn(BOX, 'text-label hover:bg-gray-alpha-100 active:bg-gray-alpha-200'),
-  error: cn(BOX, SOLID_DISABLED, 'bg-red-700 text-white hover:bg-red-900'),
   // an inline text link-button: Clear Filters, Copy
   plain: 'rounded-sm text-label-2 underline-offset-4 hover:text-label hover:underline disabled:opacity-50',
 }
@@ -24,7 +23,6 @@ const sizes: Record<Variant, Record<Size, string>> = {
   primary: box,
   secondary: box,
   tertiary: box,
-  error: box,
   plain: { sm: 'gap-1 text-[13px]', md: 'text-[14px]', lg: 'text-[16px]' },
 }
 

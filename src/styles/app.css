@@ -25,24 +25,12 @@
   font-display: swap;
 }
 
-/* wobli follows Geist, Vercel's design system: DESIGN.md is the contract. Light values here, dark below. */
-@custom-variant dark {
-  &:where([data-theme="dark"], [data-theme="dark"] *) {
-    @slot;
-  }
-  @media (prefers-color-scheme: dark) {
-    &:where(:root:not([data-theme="light"]) *) {
-      @slot;
-    }
-  }
-}
-
+/* wobli follows Geist, Vercel's design system, re-pointed by .slush for the sticker-book pages: DESIGN.md is the contract. */
 @theme {
   --font-sans: "Geist", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-sans);
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
 
-  /* the landing page's sticker-book palette. Used by the landing page only. */
+  /* the sticker-book palette (DESIGN.md): every page but the embed */
   --font-slush: "Cove", "Geist", ui-sans-serif, system-ui, sans-serif;
   --color-slush-sky: #dceeff;
   --color-slush-concrete: #cccccc;
@@ -77,14 +65,10 @@
   --color-gray-alpha-200: #00000014;
   --color-gray-alpha-400: #00000014;
   --color-gray-alpha-500: #00000024;
-  --color-blue-100: hsl(212 100% 97%);
-  --color-blue-200: hsl(210 100% 96%);
   --color-blue-700: hsl(212 100% 48%);
   --color-blue-900: hsl(211 100% 42%);
   --color-red-700: hsl(358 75% 59%);
   --color-red-900: hsl(358 66% 48%);
-  --color-green-700: hsl(131 41% 46%);
-  --color-amber-700: hsl(39 100% 57%);
 
   /* wobli semantic names, each one a Geist step (DESIGN.md §2, "How wobli names them") */
   --color-bg: var(--color-background-100);
@@ -96,38 +80,24 @@
   --color-label-3: var(--color-gray-700);
   --color-separator: var(--color-gray-alpha-400);
   --color-border-hover: var(--color-gray-500);
-  --color-border-active: var(--color-gray-600);
   --color-fill: var(--color-gray-100);
-  --color-fill-2: var(--color-gray-200);
-  --color-fill-3: var(--color-gray-300);
   --color-accent: var(--color-blue-700);
-  --color-accent-press: var(--color-blue-900);
-  --color-on-accent: #ffffff;
   --color-contrast: var(--color-gray-1000);
   --color-on-contrast: var(--color-background-100);
-  --color-material: color-mix(in srgb, var(--color-background-100) 80%, transparent);
-  --color-scrim: rgb(0 0 0 / 0.4);
 
   /* radius: 6 controls · 12 cards, menus, bars · 16 fullscreen (DESIGN.md §4) */
   --radius-control: 6px;
   --radius-card: 6px; /* code blocks, small tiles */
   --radius-float: 12px; /* popovers and floating bars */
-  --radius-tile: 12px; /* illustration cards and panels */
-  --radius-panel: 16px;
 
   /* materials, as box-shadows so the 1px border never moves layout */
   --shadow-border: 0 0 0 1px var(--color-gray-alpha-400);
   /* the same hairline drawn inside the box: use it for anything that can sit inside a scroll container, which clips outer shadows */
   --shadow-border-inset: inset 0 0 0 1px var(--color-gray-alpha-400);
   --shadow-border-small: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 2px #0000000a;
-  --shadow-border-medium: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #0000000a, 0 8px 8px -8px #0000000a;
-  --shadow-border-large: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #0000000a, 0 8px 16px -4px #0000000a;
   --shadow-menu: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 1px #00000005, 0 4px 8px -4px #0000000a, 0 16px 24px -8px #0000000f;
-  --shadow-modal: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 1px #00000005, 0 8px 16px -4px #0000000a, 0 24px 32px -8px #0000000f;
   --shadow-focus: 0 0 0 2px var(--color-background-100), 0 0 0 4px var(--color-blue-700);
 
-  --ease-out-soft: cubic-bezier(0.175, 0.885, 0.32, 1.1);
-  --ease-in-soft: ease;
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1);
   /* strong ease-out with no overshoot: for things settling back to rest */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -135,64 +105,8 @@
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* theme: follows the system unless the user picks one (html[data-theme], set before paint in __root) */
-:root { color-scheme: light dark; }
-:root[data-theme="light"] { color-scheme: light; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --color-background-100: #0a0a0a;
-    --color-background-200: #000000;
-    --color-gray-100: #1a1a1a;
-    --color-gray-200: #1f1f1f;
-    --color-gray-300: #292929;
-    --color-gray-400: #2e2e2e;
-    --color-gray-500: #454545;
-    --color-gray-600: #878787;
-    --color-gray-700: #8f8f8f;
-    --color-gray-800: #7d7d7d;
-    --color-gray-900: #a1a1a1;
-    --color-gray-1000: #ededed;
-    --color-gray-alpha-100: #ffffff0f;
-    --color-gray-alpha-200: #ffffff17;
-    --color-gray-alpha-400: #ffffff24;
-    --color-gray-alpha-500: #ffffff3d;
-    --color-blue-100: hsl(216 50% 12%);
-    --color-blue-200: hsl(214 59% 15%);
-    --color-blue-900: hsl(210 100% 66%);
-    --color-red-900: hsl(358 100% 69%);
-    --color-scrim: rgb(0 0 0 / 0.6);
-    /* dark shadows read weakly: the border carries the separation */
-    --shadow-border-small: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 2px #00000029;
-    --shadow-border-medium: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #00000052, 0 8px 8px -8px #00000029;
-  }
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --color-background-100: #0a0a0a;
-  --color-background-200: #000000;
-  --color-gray-100: #1a1a1a;
-  --color-gray-200: #1f1f1f;
-  --color-gray-300: #292929;
-  --color-gray-400: #2e2e2e;
-  --color-gray-500: #454545;
-  --color-gray-600: #878787;
-  --color-gray-700: #8f8f8f;
-  --color-gray-800: #7d7d7d;
-  --color-gray-900: #a1a1a1;
-  --color-gray-1000: #ededed;
-  --color-gray-alpha-100: #ffffff0f;
-  --color-gray-alpha-200: #ffffff17;
-  --color-gray-alpha-400: #ffffff24;
-  --color-gray-alpha-500: #ffffff3d;
-  --color-blue-100: hsl(216 50% 12%);
-  --color-blue-200: hsl(214 59% 15%);
-  --color-blue-900: hsl(210 100% 66%);
-  --color-red-900: hsl(358 100% 69%);
-  --color-scrim: rgb(0 0 0 / 0.6);
-  /* dark shadows read weakly: the border carries the separation */
-  --shadow-border-small: 0 0 0 1px var(--color-gray-alpha-400), 0 1px 2px #00000029;
-  --shadow-border-medium: 0 0 0 1px var(--color-gray-alpha-400), 0 2px 2px #00000052, 0 8px 8px -8px #00000029;
+:root {
+  color-scheme: light;
 }
 
 @layer base {
@@ -217,14 +131,6 @@
   }
 }
 
-/* Geist type presets (DESIGN.md §3). Only headings track negative. */
-@utility type-display {
-  /* Heading 72 on desktop, Heading 48 on phones */
-  font-size: clamp(3rem, 6vw, 4.5rem);
-  line-height: 1;
-  letter-spacing: -0.06em;
-  font-weight: var(--font-weight-semibold);
-}
 @utility type-title {
   /* Heading 48, Heading 32 on phones */
   font-size: clamp(2rem, 4vw, 3rem);
@@ -232,65 +138,11 @@
   letter-spacing: -0.06em;
   font-weight: var(--font-weight-semibold);
 }
-@utility type-section {
-  /* Heading 32 */
-  font-size: 2rem;
-  line-height: 2.5rem;
-  letter-spacing: -0.04em;
-  font-weight: var(--font-weight-semibold);
-}
-@utility type-headline {
-  /* Heading 20 */
-  font-size: 1.25rem;
-  line-height: 1.625rem;
-  letter-spacing: -0.02em;
-  font-weight: var(--font-weight-semibold);
-}
-@utility type-caption {
-  /* Label 12 */
-  font-size: 0.75rem;
-  line-height: 1rem;
-  font-weight: var(--font-weight-normal);
-}
-@utility type-eyebrow {
-  /* Label 12, caps */
-  font-size: 0.75rem;
-  line-height: 1rem;
-  letter-spacing: 0.02em;
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  color: var(--color-label-2);
-}
-@utility type-lead {
-  /* Copy 18, Copy 20 from md up */
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  font-weight: var(--font-weight-normal);
-  color: var(--color-label-2);
-  @media (width >= 48rem) {
-    font-size: 1.25rem;
-    line-height: 2rem;
-  }
-}
-
-/* Material medium: a resting card on the page (DESIGN.md §4) */
-@utility surface-card {
-  border-radius: var(--radius-float);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-border);
-}
-
 /* the hairline that keeps a pale colour swatch visible on a pale ground */
 @utility swatch-edge {
   box-shadow: inset 0 0 0 1px var(--color-gray-alpha-400);
 }
 
-/* Translucent chrome for things that float over content: the header and the menu material for the sticky style bar. */
-@utility material {
-  background: var(--color-material);
-  backdrop-filter: saturate(180%) blur(12px);
-  -webkit-backdrop-filter: saturate(180%) blur(12px);
-}
 @utility material-thick {
   background: color-mix(in srgb, var(--color-background-100) 85%, transparent);
   backdrop-filter: saturate(180%) blur(16px);
@@ -308,13 +160,6 @@
     linear-gradient(-45deg, transparent 75%, var(--color-fill) 75%);
   background-size: 20px 20px;
   background-position: 0 0, 0 10px, 10px -10px, -10px 0;
-}
-
-/* a sideways-scrolling row fades out at its trailing edge instead of being cut by a hard line */
-@utility scroll-fade {
-  mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
-  padding-right: 40px;
 }
 
 /* Bottom sheet. The <dialog> is a full-screen host that only waits (display and top-layer membership switch off after the
@@ -480,9 +325,9 @@
   box-shadow: var(--shadow-focus);
 }
 
-/* ── The sticker-book pages (DESIGN.md): landing, illustrations and docs ──────────────────────────────────────────────
-   These pages are always light, whatever the site theme: `.slush` pins every Geist token back to its light value so the
-   shared controls it borrows (palette strip, sliders) read correctly on its pastel bands. */
+/* ── The sticker-book shell (DESIGN.md): every page but the embed ─────────────────────────────────────────────────────
+   `.slush` re-points the Geist tokens so the shared controls it borrows (palette strip, sliders) read correctly on its
+   pastel bands. */
 .slush {
   color-scheme: light;
   color: #000;
@@ -512,10 +357,7 @@
   --color-label-3: #4d4d4d;
   --color-separator: #000000;
   --color-border-hover: var(--color-gray-500);
-  --color-border-active: var(--color-gray-600);
   --color-fill: var(--color-gray-100);
-  --color-fill-2: var(--color-gray-200);
-  --color-fill-3: var(--color-gray-300);
   --color-accent: #000000;
   --color-contrast: #000000;
   --color-on-contrast: #ffffff;
@@ -524,16 +366,11 @@
   --radius-control: 1600px;
   --radius-card: 16px;
   --radius-float: 30px;
-  --radius-tile: 20px;
-  --radius-panel: 30px;
   /* no shadows anywhere: every elevation is the same black hairline */
   --shadow-border: 0 0 0 1px #000000;
   --shadow-border-inset: inset 0 0 0 1px #000000;
   --shadow-border-small: 0 0 0 1px #000000;
-  --shadow-border-medium: 0 0 0 1px #000000;
-  --shadow-border-large: 0 0 0 1px #000000;
   --shadow-menu: 0 0 0 1px #000000;
-  --shadow-modal: 0 0 0 1px #000000;
   /* button and switch labels: 700 with a little air (DESIGN.md) */
   --control-weight: 700;
   --control-tracking: 0.032em;

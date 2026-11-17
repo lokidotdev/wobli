@@ -18,11 +18,7 @@ export function Group({ title, footer, action, children, className }: { title?: 
   )
 }
 
-export function Row({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={className}>{children}</div>
-}
-
-/** A name on the left and its control on the right, inside a Row. */
+/** A name on the left and its control on the right. */
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4">

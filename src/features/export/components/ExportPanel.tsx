@@ -7,7 +7,7 @@ import { illustrationLabel } from '~/features/illustrations'
 import { useFlash } from '~/shared/hooks/useFlash'
 import { Button } from '~/shared/ui/Button'
 import { CopyButton } from '~/shared/ui/CopyButton'
-import { Group, Row } from '~/shared/ui/Group'
+import { Group } from '~/shared/ui/Group'
 import { Check, Copy, Download, Link2 } from '~/shared/ui/icons'
 import { Segmented } from '~/shared/ui/Segmented'
 import { INSTALL, reactSnippet } from '../lib/code'
@@ -50,18 +50,18 @@ export function ExportPanel({ slug, title, icon, style, currentFrame }: Props) {
       <VideoGroup slug={slug} icon={icon} style={style} />
 
       <Group title="React" action={<CopyButton text={code} />}>
-        <Row className="flex h-10 items-center justify-between gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
+        <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
           <code className="truncate font-mono text-[13px]">{INSTALL}</code>
           <CopyButton text={INSTALL} variant="icon" label="Copy install command" />
-        </Row>
+        </div>
         <pre className="scrollbar-slush max-h-48 overflow-auto rounded-[20px] bg-slush-mist px-4 py-3 font-mono text-[12px] leading-5 text-label shadow-[var(--shadow-border-inset)]">{code}</pre>
       </Group>
 
       <Group title="Embed" footer="A hosted player for this exact look, for any site. Transparent unless you set a background." action={<CopyButton text={iframe} label="Copy Iframe" />}>
-        <Row className="flex h-10 items-center gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
+        <div className="flex h-10 items-center gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
           <input readOnly value={embed} aria-label="Embed link" onFocus={(e) => e.currentTarget.select()} className="min-w-0 flex-1 truncate bg-transparent font-mono text-[12px] text-label-2 outline-none" />
           <CopyButton text={embed} variant="icon" label="Copy embed link" icon={Link2} />
-        </Row>
+        </div>
         <pre className="scrollbar-none overflow-x-auto rounded-[20px] bg-slush-mist px-4 py-3 font-mono text-[12px] leading-5 text-label shadow-[var(--shadow-border-inset)]">{iframe}</pre>
       </Group>
 
@@ -87,13 +87,13 @@ function PngGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
   }
   return (
     <Group title="PNG" footer={style.bg === 'none' ? 'Transparent, the frame on screen now.' : 'On your background, the frame on screen now.'}>
-      <Row className="flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <Segmented label="PNG size" value={size} onChange={setSize} options={SIZES.map((s) => ({ value: s, label: `${s}px` }))} className="flex-1" size="sm" />
         <Button size="sm" onClick={save} disabled={busy} aria-label="Save PNG" className="cursor-pointer disabled:cursor-default">
           {done ? <Check className="size-4" /> : <Download className="size-4" />}
           {done ? 'Saved' : 'Save'}
         </Button>
-      </Row>
+      </div>
     </Group>
   )
 }
@@ -119,7 +119,7 @@ function SvgGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
   }
   return (
     <Group title="SVG" footer={error ?? 'Editable vectors of the frame on screen now. Paste straight into Figma.'}>
-      <Row className="flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <Button size="sm" variant="secondary" onClick={copy} aria-label="Copy SVG for Figma" className="flex-1">
           {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           {copied ? 'Copied' : 'Copy for Figma'}
@@ -128,7 +128,7 @@ function SvgGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
           {saved ? <Check className="size-4" /> : <Download className="size-4" />}
           {saved ? 'Saved' : 'Save'}
         </Button>
-      </Row>
+      </div>
     </Group>
   )
 }
@@ -188,7 +188,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
 
   return (
     <Group title="Video" footer={error ?? `${note} ${seconds.toFixed(1)}s, 60 fps, loops seamlessly.`}>
-      <Row className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <Segmented<VideoFormat>
             label="Video format"
@@ -212,7 +212,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
             </span>
           </Button>
         </div>
-      </Row>
+      </div>
     </Group>
   )
 }

@@ -10,28 +10,19 @@ type Props<T extends string> = {
   size?: 'md' | 'sm'
   /** `filled` for the primary choice; `quiet` (gray text) for a secondary row that sits back behind it. */
   variant?: 'filled' | 'quiet'
-  /** Keep the pills on one line that scrolls sideways at every width, with soft fades where it runs off the edge. */
-  scroll?: boolean
-  /** Wrap onto as many lines as it needs at every width, e.g. inside a drawer. */
-  wrap?: boolean
   className?: string
 }
 
-// Geist filter pills: one choice out of many, where a Switch would run out of room. A row of pills that scrolls sideways on a phone
-// and wraps on a wide screen (or always scrolls, with `scroll`). Radios underneath, so arrows move between them.
-export function Chips<T extends string>({ label, value, options, onChange, size = 'md', variant = 'filled', scroll = false, wrap = false, className }: Props<T>) {
+// Geist filter pills: one choice out of many, where a Switch would run out of room. They wrap onto as many lines as they need.
+// Radios underneath, so arrows move between them.
+export function Chips<T extends string>({ label, value, options, onChange, size = 'md', variant = 'filled', className }: Props<T>) {
   const name = useId()
   return (
     <div
       role="radiogroup"
       aria-label={label}
-      className={cn(
-        // relative: the sr-only radios are absolutely placed, and must not escape a scrolled row and widen the page
-        wrap
-          ? 'relative flex flex-wrap gap-1'
-          : cn('scrollbar-none relative -mx-4 flex gap-1 overflow-x-auto pl-4 sm:mx-0 sm:pl-0', scroll ? 'scroll-fade' : 'pr-4 sm:flex-wrap sm:pr-0'),
-        className,
-      )}
+      // relative: the sr-only radios are absolutely placed, and must not escape the group and widen the page
+      className={cn('relative flex flex-wrap gap-1', className)}
     >
       {options.map((o) => {
         const checked = o.value === value

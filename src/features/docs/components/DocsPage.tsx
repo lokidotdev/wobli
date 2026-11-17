@@ -263,7 +263,6 @@ function LangChips({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void
   return (
     <Chips<Lang>
       label="Example language"
-      wrap
       value={lang}
       onChange={onChange}
       options={[
