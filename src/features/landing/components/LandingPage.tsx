@@ -47,11 +47,11 @@ type TagProps = { children: ReactNode; motion: string; className?: string; fill:
 
 /**
  * A fact stuck onto the headline like a price label: a small tilted pill in a sticker colour, overlapping the letters.
- * Placed by `className` inside a Tags list (on a phone, clear of the smaller letters); the scroll motion pops it on (data-tag).
+ * Placed by `className` inside a Tags list from sm up; on a phone the tags line up in a row under the type. The motion pops it on (data-tag).
  */
 function Tag({ children, motion, className, fill, tilt }: TagProps) {
   return (
-    <li data-tag={motion} className={cn('absolute', className)}>
+    <li data-tag={motion} className={cn('sm:absolute', className)}>
       <span className={cn('inline-flex h-7 items-center rounded-full border border-black px-3 text-[10px] whitespace-nowrap slush-label sm:h-10 sm:px-5 sm:text-[13px]', fill, tilt)}>
         {children}
       </span>
@@ -59,10 +59,10 @@ function Tag({ children, motion, className, fill, tilt }: TagProps) {
   )
 }
 
-/** The layer the tags sit in: over the headline, and out of the pointer's way so the letters under them still answer. */
+/** The layer the tags sit in: over the headline from sm up, out of the pointer's way so the letters under them still answer; on a phone, a centred row under it. */
 function Tags({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <ul aria-label={label} className="pointer-events-none absolute inset-0 z-20">
+    <ul aria-label={label} className="pointer-events-none relative z-20 mt-6 flex justify-center gap-3 sm:absolute sm:inset-0 sm:mt-0 sm:block">
       {children}
     </ul>
   )
@@ -74,13 +74,13 @@ function Tags({ label, children }: { label: string; children: ReactNode }) {
  * black one a hairline wider. The shape stretches with the band; the stroke does not. The motion draws both paths along
  * their length (data-ribbon).
  */
-function Ribbon({ d, motion, className }: { d: string | ReadonlyArray<string>; motion: string; className?: string }) {
+function Ribbon({ d, motion, className, viewBox = '0 0 1440 600' }: { d: string | ReadonlyArray<string>; motion: string; className?: string; viewBox?: string }) {
   const lines = typeof d === 'string' ? [d] : d
   return (
     <svg
       data-ribbon={motion}
       aria-hidden
-      viewBox="0 0 1440 600"
+      viewBox={viewBox}
       preserveAspectRatio="none"
       fill="none"
       strokeLinecap="round"
@@ -101,6 +101,10 @@ function Ribbon({ d, motion, className }: { d: string | ReadonlyArray<string>; m
 // under the last line of type, then a loop up the right edge and out.
 const HERO_RIBBON =
   'M-60 90 C 60 40 190 90 170 220 C 155 320 40 330 60 240 C 80 160 190 300 150 430 C 130 500 200 550 340 555 C 600 565 900 530 1100 550 C 1230 562 1330 520 1340 420 C 1350 320 1240 300 1235 380 C 1230 450 1340 430 1370 300 C 1395 190 1300 120 1500 60'
+// A phone's headline fills the width, so its ribbon cannot go round the sides: it curls under the first sticker, runs down the
+// very edge of the screen, sweeps under the tags and curls out past the last one. Drawn for a tall, narrow box (400 × 500).
+const HERO_RIBBON_PHONE =
+  'M-40 30 C 40 0 110 60 80 100 C 55 135 0 110 0 160 L 0 330 C 0 400 60 440 170 445 C 270 450 340 440 355 405 C 368 375 335 360 322 385 C 305 420 360 450 440 420'
 const TAKE_RIBBON = 'M-60 420 C 160 560 330 330 250 190 C 190 80 50 150 120 270 C 220 440 560 60 800 90 C 1040 120 1060 500 1230 510 C 1390 520 1420 300 1300 280 C 1190 262 1190 420 1320 430 C 1400 436 1460 400 1500 360'
 
 const Spark = ({ className }: { className?: string }) => (
@@ -146,8 +150,8 @@ function Tape() {
 const HERO_PINS = [
   ['top-0 left-0 w-[25vw] max-w-[230px] sm:w-[16vw]', '-rotate-12'],
   ['top-0 right-0 w-[24vw] max-w-[220px] sm:w-[15vw]', 'rotate-[10deg]'],
-  // bottom left from sm up; a phone keeps it bottom right, where the left corner belongs to a tag
-  ['bottom-0 w-[26vw] max-w-[240px] max-sm:right-0 sm:bottom-[-5%] sm:left-[3%] sm:w-[17vw]', 'rotate-[8deg]'],
+  // bottom left, from sm up; a phone has room for two stickers, so this one sits it out and the tags take the space
+  ['bottom-[-5%] left-[3%] w-[17vw] max-w-[240px] max-sm:hidden', 'rotate-[8deg]'],
 ] as const
 
 const HEADLINE = [['Style'], ['it', 'live']]
@@ -198,17 +202,18 @@ function Hero({ items, look, palette }: { items: ReadonlyArray<Illustration>; lo
   return (
     <section data-hero className="overflow-x-clip bg-slush-sky pt-[72px]">
       <div className={cn(BAND, 'pt-4 pb-12 sm:pb-16')}>
-        <div className="relative py-[27vw] sm:py-[12vw] lg:py-[9vw] min-[1440px]:py-[130px]">
-          <Ribbon d={HERO_RIBBON} motion="hero" className="text-slush-blue" />
+        <div className="relative pt-[27vw] pb-[9vw] sm:py-[12vw] lg:py-[9vw] min-[1440px]:py-[130px]">
+          <Ribbon d={HERO_RIBBON} motion="hero" className="text-slush-blue max-sm:hidden" />
+          <Ribbon d={HERO_RIBBON_PHONE} viewBox="0 0 400 500" motion="hero" className="text-slush-blue sm:hidden" />
           {/* the headline and the facts stuck on it move as one */}
           <div data-hero-title className="relative">
             <Headline palette={palette} look={look} />
             {/* each tag sits on the ribbon: the left loop, the right loop, and the run under the type */}
             <Tags label="In short">
-              <Tag motion="hero" className="max-sm:right-[3%] max-sm:bottom-[-24%] sm:top-[49%] sm:right-[2%]" fill="bg-slush-mint" tilt="rotate-[7deg]">
+              <Tag motion="hero" className="max-sm:order-2 sm:top-[49%] sm:right-[2%]" fill="bg-slush-mint" tilt="rotate-[5deg] sm:rotate-[7deg]">
                 Free &amp; MIT
               </Tag>
-              <Tag motion="hero" className="max-sm:bottom-[-24%] max-sm:left-[3%] sm:top-[64%] sm:left-[1%]" fill="bg-slush-sunburst" tilt="-rotate-[8deg]">
+              <Tag motion="hero" className="max-sm:order-1 sm:top-[64%] sm:left-[1%]" fill="bg-slush-sunburst" tilt="-rotate-[5deg] sm:-rotate-[8deg]">
                 No account
               </Tag>
               <Tag motion="hero" className="right-[24%] bottom-[-15%] max-sm:hidden" fill="bg-slush-lavender" tilt="-rotate-[4deg]">
