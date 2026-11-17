@@ -1,16 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { featuredQuery } from '~/features/illustrations'
-import { LandingPage } from '~/features/landing'
+import { LandingPage, landingQueries } from '~/features/landing'
 import { buildMeta, websiteJsonLd } from '~/features/seo'
 import { pageSeo } from '~/features/settings'
 import { site } from '~/shared/config/site'
+import alloUrl from 'allo-font/fonts/webfonts/AlloVariable.woff2?url'
 
 export const Route = createFileRoute('/')({
   loader: async ({ context: { queryClient } }) => {
     const [seo] = await Promise.all([
       pageSeo(queryClient, 'home', { title: `Animated Isometric Illustrations for React & Next.js · ${site.name}`, description: site.description }),
-      queryClient.ensureQueryData(featuredQuery()),
-      queryClient.ensureQueryData(featuredQuery(8)),
+      ...landingQueries().map((q) => queryClient.ensureQueryData(q)),
     ])
     return { seo }
   },
@@ -21,8 +20,8 @@ export const Route = createFileRoute('/')({
       path: '/',
       jsonLd: websiteJsonLd(),
     })
-    // the display face is only used here, so only this page preloads it
-    return { ...head, links: [...(head.links ?? []), { rel: 'preload', href: '/fonts/Cove.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' }] }
+    // the headline face, preloaded so the first paint is already in it
+    return { ...head, links: [...(head.links ?? []), { rel: 'preload', href: alloUrl, as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' }] }
   },
   component: LandingPage,
 })

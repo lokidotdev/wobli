@@ -1,9 +1,11 @@
+import { INSTALL, PACKAGE } from '~/shared/config/site'
+
 // Every code sample in the docs, in both languages. The package ships compiled JavaScript with type definitions, so the
 // two differ only where a type is written down.
 export type Lang = 'ts' | 'js'
 export type Example = Record<Lang, string>
 
-export const INSTALLS = ['npm i wobli', 'pnpm add wobli', 'yarn add wobli', 'bun add wobli'] as const
+export const INSTALLS = [INSTALL, `pnpm add ${PACKAGE}`, `yarn add ${PACKAGE}`, `bun add ${PACKAGE}`] as const
 
 export const REACT: Example = {
   ts: `// Checkout.tsx

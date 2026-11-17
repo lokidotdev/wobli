@@ -8,7 +8,8 @@ import { Sticker } from 'wobli/react'
 import { cn } from '~/shared/lib/cn'
 import { Chips } from '~/shared/ui/Chips'
 import { CodeBlock } from '~/shared/ui/CodeBlock'
-import { BAND, FILLED, GHOST, LG, SM } from '~/shared/ui/SlushChrome'
+import { NumberedHeading, P } from '~/shared/ui/Numbered'
+import { BAND, FILLED, GHOST, LG, SM, tint } from '~/shared/ui/slush'
 import { useThread } from '../hooks/useThread'
 import { INSTALLS, LAZY, REACT, TYPES, VANILLA } from '../lib/examples'
 import type { Lang } from '../lib/examples'
@@ -24,8 +25,6 @@ const SECTIONS = [
   ['licence', 'Licence'],
 ] as const
 
-// the sticker palette as a shared set (DESIGN.md): each section's number takes the next colour
-const TINTS = ['bg-slush-sunburst', 'bg-slush-mint', 'bg-slush-lavender', 'bg-slush-blue', 'bg-slush-ember', 'bg-slush-violet text-white'] as const
 const IDS = SECTIONS.map(([id]) => id)
 // the sidebar list: every row is ROW tall and its number sits on the thread, THREAD_X in from the row's edge
 const ROW = 40
@@ -40,7 +39,6 @@ const THREAD =
       return `C${x} ${y + ROW * 0.3} ${x} ${y + ROW * 0.7} ${THREAD_X} ${y + ROW}`
     })
     .join('')
-const CODE = 'rounded-[20px]'
 const CARD = 'overflow-hidden rounded-[20px] border border-black bg-white'
 
 const PROPS = [
@@ -75,7 +73,7 @@ export function DocsPage() {
   return (
     <>
       {/* band one, sky: the page as a poster */}
-      <section className="bg-slush-sky pt-[72px]">
+      <section className="bg-slush-sky pt-(--nav-h)">
         <div className={cn(BAND, 'pt-10 pb-12 sm:pt-14 sm:pb-16')}>
           <div className="flex items-center gap-4 sm:gap-8">
             <h1 className="text-[clamp(4rem,18vw,17.5rem)] slush-display">Docs</h1>
@@ -84,7 +82,7 @@ export function DocsPage() {
               <Sticker icon={ebookReader} enter={0.3} />
             </div>
           </div>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             Every illustration is a plain data object drawn on a canvas by a small runtime with no dependencies. Colours are roles, not hex
             codes, so restyling one is a single object.
           </p>
@@ -118,28 +116,28 @@ export function DocsPage() {
                 <LangChips lang={lang} onChange={setLang} />
               </div>
 
-              <Section n={1} id="install" title="Install">
-                <p>
+              <Section id="install">
+                <P>
                   One package for both. It ships compiled JavaScript (ES modules) with type definitions beside it, so a TypeScript project
                   gets types with no extra install and a JavaScript project needs no build step for it.
-                </p>
-                <CodeBlock code={INSTALLS.join('\n')} className={CODE} />
-                <p>
+                </P>
+                <CodeBlock code={INSTALLS.join('\n')} />
+                <P>
                   Three entry points: <code>wobli</code> is the engine, <code>wobli/react</code> the component, and{' '}
                   <code>wobli/icons/&lt;slug&gt;</code> one illustration each, so an app ships only the ones it imports. React is optional.
-                </p>
+                </P>
               </Section>
 
-              <Section n={2} id="react" title="React">
-                <p>Size the sticker with CSS; the canvas fills its width at 1:1 and renders at device resolution.</p>
-                <CodeBlock code={REACT[lang]} className={CODE} />
-                <p>
+              <Section id="react">
+                <P>Size the sticker with CSS; the canvas fills its width at 1:1 and renders at device resolution.</P>
+                <CodeBlock code={REACT[lang]} />
+                <P>
                   Every sticker on a page shares one animation clock and one <code>requestAnimationFrame</code> loop. Stickers off screen skip
                   their paints, and a still hold costs nothing. Reduced motion shows each illustration's still frame.
-                </p>
+                </P>
               </Section>
 
-              <Section n={3} id="props" title="Sticker Props">
+              <Section id="props">
                 <dl className={cn(CARD, 'divide-y divide-black')}>
                   {PROPS.map(([k, t, d]) => (
                     <div key={k} className="grid items-center gap-x-4 gap-y-1.5 px-5 py-4 sm:grid-cols-[9rem_10.5rem_1fr]">
@@ -155,13 +153,13 @@ export function DocsPage() {
                 </dl>
               </Section>
 
-              <Section n={4} id="on-demand" title="Loading on Demand">
-                <p>The slug is the last part of an illustration's address on this site. Import it up front, or only when it is about to show.</p>
-                <CodeBlock code={LAZY[lang]} className={CODE} />
+              <Section id="on-demand">
+                <P>The slug is the last part of an illustration's address on this site. Import it up front, or only when it is about to show.</P>
+                <CodeBlock code={LAZY[lang]} />
               </Section>
 
-              <Section n={5} id="roles" title="Palette Roles">
-                <p>
+              <Section id="roles">
+                <P>
                   Each fill names what a part is, so any palette keeps its meaning. {sets.length} named sets ship in <code>PALETTES</code>:{' '}
                   {sets.map((s, i) => (
                     <span key={s}>
@@ -171,7 +169,7 @@ export function DocsPage() {
                   ))}
                   Or derive one with <code>brand(a, b)</code>, <code>mono(hex)</code> or <code>hue(deg)</code>, all worked in OKLCH so contrast
                   holds.
-                </p>
+                </P>
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {ROLES.map(([k, d]) => (
                     <li key={k} className="flex items-center gap-4 rounded-[20px] border border-black bg-white px-4 py-3.5">
@@ -185,13 +183,13 @@ export function DocsPage() {
                 </ul>
               </Section>
 
-              <Section n={6} id="no-react" title="Without React">
-                <p>The engine needs only a canvas, so it works with Vue, Svelte, or no framework at all.</p>
-                <CodeBlock code={VANILLA[lang]} className={CODE} />
+              <Section id="no-react">
+                <P>The engine needs only a canvas, so it works with Vue, Svelte, or no framework at all.</P>
+                <CodeBlock code={VANILLA[lang]} />
               </Section>
 
-              <Section n={7} id="types" title="Types">
-                <CodeBlock code={TYPES[lang]} className={CODE} />
+              <Section id="types">
+                <CodeBlock code={TYPES[lang]} />
               </Section>
             </article>
           </div>
@@ -202,7 +200,7 @@ export function DocsPage() {
       <section id="licence" className="scroll-mt-0 bg-slush-lavender">
         <div className={cn(BAND, 'py-16 sm:py-24')}>
           <h2 className="text-[clamp(3rem,12vw,10rem)] slush-display">Free &amp; MIT</h2>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             Code is MIT. The illustrations are free to use in commercial and personal work.
           </p>
           <Link to="/illustrations" className={cn(FILLED, LG, 'mt-8')}>
@@ -244,7 +242,7 @@ function Toc() {
                 aria-hidden
                 className={cn(
                   'grid size-6 shrink-0 place-items-center rounded-full border border-black text-[11px] font-bold tabular-nums transition-[background-color,color,scale] duration-200 ease-out',
-                  i <= active ? TINTS[i % TINTS.length] : 'bg-white text-black',
+                  i <= active ? tint(i) : 'bg-white text-black',
                   i === active && 'scale-125',
                 )}
               >
@@ -263,7 +261,6 @@ function LangChips({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void
   return (
     <Chips<Lang>
       label="Example language"
-      wrap
       value={lang}
       onChange={onChange}
       options={[
@@ -274,21 +271,16 @@ function LangChips({ lang, onChange }: { lang: Lang; onChange: (l: Lang) => void
   )
 }
 
-function Section({ n, id, title, children }: { n: number; id: string; title: string; children: ReactNode }) {
+/** One section of the docs, numbered and titled from SECTIONS, so the sidebar and the page cannot disagree. */
+function Section({ id, children }: { id: (typeof SECTIONS)[number][0]; children: ReactNode }) {
+  const n = IDS.indexOf(id) + 1
+  const title = SECTIONS[n - 1]![1]
   return (
     <section
       id={id}
-      className="scroll-mt-24 [&_code]:font-mono [&>div>p]:max-w-3xl [&>div>p]:text-[17px] [&>div>p]:leading-[1.5] [&>div>p]:font-medium [&>div>p]:tracking-[-0.01em] [&>div>p_code]:rounded-[6px] [&>div>p_code]:bg-slush-mist [&>div>p_code]:px-1.5 [&>div>p_code]:py-0.5 [&>div>p_code]:text-[0.85em]"
+      className="scroll-mt-24 [&_code]:font-mono"
     >
-      <h2 className="flex items-center gap-3 text-[clamp(2rem,4.4vw,3.5rem)] slush-display sm:gap-4">
-        <span
-          aria-hidden
-          className={cn('grid size-[2em] shrink-0 -rotate-6 place-items-center rounded-full border border-black text-[0.4em] leading-none', TINTS[(n - 1) % TINTS.length])}
-        >
-          {n}
-        </span>
-        {title}
-      </h2>
+      <NumberedHeading n={n} title={title} />
       <div className="mt-6 flex flex-col gap-5">{children}</div>
     </section>
   )

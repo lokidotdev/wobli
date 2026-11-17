@@ -1,4 +1,4 @@
-import { ACCENTS, PALETTES, brand, hue, mono } from 'wobli'
+import { ACCENTS, PALETTES, RISO, brand, hue, mono } from 'wobli'
 import type { Palette, PaletteName, Style } from 'wobli'
 import type { StyleSearch } from '../schemas/style.schema'
 
@@ -15,7 +15,7 @@ export type EditorStyle = {
   line: number // outline multiplier, within LINE_RANGE
   depth: number // extrusion multiplier, within DEPTH_RANGE
   bg: Background
-  speed: number // 0.25 to 2
+  speed: number // one of SPEEDS
   loop: boolean
 }
 
@@ -35,7 +35,11 @@ export const PALETTE_PRESETS: ReadonlyArray<{ name: PaletteName; label: string }
   { name: 'aqua', label: 'Aqua' },
 ]
 
-export const DEFAULT_STYLE: EditorStyle = {
+/**
+ * The look a style URL is written against: the package's own defaults, frozen. A URL holds only what differs from this, and
+ * a missing value means this one, so a copied link or embed shows the same look forever, whatever the admin later picks.
+ */
+export const URL_BASE: Readonly<EditorStyle> = Object.freeze<EditorStyle>({
   preset: 'system',
   recolor: { mode: 'off' },
   colors: {},
@@ -45,13 +49,23 @@ export const DEFAULT_STYLE: EditorStyle = {
   bg: 'none',
   speed: 1,
   loop: true,
-}
+})
+
+/** The site's starting look: URL_BASE until the admin's settings arrive (applySiteStyle), then theirs. */
+export const DEFAULT_STYLE: EditorStyle = { ...URL_BASE }
 
 /** The one definition of how far each control goes: sliders, the URL decoder and the docs all read these. */
 export const LINE_RANGE = { min: 0, max: 2.5, step: 0.05 } as const
 export const DEPTH_RANGE = { min: 0, max: 1.5, step: 0.05 } as const
-export const SPEED_RANGE = { min: 0.25, max: 2 } as const
-/** 1.5 → "1.5×" */
+export const HUE_RANGE = { min: -180, max: 180, step: 1 } as const
+/** The playback speeds on offer; a speed from a URL snaps to the nearest. */
+export const SPEEDS = [0.25, 0.5, 1, 1.5, 2] as const
+
+/** `v` brought inside `range`. */
+export const clamp = (v: number, range: { min: number; max: number }) => Math.min(range.max, Math.max(range.min, v))
+/** Whether `name` is one of the palettes on offer (URLs, storage and the admin's settings can all hold stale names). */
+export const isPreset = (name: unknown): name is PaletteName => PALETTE_PRESETS.some((p) => p.name === name)
+
 export const formatMultiplier = (v: number) => `${+v.toFixed(2)}×`
 
 export const SLOT_LABEL: Record<Slot, string> = {
@@ -67,7 +81,8 @@ export const SLOT_LABEL: Record<Slot, string> = {
   ink: 'Stroke',
 }
 
-export const PAPER_COLOR = '#f7f7f7'
+/** The 'paper' background: the engine's own paper. */
+const PAPER_COLOR = RISO.paper
 export const backgroundColor = (bg: Background) => (bg === 'none' ? undefined : bg === 'paper' ? PAPER_COLOR : bg)
 
 /** The whole palette a style draws with: preset, then the quick recolour, then single slot overrides, then the stroke. */
@@ -86,19 +101,23 @@ export const toEngineStyle = (s: EditorStyle): Style & { palette: Palette; line:
 // ── URL ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const HEX = /^[0-9a-f]{6}$/i
 const hex = (v: string | undefined) => (v && HEX.test(v) ? (`#${v.toLowerCase()}` as const) : undefined)
-const num = (v: string | undefined, lo: number, hi: number) => {
+const num = (v: string | undefined, range: { min: number; max: number }) => {
   const n = v === undefined ? NaN : Number(v)
-  return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : undefined
+  return Number.isFinite(n) ? clamp(n, range) : undefined
 }
+const nearestSpeed = (v: number) => SPEEDS.reduce((best, s) => (Math.abs(s - v) < Math.abs(best - v) ? s : best))
 const bare = (c: string) => c.replace('#', '').toLowerCase()
 const round = (n: number) => String(+n.toFixed(2))
 const SLOTS = new Set<string>([...ACCENTS, 'white', 'grey', 'paper'])
 
+/** The look a URL encodes; a URL with no style in it is the site's current starting look. */
 export function decodeStyle(q: StyleSearch): EditorStyle {
-  const preset = (PALETTE_PRESETS.some((p) => p.name === q.p) ? q.p : DEFAULT_STYLE.preset) as PaletteName
+  if (!hasStyleParams(q)) return { ...DEFAULT_STYLE }
+  const preset = isPreset(q.p) ? q.p : URL_BASE.preset
   let recolor: Recolor = { mode: 'off' }
   const [mode, a, b] = (q.q ?? '').split('.')
-  if (mode === 'hue' && num(a, -180, 180) !== undefined) recolor = { mode: 'hue', deg: num(a, -180, 180)! }
+  const deg = num(a, HUE_RANGE)
+  if (mode === 'hue' && deg !== undefined) recolor = { mode: 'hue', deg }
   if (mode === 'brand' && hex(a)) recolor = { mode: 'brand', a: hex(a)!, b: hex(b) ?? hex(a)! }
   if (mode === 'mono' && hex(a)) recolor = { mode: 'mono', c: hex(a)! }
   const colors: EditorStyle['colors'] = {}
@@ -111,33 +130,42 @@ export function decodeStyle(q: StyleSearch): EditorStyle {
     preset,
     recolor,
     colors,
-    ink: hex(q.ink) ?? DEFAULT_STYLE.ink,
-    line: num(q.lw, LINE_RANGE.min, LINE_RANGE.max) ?? DEFAULT_STYLE.line,
-    depth: num(q.d, DEPTH_RANGE.min, DEPTH_RANGE.max) ?? DEFAULT_STYLE.depth,
+    ink: hex(q.ink) ?? URL_BASE.ink,
+    line: num(q.lw, LINE_RANGE) ?? URL_BASE.line,
+    depth: num(q.d, DEPTH_RANGE) ?? URL_BASE.depth,
     bg,
-    speed: num(q.sp, SPEED_RANGE.min, SPEED_RANGE.max) ?? DEFAULT_STYLE.speed,
+    speed: q.sp !== undefined && Number.isFinite(Number(q.sp)) ? nearestSpeed(Number(q.sp)) : URL_BASE.speed,
     loop: q.once !== '1',
   }
 }
 
-/** Only the values that differ from the default, so a plain look has a bare URL. */
+/** Only the values that differ from URL_BASE. */
 export function encodeStyle(s: EditorStyle): StyleSearch {
   const out: StyleSearch = {}
-  if (s.preset !== DEFAULT_STYLE.preset) out.p = s.preset
+  if (s.preset !== URL_BASE.preset) out.p = s.preset
   const r = s.recolor
   if (r.mode === 'hue' && r.deg) out.q = `hue.${Math.round(r.deg)}`
   if (r.mode === 'brand') out.q = `brand.${bare(r.a)}.${bare(r.b)}`
   if (r.mode === 'mono') out.q = `mono.${bare(r.c)}`
   const c = Object.entries(s.colors).map(([k, v]) => `${k}-${bare(v)}`)
   if (c.length) out.c = c.join('.')
-  if (s.ink !== DEFAULT_STYLE.ink) out.ink = bare(s.ink)
-  if (s.line !== DEFAULT_STYLE.line) out.lw = round(s.line)
-  if (s.depth !== DEFAULT_STYLE.depth) out.d = round(s.depth)
+  if (s.ink !== URL_BASE.ink) out.ink = bare(s.ink)
+  if (s.line !== URL_BASE.line) out.lw = round(s.line)
+  if (s.depth !== URL_BASE.depth) out.d = round(s.depth)
   if (s.bg !== 'none') out.bg = s.bg === 'paper' ? 'paper' : bare(s.bg)
-  if (s.speed !== DEFAULT_STYLE.speed) out.sp = round(s.speed)
+  if (s.speed !== URL_BASE.speed) out.sp = round(s.speed)
   if (!s.loop) out.once = '1'
   return out
 }
+
+/** A look as a URL query, with its `?`; empty only for URL_BASE itself. */
+export function styleQuery(s: EditorStyle) {
+  const q = new URLSearchParams(encodeStyle(s) as Record<string, string>).toString()
+  return q ? `?${q}` : ''
+}
+
+/** Whether a look is the site's starting look, compared value by value (through the URL form, which is canonical). */
+export const isDefaultStyle = (s: EditorStyle) => styleQuery(s) === styleQuery(DEFAULT_STYLE)
 
 export const hasStyleParams = (q: StyleSearch) => Object.values(q).some((v) => v !== undefined)
 

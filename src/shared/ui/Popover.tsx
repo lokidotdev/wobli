@@ -1,15 +1,19 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
+import type { ReactNode, RefObject } from 'react'
+import { useDismiss } from '~/shared/hooks/useDismiss'
 import { cn } from '~/shared/lib/cn'
 
 type Props = {
-  trigger: (p: { open: boolean; toggle: () => void; id: string }) => ReactNode
+  /** The button that opens it: spread `props` on it (its ref and ARIA state), and call `toggle` when it is pressed. */
+  trigger: (p: { open: boolean; toggle: () => void; props: TriggerProps }) => ReactNode
   children: ReactNode
   align?: 'start' | 'end'
   side?: 'top' | 'bottom'
   className?: string
   label: string
 }
+
+type TriggerProps = { ref: RefObject<HTMLButtonElement | null>; 'aria-expanded': boolean; 'aria-controls': string }
 
 /** Space kept between the panel and the window edge it grows towards. */
 const EDGE = 16
@@ -24,25 +28,10 @@ export function Popover({ trigger, children, align = 'end', side = 'bottom', cla
   const [more, setMore] = useState({ above: false, below: false })
   const id = useId()
   const root = useRef<HTMLDivElement>(null)
-  const panel = useRef<HTMLDivElement>(null)
+  const panel = useRef<HTMLDialogElement>(null)
+  const button = useRef<HTMLButtonElement>(null)
+  useDismiss(open, () => setOpen(false), root, button)
 
-  useEffect(() => {
-    if (!open) return
-    const down = (e: PointerEvent) => !root.current?.contains(e.target as Node) && setOpen(false)
-    const key = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      setOpen(false)
-      root.current?.querySelector<HTMLElement>('[aria-controls]')?.focus()
-    }
-    document.addEventListener('pointerdown', down)
-    document.addEventListener('keydown', key)
-    return () => {
-      document.removeEventListener('pointerdown', down)
-      document.removeEventListener('keydown', key)
-    }
-  }, [open])
-
-  // Which edges have content scrolled out of view.
   const measureScroll = () => {
     const el = panel.current
     if (!el) return
@@ -77,19 +66,20 @@ export function Popover({ trigger, children, align = 'end', side = 'bottom', cla
   const fade = 'pointer-events-none absolute inset-x-0 h-12 backdrop-blur-[3px] transition-opacity duration-200 ease-(--ease-out)'
   return (
     <div ref={root} className="relative">
-      {trigger({ open, toggle: () => setOpen((o) => !o), id })}
-      <div
+      {trigger({ open, toggle: () => setOpen((o) => !o), props: { ref: button, 'aria-expanded': open, 'aria-controls': id } })}
+      {/* a non-modal <dialog>, always open: it stays mounted (inert while closed) so it can animate out */}
+      <dialog
         ref={panel}
+        open
         id={id}
-        role="dialog"
         aria-label={label}
         inert={!open}
         onScroll={measureScroll}
         style={{ transformOrigin: origin, maxHeight }}
         className={cn(
-          'absolute z-50 max-h-[calc(100dvh-7rem)] w-[min(24rem,calc(100vw-2rem))] scrollbar-slush overflow-y-auto overscroll-contain rounded-(--radius-float) bg-elevated shadow-[var(--shadow-menu)]',
+          'absolute z-50 m-0 border-0 p-0 text-inherit max-h-[calc(100dvh-7rem)] w-[min(24rem,calc(100vw-2rem))] scrollbar-slush overflow-y-auto overscroll-contain rounded-(--radius-float) bg-elevated shadow-[var(--shadow-menu)]',
           side === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2',
-          align === 'end' ? 'right-0' : 'left-0',
+          align === 'end' ? 'right-0 left-auto' : 'left-0 right-auto',
           // grows out of the trigger's corner; leaves a little faster than it came. Reduced motion: a fade only.
           'transition-[opacity,transform] ease-(--ease-out) motion-reduce:transform-none',
           open ? 'scale-100 opacity-100 duration-200' : 'pointer-events-none scale-[0.95] opacity-0 duration-150',
@@ -112,7 +102,7 @@ export function Popover({ trigger, children, align = 'end', side = 'bottom', cla
             style={{ maskImage: 'linear-gradient(to top, #000 40%, transparent)', WebkitMaskImage: 'linear-gradient(to top, #000 40%, transparent)' }}
           />
         </div>
-      </div>
+      </dialog>
     </div>
   )
 }

@@ -10,6 +10,7 @@
 
 import { createServerEntry } from '@tanstack/react-start/server-entry'
 import { createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
+import { isEmbedPath } from '~/shared/config/site'
 
 const startFetch = createStartHandler(defaultStreamHandler)
 
@@ -38,17 +39,24 @@ const cacheKey = (request: Request) => {
 
 const render = (request: Request, ...rest: unknown[]) => (startFetch as (...a: unknown[]) => Promise<Response>)(request, ...rest)
 
-/** Renders the page and, if it is worth keeping, stores a copy. Returns the response for the visitor. */
-async function renderAndStore(cache: Cache, key: Request, request: Request, rest: unknown[]): Promise<Response> {
+/** Renders the page and, if it is worth keeping, stores a copy. Returns the response for the visitor, and whether it was stored. */
+async function renderAndStore(cache: Cache, key: Request, request: Request, rest: unknown[]): Promise<{ response: Response; stored: boolean }> {
   const response = await render(request, ...rest)
   const type = response.headers.get('content-type') ?? ''
-  if (response.status !== 200 || response.headers.has('set-cookie') || !/text\/html|application\/xml/.test(type)) return response
+  if (response.status !== 200 || response.headers.has('set-cookie') || !/text\/html|application\/xml/.test(type)) return { response, stored: false }
   const stored = new Response(response.clone().body, response)
   stored.headers.set(RENDERED_AT, String(Date.now()))
   // the edge drops it after MAX_SECONDS; browsers are told to always come back, so they always see the edge's copy
   stored.headers.set('Cache-Control', `public, s-maxage=${MAX_SECONDS}`)
   await cache.put(key, stored)
-  return response
+  return { response, stored: true }
+}
+
+/** A response the cache did not keep: labelled, its own headers left alone (robots.txt sets its own Cache-Control). */
+const bypass = (response: Response) => {
+  const out = new Response(response.body, response)
+  out.headers.set('x-isr', 'BYPASS')
+  return out
 }
 
 const withState = (response: Response, state: string) => {
@@ -66,7 +74,7 @@ function secure(response: Response, request: Request): Response {
   out.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   out.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()')
   // the embed player exists to be framed by other sites; every other page may only be framed by this one
-  if (!new URL(request.url).pathname.startsWith('/embed/')) {
+  if (!isEmbedPath(new URL(request.url).pathname)) {
     out.headers.set('X-Frame-Options', 'SAMEORIGIN')
     out.headers.set('Content-Security-Policy', "frame-ancestors 'self'")
   }
@@ -90,12 +98,13 @@ async function handle(request: Request, rest: unknown[]): Promise<Response> {
     const age = (Date.now() - Number(hit.headers.get(RENDERED_AT) ?? 0)) / 1000
     if (age < FRESH_SECONDS) return withState(hit, 'HIT')
     // stale: answer now, render the next copy in the background (or inline when there is no ctx to wait on)
-    const refresh = renderAndStore(cache, key, new Request(request), rest).catch(() => undefined)
+    const refresh = renderAndStore(cache, key, new Request(request), rest).catch((e: unknown) => console.error('isr: background render failed', e))
     if (ctx) ctx.waitUntil(refresh)
     else await refresh
     return withState(hit, 'STALE')
   }
 
-  const fresh = await renderAndStore(cache, key, request, rest)
-  return withState(fresh, fresh.status === 200 ? 'MISS' : 'BYPASS')
+  // only a page this cache keeps is labelled and re-headered; anything else (robots.txt, an error) goes out as it was rendered
+  const { response, stored } = await renderAndStore(cache, key, request, rest)
+  return stored ? withState(response, 'MISS') : bypass(response)
 }

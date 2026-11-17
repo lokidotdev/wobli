@@ -14,8 +14,8 @@ import { Popover } from '~/shared/ui/Popover'
 import { Segmented } from '~/shared/ui/Segmented'
 import { BottomSheet } from '~/shared/ui/BottomSheet'
 import type { BottomSheetHandle } from '~/shared/ui/BottomSheet'
-import { BAND, PILL } from '~/shared/ui/SlushChrome'
-import { DEFAULT_STYLE, randomizeStyle, toEngineStyle } from '~/features/style'
+import { BAND, PILL } from '~/shared/ui/slush'
+import { DEFAULT_STYLE, isDefaultStyle, randomizeStyle, toEngineStyle } from '~/features/style'
 import type { StyleSearch } from '~/features/style'
 import { useEditorStyle } from '../hooks/useEditorStyle'
 import { BackgroundPanel, ColorPanel, MotionPanel, StrokePanel } from './Panels'
@@ -48,7 +48,7 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
   const [tab, setTab] = useState<Tab>('colours')
   const sheet = useRef<BottomSheetHandle>(null)
   const currentFrame = () => stage.current?.currentFrame() ?? icon.still ?? 0
-  const isDefault = JSON.stringify(style) === JSON.stringify(DEFAULT_STYLE)
+  const isDefault = isDefaultStyle(style)
   const reset = () => setStyle(DEFAULT_STYLE)
   const shuffle = () => setStyle(randomizeStyle)
   const panel = { style, update }
@@ -66,7 +66,7 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
 
   return (
     // one sky band (DESIGN.md): the drawing as a sticker-book card, its facts in display type, the controls in one outlined frame
-    <section className="bg-slush-sky pt-[72px]">
+    <section className="bg-slush-sky pt-(--nav-h)">
       <div className={cn(BAND, 'pt-4 pb-28 sm:pt-6 lg:pb-20')}>
         <nav aria-label="Editor" className="flex items-center justify-between gap-3">
           <Link to="/illustrations" className={cn(PILL, 'h-10 gap-1 bg-white pr-4 pl-2.5 text-[12px] text-black hover:bg-slush-mist sm:text-[13px]')}>
@@ -77,8 +77,8 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
           <div className="hidden lg:block">
             <Popover
               label="Export"
-              trigger={({ open, toggle, id }) => (
-                <Button onClick={toggle} aria-expanded={open} aria-controls={id} className="px-5 text-[13px]! uppercase">
+              trigger={({ toggle, props }) => (
+                <Button {...props} onClick={toggle} className="px-5 text-[13px]! uppercase">
                   <Download className="size-4" />
                   Export
                 </Button>
@@ -95,7 +95,7 @@ export function EditorPage({ illustration, search, onSearchChange }: Props) {
             <header className="mt-8 sm:mt-10">
               <p className="inline-flex h-7 items-center rounded-full border border-black bg-slush-mint px-3 text-[11px] slush-label">{illustration.category.name}</p>
               <h1 className="mt-4 text-[clamp(2.75rem,7vw,6rem)] text-balance slush-display">{illustration.title}</h1>
-              <p className="mt-5 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-pretty sm:mt-6 sm:text-[24px]">{illustration.description}</p>
+              <p className="mt-5 max-w-2xl text-[20px] leading-[1.2] font-medium text-pretty sm:mt-6 sm:text-[24px]">{illustration.description}</p>
               <ul aria-label="Tags" className="mt-6 flex flex-wrap gap-1">
                 {illustration.tags.map((tag, i) => {
                   const [c, r] = TAG_STICKER[i % TAG_STICKER.length]!

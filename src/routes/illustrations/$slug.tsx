@@ -1,12 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { EditorPage } from '~/features/customizer'
-import { loadIllustration, useIllustration } from '~/features/illustrations'
+import { POSTER_SIZE, illustrationPath, loadIllustration, useIllustration } from '~/features/illustrations'
 import { buildMeta, illustrationJsonLd } from '~/features/seo'
 import { styleSearchSchema } from '~/features/style'
 import { site } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
-import { BAND } from '~/shared/ui/SlushChrome'
+import { BAND } from '~/shared/ui/slush'
 
 export const Route = createFileRoute('/illustrations/$slug')({
   validateSearch: styleSearchSchema,
@@ -17,8 +17,8 @@ export const Route = createFileRoute('/illustrations/$slug')({
           // the admin's SEO fields when set, otherwise generated from the title and description
           title: loaderData.item.seo.title || `${loaderData.item.title} · ${site.name}`,
           description: loaderData.item.seo.description || `${loaderData.item.description} Restyle it live and export a PNG or a component for React and Next.js.`,
-          path: `/illustrations/${params.slug}`, // styled URLs share the bare canonical, so they never duplicate the page
-          image: { url: loaderData.item.poster, width: 600, height: 600, alt: `${loaderData.item.title}, an isometric illustration` }, // posters are 600×600 PNGs
+          path: illustrationPath(params.slug), // styled URLs share the bare canonical, so they never duplicate the page
+          image: { url: loaderData.item.poster, width: POSTER_SIZE, height: POSTER_SIZE, alt: `${loaderData.item.title}, an isometric illustration` },
           jsonLd: illustrationJsonLd(loaderData.item),
         })
       : {},
@@ -55,8 +55,9 @@ function AboutIllustration({ title, content }: { title: string; content: string 
             About the {title} illustration
           </h2>
           <div className="mt-6 space-y-4 text-[17px] leading-[1.5] text-pretty text-black/75 sm:text-[18px]">
-            {paragraphs.map((p, i) => (
-              <p key={i} className="whitespace-pre-line">
+            {paragraphs.map((p) => (
+              // a paragraph's text is its identity: the copy is edited as a whole, never reordered
+              <p key={p} className="whitespace-pre-line">
                 {p}
               </p>
             ))}

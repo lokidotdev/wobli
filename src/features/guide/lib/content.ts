@@ -44,7 +44,7 @@ export const SKILLS = [
     job: 'Draws It',
     text: 'The drawing style and the motion library. It knows how a sticker is built and which moves exist, so the agent composes instead of inventing.',
     gives: ['Flat fills, one thick outline, an extruded slab side', 'Motion presets written as real animation keyframes', 'Colour as roles, so any palette fits', 'A check and a frame renderer'],
-    href: 'https://skills.klvn.dev/fun-isometric',
+    href: 'https://www.designeng.tools/resources/fun-isometric-kelvinkn17-skills',
     link: 'By Kelvin Adithya',
   },
   {
@@ -52,8 +52,8 @@ export const SKILLS = [
     job: 'Moves It',
     text: 'The taste for how things should move. It decides what earns a spring, what must not overshoot, and when to hold still.',
     gives: ['Feedback lands on the frame of its cause', 'Only things with momentum bounce', 'Followers lag a few frames, never lockstep', 'Restraint: one or two sparkles, a long hold'],
-    href: undefined,
-    link: undefined,
+    href: 'https://www.designeng.tools/resources/emilkowalski-apple-design',
+    link: 'By Emil Kowalski',
   },
 ] as const
 

@@ -19,4 +19,3 @@ import ${name} from 'wobli/icons/${slug}'
 />`
 }
 
-export const INSTALL = 'npm i wobli'

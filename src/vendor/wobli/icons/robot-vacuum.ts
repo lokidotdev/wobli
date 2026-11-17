@@ -49,7 +49,8 @@ const SAMPLES = LAP.map((s) => s.p)
 const LENS = SAMPLES.reduce<Array<number>>((acc, p, i) => {
   if (!i) return [0]
   const [a, b] = [onFace(FACE, SAMPLES[i - 1]), onFace(FACE, p)]
-  return [...acc, acc[i - 1] + Math.hypot(b[0] - a[0], b[1] - a[1])]
+  acc.push(acc[i - 1] + Math.hypot(b[0] - a[0], b[1] - a[1]))
+  return acc
 }, [])
 const TOTAL = LENS[LENS.length - 1]
 const along = (share: number): { p: Vec; turn: number } => {
@@ -73,7 +74,8 @@ const HEADING = POSES.reduce<Array<number>>((acc, { turn }, i) => {
   let t = turn
   while (t - acc[i - 1] > 180) t -= 360
   while (t - acc[i - 1] < -180) t += 360
-  return [...acc, t]
+  acc.push(t)
+  return acc
 }, [])
 const LAST = HEADING[HEADING.length - 1]
 const BOT_P: Track<Vec> = STEPS.map((f, i): Key<Vec> => [f, POSES[i].p])

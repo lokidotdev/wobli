@@ -1,14 +1,14 @@
 import { BufferTarget, CanvasSource, Mp4OutputFormat, Output, QUALITY_HIGH, WebMOutputFormat, canEncodeVideo } from 'mediabunny'
-import { draw } from 'wobli'
+import { FPS } from 'wobli'
 import type { Icon, Style } from 'wobli'
+import { OPAQUE_GROUND, drawFrame, framesPerLoop } from './frame'
 
 export type VideoFormat = 'mp4' | 'webm'
 type Options = { format: VideoFormat; size: number; bg?: string; speed: number; loops: number; onProgress?: (p: number) => void; signal?: AbortSignal }
 
-const FPS = 60
 const CODEC = { mp4: 'avc', webm: 'vp9' } as const
 
-/** Whether this browser can encodeStyle a transparent VP9 WebM (WebCodecs alpha support is still patchy). */
+/** Whether this browser can encode a transparent VP9 WebM (WebCodecs alpha support is still patchy). */
 export const canTransparentWebm = (size: number) => canEncodeVideo('vp9', { width: size, height: size, alpha: 'keep', quality: QUALITY_HIGH }).catch(() => false)
 
 /**
@@ -18,7 +18,7 @@ export const canTransparentWebm = (size: number) => canEncodeVideo('vp9', { widt
  */
 export async function renderVideo(icon: Icon, style: Style, o: Options): Promise<Blob> {
   const transparent = o.format === 'webm' && !o.bg
-  const ground = o.format === 'mp4' ? (o.bg ?? '#ffffff') : o.bg
+  const ground = o.format === 'mp4' ? (o.bg ?? OPAQUE_GROUND) : o.bg
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = o.size
   const ctx = canvas.getContext('2d', { alpha: transparent })
@@ -32,20 +32,18 @@ export async function renderVideo(icon: Icon, style: Style, o: Options): Promise
   output.addVideoTrack(source, { frameRate: FPS })
   await output.start()
 
-  // speed changes how far each output frame steps through the loop, so 2× is half as long and still seamless
-  const perLoop = Math.round(icon.frames / o.speed)
+  const perLoop = framesPerLoop(icon, o.speed)
   const total = perLoop * o.loops
-  const unit = o.size / (icon.size ?? 500)
   for (let i = 0; i < total; i++) {
     if (o.signal?.aborted) {
+      // runs once at most: a cancelled export throws straight after
+      // react-doctor-disable-next-line react-doctor/async-await-in-loop
       await output.cancel()
       throw new DOMException('cancelled', 'AbortError')
     }
-    ctx.setTransform(1, 0, 0, 1, 0, 0)
-    ctx.clearRect(0, 0, o.size, o.size)
-    if (ground) (ctx.fillStyle = ground), ctx.fillRect(0, 0, o.size, o.size)
-    ctx.scale(unit, unit)
-    draw(ctx, icon, ((i % perLoop) / perLoop) * icon.frames, style)
+    drawFrame(ctx, icon, ((i % perLoop) / perLoop) * icon.frames, style, o.size, ground)
+    // frames must reach the encoder in order, one at a time: each is drawn into the same canvas the source reads
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop
     await source.add(i / FPS, 1 / FPS)
     if (i % 6 === 0) o.onProgress?.(i / total)
   }

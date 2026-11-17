@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { toSvg } from 'wobli'
+import { FPS, toSvg } from 'wobli'
 import type { Icon } from 'wobli'
-import { backgroundColor, encodeStyle, toEngineStyle } from '~/features/style'
+import { backgroundColor, styleQuery, toEngineStyle } from '~/features/style'
 import type { EditorStyle } from '~/features/style'
-import { illustrationLabel } from '~/features/illustrations'
+import { illustrationLabel, illustrationPath } from '~/features/illustrations'
 import { useFlash } from '~/shared/hooks/useFlash'
 import { Button } from '~/shared/ui/Button'
 import { CopyButton } from '~/shared/ui/CopyButton'
-import { Group, Row } from '~/shared/ui/Group'
+import { Group } from '~/shared/ui/Group'
 import { Check, Copy, Download, Link2 } from '~/shared/ui/icons'
 import { Segmented } from '~/shared/ui/Segmented'
-import { INSTALL, reactSnippet } from '../lib/code'
+import { INSTALL } from '~/shared/config/site'
+import { reactSnippet } from '../lib/code'
 import { embedUrl, iframeSnippet } from '../lib/embed'
+import { OPAQUE_GROUND, videoSeconds } from '../lib/frame'
 import { download, renderPng } from '../lib/png'
 import type { VideoFormat } from '../lib/video'
 
@@ -38,10 +40,7 @@ export function ExportPanel({ slug, title, icon, style, currentFrame }: Props) {
   useEffect(() => setOrigin(location.origin), [])
   const embed = embedUrl(origin, slug, style)
   const iframe = iframeSnippet(embed, illustrationLabel(title))
-  const shareLink = () => {
-    const q = new URLSearchParams(encodeStyle(style) as Record<string, string>).toString()
-    return `${location.origin}/illustrations/${slug}${q ? `?${q}` : ''}`
-  }
+  const shareLink = () => `${location.origin}${illustrationPath(slug)}${styleQuery(style)}`
 
   return (
     <div className="flex flex-col gap-6">
@@ -50,18 +49,18 @@ export function ExportPanel({ slug, title, icon, style, currentFrame }: Props) {
       <VideoGroup slug={slug} icon={icon} style={style} />
 
       <Group title="React" action={<CopyButton text={code} />}>
-        <Row className="flex h-10 items-center justify-between gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
+        <div className="flex h-10 items-center justify-between gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
           <code className="truncate font-mono text-[13px]">{INSTALL}</code>
           <CopyButton text={INSTALL} variant="icon" label="Copy install command" />
-        </Row>
+        </div>
         <pre className="scrollbar-slush max-h-48 overflow-auto rounded-[20px] bg-slush-mist px-4 py-3 font-mono text-[12px] leading-5 text-label shadow-[var(--shadow-border-inset)]">{code}</pre>
       </Group>
 
       <Group title="Embed" footer="A hosted player for this exact look, for any site. Transparent unless you set a background." action={<CopyButton text={iframe} label="Copy Iframe" />}>
-        <Row className="flex h-10 items-center gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
+        <div className="flex h-10 items-center gap-2 rounded-full bg-bg pr-1 pl-4 shadow-[var(--shadow-border-inset)]">
           <input readOnly value={embed} aria-label="Embed link" onFocus={(e) => e.currentTarget.select()} className="min-w-0 flex-1 truncate bg-transparent font-mono text-[12px] text-label-2 outline-none" />
           <CopyButton text={embed} variant="icon" label="Copy embed link" icon={Link2} />
-        </Row>
+        </div>
         <pre className="scrollbar-none overflow-x-auto rounded-[20px] bg-slush-mist px-4 py-3 font-mono text-[12px] leading-5 text-label shadow-[var(--shadow-border-inset)]">{iframe}</pre>
       </Group>
 
@@ -74,26 +73,28 @@ function PngGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
   const [size, setSize] = useState<(typeof SIZES)[number]>('1024')
   const [busy, setBusy] = useState(false)
   const [done, flash] = useFlash()
+  const [error, setError] = useState<string | null>(null)
   const save = async () => {
     setBusy(true)
+    setError(null)
     try {
       download(await renderPng(icon, Math.floor(currentFrame()), toEngineStyle(style), Number(size), backgroundColor(style.bg)), `${slug}-${size}.png`)
       flash()
     } catch {
-      // nothing was saved: the button simply goes back to Save
+      setError('This browser could not make the PNG. Try a smaller size.')
     } finally {
       setBusy(false)
     }
   }
   return (
-    <Group title="PNG" footer={style.bg === 'none' ? 'Transparent, the frame on screen now.' : 'On your background, the frame on screen now.'}>
-      <Row className="flex items-center gap-3">
+    <Group title="PNG" footer={error ?? (style.bg === 'none' ? 'Transparent, the frame on screen now.' : 'On your background, the frame on screen now.')}>
+      <div className="flex items-center gap-3">
         <Segmented label="PNG size" value={size} onChange={setSize} options={SIZES.map((s) => ({ value: s, label: `${s}px` }))} className="flex-1" size="sm" />
         <Button size="sm" onClick={save} disabled={busy} aria-label="Save PNG" className="cursor-pointer disabled:cursor-default">
           {done ? <Check className="size-4" /> : <Download className="size-4" />}
           {done ? 'Saved' : 'Save'}
         </Button>
-      </Row>
+      </div>
     </Group>
   )
 }
@@ -119,7 +120,7 @@ function SvgGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
   }
   return (
     <Group title="SVG" footer={error ?? 'Editable vectors of the frame on screen now. Paste straight into Figma.'}>
-      <Row className="flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <Button size="sm" variant="secondary" onClick={copy} aria-label="Copy SVG for Figma" className="flex-1">
           {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
           {copied ? 'Copied' : 'Copy for Figma'}
@@ -128,7 +129,7 @@ function SvgGroup({ slug, icon, style, currentFrame }: Omit<Props, 'title'>) {
           {saved ? <Check className="size-4" /> : <Download className="size-4" />}
           {saved ? 'Saved' : 'Save'}
         </Button>
-      </Row>
+      </div>
     </Group>
   )
 }
@@ -143,7 +144,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
   const [alphaOk, setAlphaOk] = useState<boolean | null>(null)
   const abort = useRef<AbortController | null>(null)
   const bg = backgroundColor(style.bg)
-  const seconds = ((icon.frames / style.speed) * Number(loops)) / 60
+  const seconds = videoSeconds(icon, style.speed, Number(loops))
 
   useEffect(() => {
     if (format === 'webm' && !bg) loadVideoEncoder()
@@ -162,7 +163,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
       const blob = await renderVideo(icon, toEngineStyle(style), {
         format,
         size: Number(size),
-        bg: format === 'webm' && !bg && alphaOk === false ? '#ffffff' : bg,
+        bg: format === 'webm' && !bg && alphaOk === false ? OPAQUE_GROUND : bg,
         speed: style.speed,
         loops: Number(loops),
         onProgress: setProgress,
@@ -171,7 +172,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
       download(blob, `${slug}-${size}.${format}`)
       flash()
     } catch (e) {
-      if ((e as Error).name !== 'AbortError') setError('This browser could not encodeStyle the video. Try MP4, or a recent Chrome, Edge or Safari.')
+      if ((e as Error).name !== 'AbortError') setError('This browser could not encode the video. Try MP4, or a recent Chrome, Edge or Safari.')
     } finally {
       setProgress(null)
     }
@@ -183,12 +184,12 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
       : bg
         ? 'VP9 on your background.'
         : alphaOk === false
-          ? 'This browser can’t encodeStyle transparent video, so it will be on white. Chrome or Edge can.'
+          ? 'This browser can’t encode transparent video, so it will be on white. Chrome or Edge can.'
           : 'VP9 with a transparent background, for the web.'
 
   return (
-    <Group title="Video" footer={error ?? `${note} ${seconds.toFixed(1)}s, 60 fps, loops seamlessly.`}>
-      <Row className="flex flex-col gap-3">
+    <Group title="Video" footer={error ?? `${note} ${seconds.toFixed(1)}s, ${FPS} fps, loops seamlessly.`}>
+      <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <Segmented<VideoFormat>
             label="Video format"
@@ -212,7 +213,7 @@ function VideoGroup({ slug, icon, style }: Pick<Props, 'slug' | 'icon' | 'style'
             </span>
           </Button>
         </div>
-      </Row>
+      </div>
     </Group>
   )
 }

@@ -7,7 +7,8 @@ import { DEFAULT_STYLE, toEngineStyle } from '~/features/style'
 import { cn } from '~/shared/lib/cn'
 import { CodeBlock } from '~/shared/ui/CodeBlock'
 import { CopyButton } from '~/shared/ui/CopyButton'
-import { BAND, FILLED, GHOST, LG, SM } from '~/shared/ui/SlushChrome'
+import { NumberedHeading, P } from '~/shared/ui/Numbered'
+import { BAND, FILLED, GHOST, LG, SM, tint } from '~/shared/ui/slush'
 import { BEATS, BRIEF, CHECKS, FILES, FORMATS, GENERAL, PROMPT, RULES, RUN, SKILLS, STORY, SWAPS } from '../lib/content'
 
 // How an illustration gets made, told with one of them (Card Tap) from the first sentence to every file it exports as.
@@ -21,19 +22,17 @@ const STEPS = [
   ['export', 'Export Every Format'],
 ] as const
 
-// the sticker palette as a shared set: each step's number takes the next colour
-const TINTS = ['bg-slush-sunburst', 'bg-slush-mint', 'bg-slush-lavender', 'bg-slush-blue', 'bg-slush-ember', 'bg-slush-violet text-white'] as const
 const CARD = 'rounded-[20px] border border-black bg-white'
-const CODE = 'rounded-[20px]'
-const LOOK = toEngineStyle(DEFAULT_STYLE)
 // the closer's three columns, each headed in its own sticker colour
 const SWAP_FILL = ['bg-slush-sunburst', 'bg-slush-mint', 'bg-slush-sky'] as const
 
 export function GuidePage() {
+  // read while rendering, not when the module loads: the site's starting look arrives with the admin's settings
+  const LOOK = toEngineStyle(DEFAULT_STYLE)
   return (
     <>
       {/* band one, sky: the page as a poster */}
-      <section className="bg-slush-sky pt-[72px]">
+      <section className="bg-slush-sky pt-(--nav-h)">
         <div className={cn(BAND, 'pt-10 pb-12 sm:pt-14 sm:pb-16')}>
           <div className="flex items-center gap-4 sm:gap-8">
             <h1 className="text-[clamp(2.75rem,11.5vw,11rem)] slush-display">
@@ -45,14 +44,14 @@ export function GuidePage() {
               <Sticker icon={cardTap} palette={LOOK.palette} line={LOOK.line} depth={LOOK.depth} enter={0.3} />
             </div>
           </div>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             No design tool. Every illustration starts as two descriptions in plain words, an AI agent draws and animates it with two skills,
             and it leaves in every format the editor exports. Here is one, start to finish.
           </p>
           <nav aria-label="Steps" className="scrollbar-none -mx-4 mt-8 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
             {STEPS.map(([id, label], i) => (
               <a key={id} href={`#${id}`} className={cn(GHOST, SM, 'shrink-0 gap-2 pl-1.5')}>
-                <span aria-hidden className={cn('grid size-7 place-items-center rounded-full border border-black text-[11px] tabular-nums', TINTS[i % TINTS.length])}>
+                <span aria-hidden className={cn('grid size-7 place-items-center rounded-full border border-black text-[11px] tabular-nums', tint(i))}>
                   {i + 1}
                 </span>
                 {label}
@@ -65,7 +64,7 @@ export function GuidePage() {
       {/* band two, white: the five steps */}
       <section className="bg-white">
         <div className={cn(BAND, 'flex flex-col gap-20 pt-14 pb-20 sm:gap-28 sm:pt-20 sm:pb-28')}>
-          <Step n={1} id="brief" title="Write a General Description" lead="One line that says what the object is and the single thing it does. If it does not read in a second, the idea is not ready to draw.">
+          <Step id="brief" title="Write a General Description" lead="One line that says what the object is and the single thing it does. If it does not read in a second, the idea is not ready to draw.">
             <div className={cn(CARD, 'overflow-hidden')}>
               <dl className="divide-y divide-black">
                 {BRIEF.map(([k, v]) => (
@@ -79,7 +78,7 @@ export function GuidePage() {
             <ul className="grid gap-2 sm:grid-cols-2">
               {RULES.map(([name, text]) => (
                 <li key={name} className={cn(CARD, 'px-5 py-4')}>
-                  <h3 className="text-[17px] leading-[1.2] font-bold tracking-[-0.01em]">{name}</h3>
+                  <h3 className="text-[17px] leading-[1.2] font-bold">{name}</h3>
                   <p className="mt-1.5 text-[15px] leading-[1.39] font-medium text-label-3">{text}</p>
                 </li>
               ))}
@@ -89,18 +88,17 @@ export function GuidePage() {
           </Step>
 
           <Step
-            n={2}
             id="motion"
             title="Write the Animation Description"
             lead="Now the same idea as a short story, in the order it happens. Four beats: rest, action, settle, reset. End with the loop length and the palette."
           >
             <figure className={cn(CARD, 'overflow-hidden')}>
-              <blockquote className="bg-slush-sky px-5 py-6 text-[20px] leading-[1.3] font-medium tracking-[-0.01em] text-pretty sm:px-7 sm:py-8 sm:text-[24px]">{STORY}</blockquote>
+              <blockquote className="bg-slush-sky px-5 py-6 text-[20px] leading-[1.3] font-medium text-pretty sm:px-7 sm:py-8 sm:text-[24px]">{STORY}</blockquote>
               <figcaption className="grid divide-y divide-black border-t border-black sm:grid-cols-4 sm:divide-x sm:divide-y-0">
                 {BEATS.map(([name, text], i) => (
                   <div key={name} className="px-5 py-4">
                     <p className="flex items-center gap-2 text-[12px] slush-label">
-                      <span aria-hidden className={cn('size-3 rounded-full border border-black', TINTS[i])} />
+                      <span aria-hidden className={cn('size-3 rounded-full border border-black', tint(i))} />
                       {name}
                     </p>
                     <p className="mt-1.5 text-[14px] leading-[1.39] font-medium">{text}</p>
@@ -117,7 +115,6 @@ export function GuidePage() {
           </Step>
 
           <Step
-            n={3}
             id="skills"
             title="Use the Skills"
             lead="A skill is a folder of instructions an AI coding agent reads before it works. Two of them turn the description into a drawing that moves."
@@ -149,16 +146,16 @@ export function GuidePage() {
               ))}
             </ul>
             <P>Then ask for it. The object goes on the first line, both descriptions go under it.</P>
-            <CodeBlock code={PROMPT} className={cn(CODE, '[&_pre]:whitespace-pre-wrap')} />
+            <CodeBlock code={PROMPT} className="[&_pre]:whitespace-pre-wrap" />
             <P>
               The agent writes two small files. The drawing is plain data on a 500 unit canvas, and every colour is a role such as{' '}
               <code>main</code> or <code>ok</code>, never a hex code, which is what lets anyone restyle it later.
             </P>
-            <CodeBlock code={FILES} className={CODE} />
+            <CodeBlock code={FILES} />
           </Step>
 
-          <Step n={4} id="check" title="Check It and Make the Poster" lead="Two commands decide whether it ships. Nobody eyeballs a loop seam.">
-            <CodeBlock code={RUN} className={CODE} />
+          <Step id="check" title="Check It and Make the Poster" lead="Two commands decide whether it ships. Nobody eyeballs a loop seam.">
+            <CodeBlock code={RUN} />
             <ul className={cn(CARD, 'divide-y divide-black overflow-hidden')}>
               {CHECKS.map((c) => (
                 <li key={c} className="flex items-center gap-3 px-5 py-3.5 text-[15px] leading-[1.39] font-medium">
@@ -173,7 +170,6 @@ export function GuidePage() {
           </Step>
 
           <Step
-            n={5}
             id="export"
             title="Export It in Every Format"
             lead="One drawing, every file. This is the finished Card Tap, and the panel beside it is the real exporter: each button saves or copies it right here."
@@ -188,7 +184,7 @@ export function GuidePage() {
                 <ul className="grid gap-2 sm:grid-cols-2">
                   {FORMATS.map(([name, text], i) => (
                     <li key={name} className={cn(CARD, 'flex items-start gap-3 px-4 py-3.5')}>
-                      <span aria-hidden className={cn('mt-0.5 size-4 shrink-0 rounded-full border border-black', TINTS[i % TINTS.length])} />
+                      <span aria-hidden className={cn('mt-0.5 size-4 shrink-0 rounded-full border border-black', tint(i))} />
                       <span className="flex min-w-0 flex-col gap-0.5">
                         <span className="text-[13px] slush-label">{name}</span>
                         <span className="text-[14px] leading-[1.39] font-medium text-label-3">{text}</span>
@@ -216,7 +212,7 @@ export function GuidePage() {
             Want Another <br />
             Style?
           </h2>
-          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+          <p className="mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
             Nothing here is tied to stickers. The recipe is a description plus skills, so change either one and the same steps give you a
             different look.
           </p>
@@ -236,7 +232,7 @@ export function GuidePage() {
                       We use
                       <span className="inline-flex h-6 items-center rounded-full bg-black px-2.5 text-[11px] font-medium tracking-normal whitespace-nowrap text-white normal-case">{item.from}</span>
                     </p>
-                    <h4 className="mt-3 text-[22px] leading-[1.2] font-bold tracking-[-0.01em]">{item.change}</h4>
+                    <h4 className="mt-3 text-[22px] leading-[1.2] font-bold">{item.change}</h4>
                     <p className="mt-2 mb-4 text-[15px] leading-[1.39] font-medium text-label-3 lg:min-h-[4.17em]">{item.how}</p>
                     {/* the sentence above keeps room for three lines, so the chips of all three columns start on one line */}
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -281,25 +277,13 @@ function Description({ title, text }: { title: string; text: string }) {
   )
 }
 
-function P({ children }: { children: ReactNode }) {
-  return (
-    <p className="max-w-3xl text-[17px] leading-[1.5] font-medium tracking-[-0.01em] [&_code]:rounded-[6px] [&_code]:bg-slush-mist [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em]">
-      {children}
-    </p>
-  )
-}
-
 /** One numbered step: the number as a tilted sticker, the title in display type, a lead, then whatever the step shows. */
-function Step({ n, id, title, lead, children }: { n: number; id: string; title: string; lead: string; children: ReactNode }) {
+function Step({ id, title, lead, children }: { id: (typeof STEPS)[number][0]; title: string; lead: string; children: ReactNode }) {
+  const n = STEPS.findIndex(([step]) => step === id) + 1
   return (
     <section id={id} className="scroll-mt-24">
-      <h2 className="flex items-center gap-3 text-[clamp(2rem,4.4vw,3.5rem)] slush-display sm:gap-4">
-        <span aria-hidden className={cn('grid size-[2em] shrink-0 -rotate-6 place-items-center rounded-full border border-black text-[0.4em] leading-none', TINTS[(n - 1) % TINTS.length])}>
-          {n}
-        </span>
-        {title}
-      </h2>
-      <p className="mt-5 max-w-3xl text-[20px] leading-[1.25] font-medium tracking-[-0.01em] text-pretty sm:text-[24px]">{lead}</p>
+      <NumberedHeading n={n} title={title} />
+      <p className="mt-5 max-w-3xl text-[20px] leading-[1.25] font-medium text-pretty sm:text-[24px]">{lead}</p>
       <div className="mt-8 flex max-w-5xl flex-col gap-5">{children}</div>
     </section>
   )

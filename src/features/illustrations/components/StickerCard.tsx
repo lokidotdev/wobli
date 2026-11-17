@@ -33,7 +33,7 @@ export const StickerCard = memo(function StickerCard({ illustration, look, offse
       </div>
       <div className="flex items-center justify-between gap-3 px-5 py-4">
         <div className="min-w-0">
-          <h3 className="truncate text-[20px] leading-[1.2] font-bold tracking-[-0.02em]">{illustration.title}</h3>
+          <h3 className="truncate text-[20px] leading-[1.2] font-bold">{illustration.title}</h3>
           <p className="mt-1 truncate text-[13px] leading-4 font-medium text-[#4d4d4d]">{illustration.tags.slice(0, 3).map(tagLabel).join(' · ')}</p>
         </div>
         <span

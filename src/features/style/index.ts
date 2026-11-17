@@ -7,17 +7,19 @@ export { applySiteStyle, getGlobalStyle, isDefaultGlobalStyle, useGlobalStyle, r
 export {
   DEFAULT_STYLE,
   DEPTH_RANGE,
+  HUE_RANGE,
   LINE_RANGE,
-  PAPER_COLOR,
-  SITE_PALETTES,
+  SPEEDS,
   SLOT_LABEL,
   backgroundColor,
   decodeStyle,
   encodeStyle,
   formatMultiplier,
   hasStyleParams,
+  isDefaultStyle,
   paletteOf,
   randomizeStyle,
+  styleQuery,
   toEngineStyle,
 } from './lib/style'
 export type { Background, EditorStyle, Recolor } from './lib/style'

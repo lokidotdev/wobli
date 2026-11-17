@@ -2,7 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { siteSettingsSchema } from 'wobli-api/contracts'
 import type { SiteSettings } from 'wobli-api/contracts'
-import { apiGet, isUnreachable } from '~/shared/lib/api'
+import { apiGetOr } from '~/shared/lib/api'
 
 // Site-wide settings the admin panel edits: the starting look (palette, stroke, depth, recoloured palettes) and page SEO.
 // Without an API (a fresh clone running only the site) everything falls back to the built-in defaults.
@@ -11,14 +11,7 @@ export type { SiteSettings }
 
 const DEFAULTS = siteSettingsSchema.parse({})
 
-async function getSettings(): Promise<SiteSettings> {
-  try {
-    return await apiGet('/v1/settings', siteSettingsSchema)
-  } catch (e) {
-    if (isUnreachable(e)) return DEFAULTS
-    throw e
-  }
-}
+const getSettings = (): Promise<SiteSettings> => apiGetOr('/v1/settings', siteSettingsSchema, {}, () => DEFAULTS)
 
 export const settingsQuery = () => queryOptions({ queryKey: ['settings'], queryFn: getSettings, staleTime: 5 * 60_000 })
 

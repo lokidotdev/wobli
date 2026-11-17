@@ -21,7 +21,6 @@ export const Pause = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)} fill="currentColor" stroke="none"><rect x="6" y="4" width="4.2" height="16" rx="1.3" /><rect x="13.8" y="4" width="4.2" height="16" rx="1.3" /></svg>
 )
 export const ChevronLeft = (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="m15 5-7 7 7 7" /></svg>
-export const ChevronRight = (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="m9 5 7 7-7 7" /></svg>
 export const Link2 = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" /><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>
 )
@@ -35,6 +34,5 @@ export const Copy = (p: SVGProps<SVGSVGElement>) => (
   <svg {...base(p)}><rect x="8" y="8" width="12" height="12" rx="2.5" /><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8" /></svg>
 )
 export const Search = (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></svg>
-export const Repeat = (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M17 3l3 3-3 3M4 11V9a3 3 0 0 1 3-3h13M7 21l-3-3 3-3m13-2v2a3 3 0 0 1-3 3H4" /></svg>
 export const Filter = (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M4 7h16M7 12h10M10 17h4" /></svg>
 export const Close = (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M6 6l12 12M18 6 6 18" /></svg>

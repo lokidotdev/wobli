@@ -26,6 +26,9 @@ importers:
       '@tanstack/react-start':
         specifier: ^1.169.4
         version: 1.169.5(esbuild@0.28.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rolldown@1.2.19)(supports-color@10.2.2)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0))
+      allo-font:
+        specifier: 1.0.0
+        version: 1.0.0
       gsap:
         specifier: ^3.15.1
         version: 3.15.1
@@ -1177,6 +1180,9 @@ packages:
         optional: true
       oxc-transform-react:
         optional: true
+
+  allo-font@1.0.0:
+    resolution: {integrity: sha512-lHuzg9QRgC7pJVWH2JHmmg530v6b2kF9g3PdctfN9N1EtVI5j3rD9esAZ6ZXDgM5hrZe6HdVbTXFZyOCU9/VrA==}
 
   ansis@4.5.0:
     resolution: {integrity: sha512-KwIVkfFfJSSzBmZhDGuTmkhWqTdyB5oNVzzznBJbBZ5bZtHiqSrcugRF0RKJKT4Ss3d7ZrcjnlFVDlQNmtWfWw==}
@@ -2699,6 +2705,8 @@ snapshots:
     dependencies:
       '@rolldown/pluginutils': 1.1.1
       vite: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)
+
+  allo-font@1.0.0: {}
 
   ansis@4.5.0: {}
 

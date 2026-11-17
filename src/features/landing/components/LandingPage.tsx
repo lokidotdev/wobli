@@ -2,16 +2,17 @@ import { Link } from '@tanstack/react-router'
 import type { Palette, Style } from 'wobli'
 import { useEffect, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { GlobalStyleControls, SITE_PALETTES, randomPresetForVisit, useGlobalLook, useGlobalStyle } from '~/features/style'
-import { LiveSticker, StickerCard, useFeatured } from '~/features/illustrations'
+import { GlobalStyleControls, randomPresetForVisit, useGlobalLook } from '~/features/style'
+import { LiveSticker, StickerCard, useFeatured, useShuffled } from '~/features/illustrations'
 import type { Illustration } from '~/features/illustrations'
-import { INSTALL } from '~/features/export/lib/code'
+import { INSTALL } from '~/shared/config/site'
 import { cn } from '~/shared/lib/cn'
 import { CopyButton } from '~/shared/ui/CopyButton'
 import { GitHubStar } from '~/shared/ui/GitHubStar'
 import { LetterSticker } from '~/shared/ui/LetterSticker'
-import { BAND, FILLED, GHOST, LG, SM, STAR_GHOST } from '~/shared/ui/SlushChrome'
+import { BAND, FILLED, GHOST, LG, SM, STAR_GHOST } from '~/shared/ui/slush'
 import { useLandingMotion } from '../hooks/useLandingMotion'
+import { GRID, HERO_COUNT } from '../lib/queries'
 import letterD from '../lib/letter-d'
 import letterI from '../lib/letter-i'
 
@@ -19,7 +20,6 @@ import letterI from '../lib/letter-i'
 // outlines, pills everywhere, no shadows and no gradients. The stickers are the site's own live illustrations, pinned around
 // the type like cut-outs. Everything else on the site stays Geist (DESIGN.md).
 
-const GRID = ['folder-hover', 'ai-agent-tasks', 'calendar-booking', 'camera-capture', 'e-signature', 'headphones', 'invoice-paid', 'no-results']
 const rank = (slug: string) => (GRID.indexOf(slug) + GRID.length + 1) % (GRID.length + 1)
 
 type PinProps = { illustration: Illustration; look: Style; index: number; motion: string; className?: string; tilt?: string }
@@ -47,11 +47,11 @@ type TagProps = { children: ReactNode; motion: string; className?: string; fill:
 
 /**
  * A fact stuck onto the headline like a price label: a small tilted pill in a sticker colour, overlapping the letters.
- * Placed by `className` inside a Tags list (on a phone, clear of the smaller letters); the scroll motion pops it on (data-tag).
+ * Placed by `className` inside a Tags list from sm up; on a phone the tags line up in a row under the type. The motion pops it on (data-tag).
  */
 function Tag({ children, motion, className, fill, tilt }: TagProps) {
   return (
-    <li data-tag={motion} className={cn('absolute', className)}>
+    <li data-tag={motion} className={cn('sm:absolute', className)}>
       <span className={cn('inline-flex h-7 items-center rounded-full border border-black px-3 text-[10px] whitespace-nowrap slush-label sm:h-10 sm:px-5 sm:text-[13px]', fill, tilt)}>
         {children}
       </span>
@@ -59,10 +59,10 @@ function Tag({ children, motion, className, fill, tilt }: TagProps) {
   )
 }
 
-/** The layer the tags sit in: over the headline, and out of the pointer's way so the letters under them still answer. */
+/** The layer the tags sit in: over the headline from sm up, out of the pointer's way so the letters under them still answer; on a phone, a row under it, out at either edge. */
 function Tags({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <ul aria-label={label} className="pointer-events-none absolute inset-0 z-20">
+    <ul aria-label={label} className="pointer-events-none relative z-20 mt-6 flex justify-between gap-3 px-1 sm:absolute sm:inset-0 sm:mt-0 sm:block">
       {children}
     </ul>
   )
@@ -74,13 +74,13 @@ function Tags({ label, children }: { label: string; children: ReactNode }) {
  * black one a hairline wider. The shape stretches with the band; the stroke does not. The motion draws both paths along
  * their length (data-ribbon).
  */
-function Ribbon({ d, motion, className }: { d: string | ReadonlyArray<string>; motion: string; className?: string }) {
+function Ribbon({ d, motion, className, viewBox = '0 0 1440 600' }: { d: string | ReadonlyArray<string>; motion: string; className?: string; viewBox?: string }) {
   const lines = typeof d === 'string' ? [d] : d
   return (
     <svg
       data-ribbon={motion}
       aria-hidden
-      viewBox="0 0 1440 600"
+      viewBox={viewBox}
       preserveAspectRatio="none"
       fill="none"
       strokeLinecap="round"
@@ -146,8 +146,8 @@ function Tape() {
 const HERO_PINS = [
   ['top-0 left-0 w-[25vw] max-w-[230px] sm:w-[16vw]', '-rotate-12'],
   ['top-0 right-0 w-[24vw] max-w-[220px] sm:w-[15vw]', 'rotate-[10deg]'],
-  // bottom left from sm up; a phone keeps it bottom right, where the left corner belongs to a tag
-  ['bottom-0 w-[26vw] max-w-[240px] max-sm:right-0 sm:bottom-[-5%] sm:left-[3%] sm:w-[17vw]', 'rotate-[8deg]'],
+  // bottom left, from sm up; a phone has room for two stickers, so this one sits it out and the tags take the space
+  ['bottom-[-5%] left-[3%] w-[17vw] max-w-[240px] max-sm:hidden', 'rotate-[8deg]'],
 ] as const
 
 const HEADLINE = [['Style'], ['it', 'live']]
@@ -159,7 +159,8 @@ const LETTER_TILT = [-7, 5, -4, 8, -6, 4, 7, -5, 6, -8, 5]
  * "Try a Style", gets the black cut-out outline and tips up off the page. The colour fades out slowly, so sweeping across
  * leaves a trail. It is the pitch in the headline itself: the type restyles live, like the illustrations do.
  */
-function Headline({ palette, look }: { palette: Palette; look: Style }) {
+function Headline({ look }: { look: Style & { palette: Palette } }) {
+  const palette = look.palette
   let n = 0
   return (
     <h1
@@ -194,21 +195,21 @@ function Headline({ palette, look }: { palette: Palette; look: Style }) {
   )
 }
 
-function Hero({ items, look, palette }: { items: ReadonlyArray<Illustration>; look: Style; palette: Palette }) {
+function Hero({ items, look }: { items: ReadonlyArray<Illustration>; look: Style & { palette: Palette } }) {
   return (
-    <section data-hero className="overflow-x-clip bg-slush-sky pt-[72px]">
+    <section data-hero className="overflow-x-clip bg-slush-sky pt-(--nav-h)">
       <div className={cn(BAND, 'pt-4 pb-12 sm:pb-16')}>
-        <div className="relative py-[27vw] sm:py-[12vw] lg:py-[9vw] min-[1440px]:py-[130px]">
-          <Ribbon d={HERO_RIBBON} motion="hero" className="text-slush-blue" />
+        <div className="relative pt-[27vw] pb-[9vw] sm:py-[12vw] lg:py-[9vw] min-[1440px]:py-[130px]">
+          <Ribbon d={HERO_RIBBON} motion="hero" className="text-slush-blue max-sm:hidden" />
           {/* the headline and the facts stuck on it move as one */}
           <div data-hero-title className="relative">
-            <Headline palette={palette} look={look} />
+            <Headline look={look} />
             {/* each tag sits on the ribbon: the left loop, the right loop, and the run under the type */}
             <Tags label="In short">
-              <Tag motion="hero" className="max-sm:right-[3%] max-sm:bottom-[-24%] sm:top-[49%] sm:right-[2%]" fill="bg-slush-mint" tilt="rotate-[7deg]">
+              <Tag motion="hero" className="max-sm:order-2 sm:top-[49%] sm:right-[2%]" fill="bg-slush-mint" tilt="rotate-[5deg] sm:rotate-[7deg]">
                 Free &amp; MIT
               </Tag>
-              <Tag motion="hero" className="max-sm:bottom-[-24%] max-sm:left-[3%] sm:top-[64%] sm:left-[1%]" fill="bg-slush-sunburst" tilt="-rotate-[8deg]">
+              <Tag motion="hero" className="max-sm:order-1 sm:top-[64%] sm:left-[1%]" fill="bg-slush-sunburst" tilt="-rotate-[5deg] sm:-rotate-[8deg]">
                 No account
               </Tag>
               <Tag motion="hero" className="right-[24%] bottom-[-15%] max-sm:hidden" fill="bg-slush-lavender" tilt="-rotate-[4deg]">
@@ -221,7 +222,7 @@ function Hero({ items, look, palette }: { items: ReadonlyArray<Illustration>; lo
           ))}
         </div>
 
-        <p className="mx-auto mt-6 max-w-3xl text-center text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:mt-8 sm:text-[24px]">
+        <p className="mx-auto mt-6 max-w-3xl text-center text-[20px] leading-[1.2] font-medium text-balance sm:mt-8 sm:text-[24px]">
           Animated isometric illustrations you restyle in the browser. Pick a palette, set the outline and depth, then export a PNG or a
           component for React and Next.js.
         </p>
@@ -265,7 +266,7 @@ function How({ items, look }: { items: ReadonlyArray<Illustration>; look: Style 
               </span>
             ))}
           </h2>
-          <p data-rise className="max-w-[9em] text-[clamp(2rem,4.4vw,4rem)] leading-none font-bold tracking-[-0.03em] lg:pb-2 lg:text-right">No design tool in between.</p>
+          <p data-rise className="max-w-[9em] text-[clamp(2rem,4.4vw,4rem)] leading-none font-bold lg:pb-2 lg:text-right">No design tool in between.</p>
         </div>
         <ol data-steps className="mt-12 grid gap-4 sm:mt-16 md:grid-cols-3">
           {STEPS.map(([title, body, fill], i) => {
@@ -281,7 +282,7 @@ function How({ items, look }: { items: ReadonlyArray<Illustration>; look: Style 
                   )}
                 </div>
                 <h3 className="mt-6 text-[clamp(3rem,6vw,5rem)] slush-display">{title}</h3>
-                <p className="mt-4 max-w-sm text-[16px] leading-[1.39] font-medium tracking-[-0.01em]">{body}</p>
+                <p className="mt-4 max-w-sm text-[16px] leading-[1.39] font-medium">{body}</p>
               </li>
             )
           })}
@@ -291,11 +292,12 @@ function How({ items, look }: { items: ReadonlyArray<Illustration>; look: Style 
   )
 }
 
-// Only whole rows, two at most, whatever the column count and however many are featured: a card past the last full row
-// is hidden at that breakpoint. Columns: 1 below sm, 2 from sm, 3 from lg, 4 from xl.
+// Only whole rows, whatever the column count and however many are featured: a card past the last full row is hidden at that
+// breakpoint. Two rows at most, except a phone's single column, which gets four. Columns: 1 below sm, 2 from sm, 3 from lg, 4 from xl.
+const PHONE_ROWS = 4
 const fullRows = (n: number, cols: number) => (n < cols ? n : Math.min(Math.floor(n / cols), 2) * cols)
 const rowClass = (i: number, n: number) =>
-  cn(i >= Math.min(n, 2) && 'max-sm:hidden', i >= fullRows(n, 2) && 'sm:max-lg:hidden', i >= fullRows(n, 3) && 'lg:max-xl:hidden', i >= fullRows(n, 4) && 'xl:hidden')
+  cn(i >= Math.min(n, PHONE_ROWS) && 'max-sm:hidden', i >= fullRows(n, 2) && 'sm:max-lg:hidden', i >= fullRows(n, 3) && 'lg:max-xl:hidden', i >= fullRows(n, 4) && 'xl:hidden')
 
 function Featured({ items, look }: { items: ReadonlyArray<Illustration>; look: Style }) {
   return (
@@ -311,16 +313,18 @@ function Featured({ items, look }: { items: ReadonlyArray<Illustration>; look: S
           </h2>
         </div>
         <div data-rise className="mt-5 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-[24px] leading-[1.2] font-medium tracking-[-0.01em] sm:text-[30px]">All of them, in your style.</p>
+          <p className="text-[24px] leading-[1.2] font-medium sm:text-[30px]">All of them, in your style.</p>
           <Link to="/illustrations" className={cn(GHOST, SM)}>
             Browse All Illustrations
           </Link>
         </div>
         <div data-cards className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.map((it, i) => (
-            // the wrapper is what the scroll motion deals in; the card inside keeps its own hover lift
-            <div key={it.slug} data-card className={cn('grid', rowClass(i, items.length))}>
-              <StickerCard illustration={it} look={look} offset={i * 20} />
+            // the wrapper is what the scroll motion deals in, so it stays put (keyed by slot) when a visit's random set
+            // swaps the cards in; the card inside keeps its own hover lift
+            // react-doctor-disable-next-line react-doctor/no-array-index-as-key
+            <div key={i} data-card className={cn('grid', rowClass(i, items.length))}>
+              <StickerCard key={it.slug} illustration={it} look={look} offset={i * 20} />
             </div>
           ))}
         </div>
@@ -358,7 +362,7 @@ function TakeHome({ pins, look }: { pins: ReadonlyArray<Illustration>; look: Sty
           {pins[0] && <Pin illustration={pins[0]} look={look} index={6} motion="take-left" className="top-0 left-0 w-[28vw] max-w-[220px] sm:w-[16vw]" tilt="-rotate-[10deg]" />}
           {pins[1] && <Pin illustration={pins[1]} look={look} index={7} motion="take-right" className="right-0 bottom-0 w-[28vw] max-w-[220px] sm:w-[16vw]" tilt="rotate-[9deg]" />}
         </div>
-        <p className="mx-auto mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium tracking-[-0.01em] text-balance sm:text-[24px]">
+        <p className="mx-auto mt-6 max-w-2xl text-[20px] leading-[1.2] font-medium text-balance sm:text-[24px]">
           A transparent PNG, a React component, or a link to the look. Free and MIT, no account.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
@@ -383,12 +387,14 @@ function TakeHome({ pins, look }: { pins: ReadonlyArray<Illustration>; look: Sty
 }
 
 export function LandingPage() {
-  const { data: items } = useFeatured()
-  // the grid: the eight featured, in this order, as two full rows of four
   const { data: featured } = useFeatured(GRID.length)
+  const items = featured.slice(0, HERO_COUNT)
+  // the grid: the eight featured, in this order, as two full rows of four
   const grid = [...featured].sort((a, b) => rank(a.slug) - rank(b.slug))
+  // the Featured section: the featured eight as rendered, then a random eight from the whole catalogue for this visit, swapped
+  // in long before the section scrolls into view
+  const shuffled = useShuffled(GRID.length)
   const look = useGlobalLook()
-  const palette = SITE_PALETTES[useGlobalStyle().preset]
   // stickers for the lower bands: ones the hero has not already shown come first
   const hero = new Set(items.map((it) => it.slug))
   const rest = [...grid.filter((it) => !hero.has(it.slug)), ...grid.filter((it) => hero.has(it.slug))]
@@ -403,9 +409,9 @@ export function LandingPage() {
 
   return (
     <div ref={root}>
-      <Hero items={items} look={look} palette={palette} />
+      <Hero items={items} look={look} />
       <How items={pick(0, 3)} look={look} />
-      <Featured items={grid} look={look} />
+      <Featured items={shuffled?.length === GRID.length ? shuffled : grid} look={look} />
       <TakeHome pins={pick(4, 2)} look={look} />
     </div>
   )

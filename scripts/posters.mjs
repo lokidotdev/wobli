@@ -13,16 +13,15 @@ const SIZES = [
 
 const mtime = (file) => stat(file).then((s) => s.mtimeMs, () => 0)
 
-let written = 0
-for (const name of await readdir(dir)) {
-  if (!name.endsWith('.png')) continue
-  const src = join(dir, name)
-  const srcTime = await mtime(src)
-  for (const { suffix, width } of SIZES) {
-    const out = join(dir, name.replace(/\.png$/, `${suffix}.webp`))
-    if ((await mtime(out)) >= srcTime) continue
+// Every (poster, size) pair is independent, so they all run at once; sharp queues the actual encoding on its own thread pool.
+const names = (await readdir(dir)).filter((name) => name.endsWith('.png'))
+const jobs = names.flatMap((name) => SIZES.map(({ suffix, width }) => ({ src: join(dir, name), out: join(dir, name.replace(/\.png$/, `${suffix}.webp`)), width })))
+const done = await Promise.all(
+  jobs.map(async ({ src, out, width }) => {
+    const [srcTime, outTime] = await Promise.all([mtime(src), mtime(out)])
+    if (outTime >= srcTime) return false
     await sharp(src).resize(width, width).webp({ quality: 82, alphaQuality: 90, effort: 6 }).toFile(out)
-    written++
-  }
-}
-console.log(`posters: ${written} WebP file(s) written`)
+    return true
+  }),
+)
+console.log(`posters: ${done.filter(Boolean).length} WebP file(s) written`)

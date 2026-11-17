@@ -1,10 +1,9 @@
-import { encodeStyle } from '~/features/style'
+import { styleQuery } from '~/features/style'
 import type { EditorStyle } from '~/features/style'
 
 /** The hosted player for this exact look: no chrome, transparent unless the look has a background. */
 export function embedUrl(origin: string, slug: string, style: EditorStyle) {
-  const q = new URLSearchParams(encodeStyle(style) as Record<string, string>).toString()
-  return `${origin}/embed/${slug}${q ? `?${q}` : ''}`
+  return `${origin}/embed/${slug}${styleQuery(style)}`
 }
 
 export const iframeSnippet = (url: string, title: string, size = 320) =>

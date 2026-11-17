@@ -1,7 +1,7 @@
 import { site } from '~/shared/config/site'
 
 /** A share image and what scrapers want to know about it up front: its size (some skip the image on first share without it) and alt text. */
-export type ShareImage = { url: string; width: number; height: number; alt: string }
+type ShareImage = { url: string; width: number; height: number; alt: string }
 
 type MetaInput = {
   title: string

@@ -69,7 +69,7 @@ export function GlobalStyleControls({ label, floating, className, stacked }: Pro
     >
       <div className="flex min-w-0 flex-1 items-center gap-3 lg:flex-none lg:pr-5">
         {label ? (
-          <p className="hidden shrink-0 text-[14px] font-semibold tracking-[-0.02em] sm:block">{label}</p>
+          <p className="hidden shrink-0 text-[14px] font-semibold sm:block">{label}</p>
         ) : (
           <p className="hidden w-[4.5rem] shrink-0 sm:block">
             <span className="block text-[12px] leading-4 text-label-3">Palette</span>

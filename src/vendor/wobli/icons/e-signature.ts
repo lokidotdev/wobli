@@ -35,7 +35,7 @@ const SIGNATURE: ReadonlyArray<Vec> = [
 
 // the pen's nib follows the stroke at the speed the ink is drawn: one key per point, timed by its share of the length on screen
 const SEEN = SIGNATURE.map((p) => facePoint(...p))
-const RUN = SEEN.reduce<Array<number>>((acc, p, i) => [...acc, i ? acc[i - 1] + Math.hypot(p[0] - SEEN[i - 1][0], p[1] - SEEN[i - 1][1]) : 0], [])
+const RUN = SEEN.reduce<Array<number>>((acc, p, i) => (acc.push(i ? acc[i - 1] + Math.hypot(p[0] - SEEN[i - 1][0], p[1] - SEEN[i - 1][1]) : 0), acc), [])
 const HOME: Vec = [138, -104]
 const PEN: Track<Vec> = [
   [REACH, HOME, SNAP],

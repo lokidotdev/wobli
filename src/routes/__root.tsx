@@ -1,13 +1,11 @@
-import { themeScript } from '~/shared/ui/ThemeToggle'
 /// <reference types="vite/client" />
 import { HeadContent, Outlet, Scripts, createRootRouteWithContext, useRouterState } from '@tanstack/react-router'
+import { NotFoundPage } from '~/features/landing'
 import { settingsQuery } from '~/features/settings'
 import { applySiteStyle } from '~/features/style'
 import type { QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { site } from '~/shared/config/site'
-import { Footer } from '~/shared/ui/Footer'
-import { Header } from '~/shared/ui/Header'
+import { isEmbedPath, site } from '~/shared/config/site'
 import { SlushLayout } from '~/shared/ui/SlushChrome'
 import appCss from '~/styles/app.css?url'
 
@@ -27,9 +25,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-      { name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
-      { name: 'theme-color', content: '#0a0a0a', media: '(prefers-color-scheme: dark)' },
-      { name: 'color-scheme', content: 'light dark' },
+      { name: 'theme-color', content: '#ffffff' },
+      { name: 'color-scheme', content: 'light' },
       { title: site.name },
     ],
     links: [
@@ -44,53 +41,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: analytics,
   }),
   component: RootComponent,
-  notFoundComponent: () => (
-    <div className="mx-auto max-w-xl px-4 py-32 text-center">
-      <h1 className="type-title">Page Not Found</h1>
-      <p className="mt-3 text-label-2">This illustration doesn't exist (yet).</p>
-    </div>
-  ),
+  notFoundComponent: NotFoundPage,
 })
-
-const SLUSH_PAGES = new Set(['/', '/illustrations', '/docs', '/how-its-made'])
-// the editor (/illustrations/$slug) is a sticker-book page too
-const isSlush = (path: string) => SLUSH_PAGES.has(path.replace(/\/+$/, '') || '/') || path.startsWith('/illustrations/')
 
 function RootComponent() {
   applySiteStyle(Route.useLoaderData().style) // no-op once applied; covers hydration, where the loader does not re-run
-  // the embed player is bare: no header or footer, and no page colour behind a transparent sticker
-  // the sticker-book pages (DESIGN.md) bring their own shell: marquee, pill nav and footer
-  const shell = useRouterState({ select: (s) => (s.location.pathname.startsWith('/embed/') ? 'embed' : isSlush(s.location.pathname) ? 'slush' : 'site') })
-  if (shell === 'embed')
+  // every page is a sticker-book page (DESIGN.md), 404s included; only the embed player is bare: no nav or footer, and no
+  // page colour behind a transparent sticker
+  const embed = useRouterState({ select: (s) => isEmbedPath(s.location.pathname) })
+  if (embed)
     return (
       <RootDocument bodyClass="bg-transparent">
         <Outlet />
       </RootDocument>
     )
-  if (shell === 'slush')
-    return (
-      <RootDocument>
-        <SlushLayout>
-          <Outlet />
-        </SlushLayout>
-      </RootDocument>
-    )
   return (
     <RootDocument>
-      <Header />
-      <main>
+      <SlushLayout>
         <Outlet />
-      </main>
-      <Footer />
+      </SlushLayout>
     </RootDocument>
   )
 }
 
 function RootDocument({ children, bodyClass }: { children: ReactNode; bodyClass?: string }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <HeadContent />
       </head>
       <body className={bodyClass}>
