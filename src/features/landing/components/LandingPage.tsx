@@ -15,6 +15,7 @@ import { useLandingMotion } from '../hooks/useLandingMotion'
 import { GRID, HERO_COUNT } from '../lib/queries'
 import letterD from '../lib/letter-d'
 import letterI from '../lib/letter-i'
+import { BackedBy, HomeSponsors } from '~/features/sponsors'
 
 // The landing page is a sticker book: pastel colour bands, crushed display type, black hairline
 // outlines, pills everywhere, no shadows and no gradients. The stickers are the site's own live illustrations, pinned around
@@ -235,6 +236,9 @@ function Hero({ items, look }: { items: ReadonlyArray<Illustration>; look: Style
           </Link>
           <GitHubStar size="lg" className={cn(STAR_GHOST, 'px-6! text-[14px]!')} />
         </div>
+        <div className="mt-5 flex justify-center">
+          <BackedBy />
+        </div>
 
         {/* the pitch, made by touching it: this strip restyles every sticker on the page */}
         <GlobalStyleControls
@@ -413,6 +417,7 @@ export function LandingPage() {
       <How items={pick(0, 3)} look={look} />
       <Featured items={shuffled?.length === GRID.length ? shuffled : grid} look={look} />
       <TakeHome pins={pick(4, 2)} look={look} />
+      <HomeSponsors />
     </div>
   )
 }

@@ -97,7 +97,17 @@ function PhoneMenu() {
               <Arrow />
             </Link>
           ))}
-          <a href={site.repoUrl} target="_blank" rel="noreferrer" aria-label="Star on GitHub" className={cn(ROW, 'bg-black text-white')} style={{ '--i': PAGES.length, '--r': '1deg' } as CSSProperties}>
+          <Link
+            to="/sponsors"
+            onClick={() => setOpen(false)}
+            className={ROW}
+            style={{ background: sticker('ember'), '--i': PAGES.length, '--r': '-1deg' } as CSSProperties}
+            activeProps={{ 'aria-current': 'page' }}
+          >
+            Sponsor
+            <Arrow />
+          </Link>
+          <a href={site.repoUrl} target="_blank" rel="noreferrer" aria-label="Star on GitHub" className={cn(ROW, 'bg-black text-white')} style={{ '--i': PAGES.length + 1, '--r': '1deg' } as CSSProperties}>
             <span className="flex items-center gap-3">
               <span className="[&_svg]:size-6">
                 <GitHubMark />
@@ -147,6 +157,9 @@ function Foot() {
               ))}
               <Link to="/docs" hash="licence" className={FOOT_LINK}>
                 Licence
+              </Link>
+              <Link to="/sponsors" className={FOOT_LINK}>
+                Sponsor
               </Link>
             </FootNav>
             <FootNav label="More from the creator" title="More from the Creator">

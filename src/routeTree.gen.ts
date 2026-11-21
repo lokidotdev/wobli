@@ -14,6 +14,7 @@ import { Route as DocsRouteImport } from './routes/docs'
 import { Route as HowItsMadeRouteImport } from './routes/how-its-made'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SponsorsRouteImport } from './routes/sponsors'
 import { Route as EmbedSlugRouteImport } from './routes/embed.$slug'
 import { Route as IllustrationsIndexRouteImport } from './routes/illustrations/index'
 import { Route as IllustrationsSlugRouteImport } from './routes/illustrations/$slug'
@@ -43,6 +44,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SponsorsRoute = SponsorsRouteImport.update({
+  id: '/sponsors',
+  path: '/sponsors',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmbedSlugRoute = EmbedSlugRouteImport.update({
   id: '/embed/$slug',
   path: '/embed/$slug',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/how-its-made': typeof HowItsMadeRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sponsors': typeof SponsorsRoute
   '/embed/$slug': typeof EmbedSlugRoute
   '/illustrations/$slug': typeof IllustrationsSlugRoute
   '/illustrations/': typeof IllustrationsIndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/how-its-made': typeof HowItsMadeRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sponsors': typeof SponsorsRoute
   '/embed/$slug': typeof EmbedSlugRoute
   '/illustrations/$slug': typeof IllustrationsSlugRoute
   '/illustrations': typeof IllustrationsIndexRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/how-its-made': typeof HowItsMadeRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sponsors': typeof SponsorsRoute
   '/embed/$slug': typeof EmbedSlugRoute
   '/illustrations/$slug': typeof IllustrationsSlugRoute
   '/illustrations/': typeof IllustrationsIndexRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/how-its-made'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sponsors'
     | '/embed/$slug'
     | '/illustrations/$slug'
     | '/illustrations/'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/how-its-made'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sponsors'
     | '/embed/$slug'
     | '/illustrations/$slug'
     | '/illustrations'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/how-its-made'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sponsors'
     | '/embed/$slug'
     | '/illustrations/$slug'
     | '/illustrations/'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   HowItsMadeRoute: typeof HowItsMadeRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SponsorsRoute: typeof SponsorsRoute
   EmbedSlugRoute: typeof EmbedSlugRoute
   IllustrationsSlugRoute: typeof IllustrationsSlugRoute
   IllustrationsIndexRoute: typeof IllustrationsIndexRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sponsors': {
+      id: '/sponsors'
+      path: '/sponsors'
+      fullPath: '/sponsors'
+      preLoaderRoute: typeof SponsorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/embed/$slug': {
       id: '/embed/$slug'
       path: '/embed/$slug'
@@ -201,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   HowItsMadeRoute: HowItsMadeRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SponsorsRoute: SponsorsRoute,
   EmbedSlugRoute: EmbedSlugRoute,
   IllustrationsSlugRoute: IllustrationsSlugRoute,
   IllustrationsIndexRoute: IllustrationsIndexRoute,

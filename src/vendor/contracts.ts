@@ -196,3 +196,145 @@ export type AdminIllustration = z.infer<typeof adminIllustrationListSchema>[numb
 
 /** Every non-2xx response. */
 export const errorSchema = z.object({ error: z.object({ code: z.string(), message: z.string(), details: z.unknown().optional() }) })
+
+// ── Sponsors ────────────────────────────────────────────────────────────────────────────────────────────────────────────
+// Money is integer cents, USD. A form on the site opens a Dodo checkout; Dodo's payment webhook puts the logo on the page
+// at once. An admin can unpublish, edit or delete it afterwards.
+
+const MAX_CENTS = 10_000_000 // $100,000
+export const centsSchema = z.number().int().min(100, 'at least $1').max(MAX_CENTS)
+const httpsSchema = z.url({ protocol: /^https$/, error: 'use a full https:// link' }).max(300)
+/** An optional field from a form: an empty box means "not given". */
+const optionalField = <T extends z.ZodType>(schema: T) => z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? undefined : v), schema.optional())
+
+export const SPONSOR_STATUSES = ['pending', 'paid', 'active', 'rejected', 'failed', 'cancelled', 'refunded'] as const
+export const sponsorStatusSchema = z.enum(SPONSOR_STATUSES)
+export type SponsorStatus = z.infer<typeof sponsorStatusSchema>
+/** monthly: renews until cancelled. one_month: one month in a tier slot, paid once. one_time: pay what you want, a backer. */
+export const billingSchema = z.enum(['monthly', 'one_month', 'one_time'])
+export type Billing = z.infer<typeof billingSchema>
+
+/** Who the sponsor is: the fields of the form on /sponsors. `company` is a honeypot, hidden from people. */
+export const sponsorFieldsSchema = z.object({
+  name: z.string().trim().min(1, 'who should we thank?').max(80, 'keep it under 80 characters'),
+  email: z.email('enter an email we can reach you at').max(254),
+  website: optionalField(httpsSchema),
+  logoUrl: optionalField(httpsSchema),
+  message: optionalField(z.string().trim().max(500, 'keep it under 500 characters')),
+  company: z.string().max(200).optional(),
+})
+export type SponsorFields = z.input<typeof sponsorFieldsSchema>
+
+/** POST /v1/sponsors/checkout. Monthly picks a tier; one-time pays what it wants above the admin's minimum. */
+export const checkoutSchema = z.discriminatedUnion('billing', [
+  sponsorFieldsSchema.extend({ billing: z.literal('monthly'), tierId: z.string().min(1).max(32) }),
+  sponsorFieldsSchema.extend({ billing: z.literal('one_month'), tierId: z.string().min(1).max(32) }),
+  sponsorFieldsSchema.extend({ billing: z.literal('one_time'), amount: centsSchema }),
+])
+export type CheckoutInput = z.input<typeof checkoutSchema>
+export const checkoutResponseSchema = z.object({ id: z.number().int(), url: z.url() })
+
+export const sponsorTierSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]{1,32}$/, 'lowercase letters, digits and hyphens'),
+  name: z.string().trim().min(1).max(40),
+  monthlyPrice: centsSchema,
+  perks: z.array(z.string().trim().min(1).max(120)).max(8),
+  highlight: z.boolean().default(false),
+  active: z.boolean().default(true),
+  maxSponsors: z.number().int().min(1).max(1000).nullable().default(null), // null = unlimited
+})
+export type SponsorTier = z.infer<typeof sponsorTierSchema>
+
+export const platformSponsorSchema = z.object({ name: z.string().trim().min(1).max(60), logoUrl: httpsSchema, href: httpsSchema, label: z.string().trim().max(40) })
+
+/** GET and PUT /v1/admin/sponsors/pricing. New prices apply to new checkouts; existing subscriptions keep theirs. */
+export const sponsorPricingSchema = z.object({
+  tiers: z
+    .array(sponsorTierSchema)
+    .max(6)
+    .refine((t) => new Set(t.map((x) => x.id)).size === t.length, 'tier ids must be unique'),
+  oneTime: z.object({ enabled: z.boolean(), min: centsSchema, suggested: z.array(centsSchema).max(4) }),
+  oneMonth: z.object({ enabled: z.boolean() }).prefault({ enabled: true }), // a tier slot for one month, paid once
+  platform: z.array(platformSponsorSchema).max(6),
+  contactEmail: z.email().nullable(),
+})
+export type SponsorPricing = z.infer<typeof sponsorPricingSchema>
+export const sponsorPricingAdminSchema = sponsorPricingSchema.extend({
+  payments: z.object({ configured: z.boolean(), mode: z.enum(['test', 'live']), webhook: z.boolean() }),
+})
+
+const publicSponsorSchema = z.object({ id: z.number().int(), name: z.string(), website: z.string().nullable(), logoUrl: z.string().nullable() })
+export type PublicSponsor = z.infer<typeof publicSponsorSchema>
+
+/** GET /v1/sponsors: tiers with their verified sponsors, backers (no tier), the one-time option and platform sponsors. */
+export const sponsorsPageSchema = z.object({
+  // spotsLeft: null = unlimited, 0 = sold out
+  tiers: z.array(sponsorTierSchema.omit({ active: true }).extend({ sponsors: z.array(publicSponsorSchema), spotsLeft: z.number().int().nullable() })),
+  backers: z.array(publicSponsorSchema),
+  oneTime: sponsorPricingSchema.shape.oneTime,
+  oneMonth: z.object({ enabled: z.boolean() }),
+  platform: z.array(platformSponsorSchema),
+  contactEmail: z.string().nullable(),
+  currency: z.literal('USD'),
+  open: z.boolean(), // false until the API has its Dodo keys: the plans show, the form doesn't
+})
+export type SponsorsPage = z.infer<typeof sponsorsPageSchema>
+
+/** GET /v1/sponsors/stats: pageviews (Umami) and stars (GitHub), refreshed hourly. null when unknown. */
+export const sponsorStatsSchema = z.object({
+  pageviewsMonth: z.number().nullable(),
+  pageviewsTotal: z.number().nullable(),
+  stars: z.number().nullable(),
+  updatedAt: z.iso.datetime().nullable(),
+})
+export type SponsorStats = z.infer<typeof sponsorStatsSchema>
+
+export const sponsorSchema = z.object({
+  id: z.number().int(),
+  name: z.string(),
+  email: z.string(),
+  website: z.string().nullable(),
+  logoUrl: z.string().nullable(),
+  message: z.string().nullable(),
+  billing: billingSchema,
+  tierId: z.string().nullable(), // where the logo shows; null lists them as a backer
+  amount: z.number().int(),
+  currency: z.string(),
+  status: sponsorStatusSchema,
+  note: z.string().nullable(),
+  paymentId: z.string().nullable(),
+  subscriptionId: z.string().nullable(),
+  paidAt: z.iso.datetime().nullable(),
+  expiresAt: z.iso.datetime().nullable(), // one-month sponsors only
+  verifiedAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
+})
+export type Sponsor = z.infer<typeof sponsorSchema>
+
+/** PATCH /v1/admin/sponsors/:id: publish (active) or unpublish (paid), reject, fix the details, or move them to another tier. */
+export const sponsorPatchSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    email: z.email().max(254),
+    website: httpsSchema.nullable(),
+    logoUrl: httpsSchema.nullable(),
+    message: z.string().trim().max(500).nullable(),
+    tierId: z.string().max(32).nullable(),
+    status: sponsorStatusSchema,
+    note: z.string().trim().max(1000).nullable(),
+  })
+  .partial()
+export type SponsorPatch = z.infer<typeof sponsorPatchSchema>
+
+/** POST /v1/admin/sponsors: someone who paid another way. Live at once unless a status says otherwise. */
+export const manualSponsorSchema = sponsorFieldsSchema.omit({ company: true }).extend({
+  billing: billingSchema,
+  tierId: z.string().max(32).nullable().default(null),
+  amount: z.number().int().min(0).max(MAX_CENTS),
+  status: sponsorStatusSchema.default('active'),
+  note: z.string().trim().max(1000).nullable().default(null),
+})
+export type ManualSponsorInput = z.input<typeof manualSponsorSchema>
+
+/** POST /v1/sponsors/manage: Dodo emails the sponsor a link to its customer portal (manage the card, cancel). */
+export const manageSchema = z.object({ email: z.email('enter a valid email').max(254) })
