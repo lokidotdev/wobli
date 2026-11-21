@@ -717,3 +717,73 @@
     transition: none;
   }
 }
+
+/* The sponsor sheet (features/sponsors): enters and leaves along the same path. A bottom sheet on phones, a card that
+   settles in from slightly below elsewhere. Reduced motion keeps only the fade. */
+@keyframes sponsor-scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sponsor-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sponsor-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+.sponsor-scrim {
+  animation: sponsor-scrim-in 200ms ease-out;
+  transition: opacity 200ms ease-in;
+}
+.sponsor-panel {
+  animation: sponsor-up 420ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition:
+    transform 200ms cubic-bezier(0.4, 0, 1, 1),
+    opacity 200ms ease-in;
+}
+.sponsor-sheet[data-leaving] .sponsor-scrim {
+  opacity: 0;
+}
+.sponsor-sheet[data-leaving] .sponsor-panel {
+  transform: translateY(100%);
+}
+@media (min-width: 640px) {
+  .sponsor-panel {
+    animation: sponsor-pop 320ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .sponsor-sheet[data-leaving] .sponsor-panel {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sponsor-panel,
+  .sponsor-sheet[data-leaving] .sponsor-panel {
+    animation: sponsor-scrim-in 150ms ease-out;
+    transform: none;
+  }
+  .sponsor-sheet[data-leaving] .sponsor-panel {
+    opacity: 0;
+  }
+}
+
+/* The sponsors page's "Manage or cancel" panel settles in from just above the link that opened it. */
+@keyframes manage-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.manage-in {
+  animation: manage-in 240ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .manage-in {
+    animation-name: sponsor-scrim-in;
+  }
+}
