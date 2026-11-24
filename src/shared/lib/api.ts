@@ -81,3 +81,24 @@ export async function apiGetOr<T extends z.ZodType>(path: string, schema: T, par
     throw e
   }
 }
+
+/**
+ * POST JSON from the browser and parse the answer. Unlike apiGet there is no fallback: a failure is the caller's to show,
+ * as `{ ok: false, message }` with the API's own message, or the field errors it sent back.
+ */
+export async function apiPost<T extends z.ZodType>(
+  path: string,
+  body: unknown,
+  schema: T,
+): Promise<{ ok: true; data: z.output<T> } | { ok: false; message: string; fields?: Record<string, string[]> }> {
+  if (!API_URL) return { ok: false, message: UNREACHABLE_MESSAGE }
+  try {
+    const res = await withTimeout(fetch(API_URL + path, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body) }), 15_000)
+    const json = (await res.json().catch(() => null)) as { error?: { message?: string; details?: { fieldErrors?: Record<string, string[]> } } } | null
+    if (!res.ok) return { ok: false, message: json?.error?.message ?? `The API answered ${res.status}.`, fields: json?.error?.details?.fieldErrors }
+    const parsed = schema.safeParse(json)
+    return parsed.success ? { ok: true, data: parsed.data } : { ok: false, message: 'Unexpected answer from the API.' }
+  } catch {
+    return { ok: false, message: UNREACHABLE_MESSAGE }
+  }
+}
