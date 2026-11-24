@@ -235,7 +235,7 @@ function Plans({ data, onChoose }: { data: Data; onChoose: (p: Plan) => void }) 
           <p className="mt-5 max-w-xl text-[18px] leading-[1.3] font-medium text-balance">
             Pick a tier and put your logo in front of the people building with wobli. Cancel anytime.
           </p>
-          {(data.oneTime.enabled || data.oneMonth.enabled) && (
+          {data.open && (data.oneTime.enabled || data.oneMonth.enabled) && (
             <BillingSwitch
               value={billing}
               onChange={setBilling}
@@ -248,7 +248,9 @@ function Plans({ data, onChoose }: { data: Data; onChoose: (p: Plan) => void }) 
           )}
         </div>
         <div className="mx-auto mt-12 max-w-5xl">
-          {billing !== 'one_time' ? (
+          {!data.open && data.tiers.length === 0 ? (
+            <p className={cn(CARD, 'mx-auto max-w-md bg-white px-6 py-10 text-center text-[clamp(2.25rem,5vw,3.25rem)] slush-display')}>Coming soon</p>
+          ) : billing !== 'one_time' ? (
             <ul className={cn('grid gap-4', data.tiers.length >= 3 ? 'lg:grid-cols-3' : data.tiers.length === 2 && 'sm:grid-cols-2')}>
               {data.tiers.map((t, i) => (
                 <li key={t.id}>
@@ -309,11 +311,16 @@ function TierCard({ tier, index, billing, open, onChoose }: { tier: Tier; index:
         </span>
       )}
       <h3 className={cn('w-fit rounded-full border border-black px-3 py-1 text-[12px] slush-label', TIER_TINT[index % TIER_TINT.length])}>{tier.name}</h3>
-      <p className="mt-5 flex items-end gap-1.5">
-        <span className="text-[64px] slush-display tabular-nums">{money(tier.monthlyPrice)}</span>
-        <span className="pb-1 text-[14px] font-medium text-black/60">{billing === 'monthly' ? '/month' : 'for 1 month'}</span>
-      </p>
-      {billing === 'one_month' && <p className="mt-1 text-[13px] font-medium text-black/60">Paid once. No renewal.</p>}
+      {/* no price until sponsorships open: the API's are placeholders until the admin sets them */}
+      {open ? (
+        <p className="mt-5 flex items-end gap-1.5">
+          <span className="text-[64px] slush-display tabular-nums">{money(tier.monthlyPrice)}</span>
+          <span className="pb-1 text-[14px] font-medium text-black/60">{billing === 'monthly' ? '/month' : 'for 1 month'}</span>
+        </p>
+      ) : (
+        <p className="mt-5 flex min-h-[64px] items-end text-[40px] slush-display">Coming soon</p>
+      )}
+      {open && billing === 'one_month' && <p className="mt-1 text-[13px] font-medium text-black/60">Paid once. No renewal.</p>}
       {tier.spotsLeft !== null && tier.maxSponsors !== null && (
         <p
           className={cn(
