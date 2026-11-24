@@ -249,6 +249,8 @@ export const platformSponsorSchema = z.object({ name: z.string().trim().min(1).m
 
 /** GET and PUT /v1/admin/sponsors/pricing. New prices apply to new checkouts; existing subscriptions keep theirs. */
 export const sponsorPricingSchema = z.object({
+  // the go-live switch: off, /sponsors shows "Coming soon" in place of prices and checkout is refused
+  live: z.boolean().default(false),
   tiers: z
     .array(sponsorTierSchema)
     .max(6)
@@ -276,7 +278,7 @@ export const sponsorsPageSchema = z.object({
   platform: z.array(platformSponsorSchema),
   contactEmail: z.string().nullable(),
   currency: z.literal('USD'),
-  open: z.boolean(), // false until the API has its Dodo keys: the plans show, the form doesn't
+  open: z.boolean(), // false until sponsorships are switched live and the API has its Dodo keys: the plans show, prices and the form don't
 })
 export type SponsorsPage = z.infer<typeof sponsorsPageSchema>
 
